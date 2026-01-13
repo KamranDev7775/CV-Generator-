@@ -157,7 +157,28 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-white">
       {step === 'landing' && (
-        <LandingSection onStart={scrollToForm} />
+        <>
+          <LandingSection onStart={scrollToForm} />
+          
+          {/* Company Logos Section */}
+          <section className="px-6 md:px-12 lg:px-24 py-16 bg-gray-50">
+            <div className="max-w-5xl mx-auto">
+              <h3 className="text-center text-sm uppercase tracking-widest text-gray-400 mb-8">
+                Trusted by applicants targeting companies like:
+              </h3>
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-8 items-center justify-items-center">
+                <div className="text-2xl font-light text-gray-300">Deloitte</div>
+                <div className="text-2xl font-light text-gray-300">Lufthansa</div>
+                <div className="text-2xl font-light text-gray-300">PwC</div>
+                <div className="text-2xl font-light text-gray-300">BMW</div>
+                <div className="text-2xl font-light text-gray-300">SAP</div>
+              </div>
+              <p className="text-xs text-gray-400 text-center mt-8 leading-relaxed max-w-3xl mx-auto">
+                *The names and logos of the companies mentioned above are registered trademarks belonging to their respective owners. Unless otherwise noted, these references in no way aim to suggest an affiliation or association with Makemycv.
+              </p>
+            </div>
+          </section>
+        </>
       )}
       
       {step === 'form' && (
