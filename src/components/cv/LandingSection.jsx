@@ -1,5 +1,7 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
+import { Link } from 'react-router-dom';
+import { createPageUrl } from '../../utils';
 
 export default function LandingSection({ onStart }) {
   return (
@@ -28,12 +30,22 @@ export default function LandingSection({ onStart }) {
           </li>
         </ul>
         
-        <Button 
-          onClick={onStart}
-          className="bg-black text-white hover:bg-gray-900 px-8 py-6 text-base font-normal rounded-none"
-        >
-          Start now
-        </Button>
+        <div className="flex flex-col sm:flex-row gap-4">
+          <Button 
+            onClick={onStart}
+            className="bg-black text-white hover:bg-gray-900 px-8 py-6 text-base font-normal rounded-none"
+          >
+            Start now
+          </Button>
+          <Link to={createPageUrl('Pricing')}>
+            <Button 
+              variant="outline"
+              className="w-full border-gray-200 text-black hover:bg-gray-50 px-8 py-6 text-base font-normal rounded-none"
+            >
+              See pricing
+            </Button>
+          </Link>
+        </div>
       </div>
     </section>
   );
