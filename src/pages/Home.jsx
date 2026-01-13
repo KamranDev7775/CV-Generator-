@@ -5,7 +5,14 @@ import { createPageUrl } from '../utils';
 import LandingSection from '@/components/cv/LandingSection';
 import CVForm from '@/components/cv/CVForm';
 import PreviewSection from '@/components/cv/PreviewSection';
-import FeaturesSection from '@/components/home/FeaturesSection';
+import SocialProofSection from '@/components/home/SocialProofSection';
+import CorporateDesignSection from '@/components/home/CorporateDesignSection';
+import WhyItWorksSection from '@/components/home/WhyItWorksSection';
+import TransparentPricingSection from '@/components/home/TransparentPricingSection';
+import CVIncludesSection from '@/components/home/CVIncludesSection';
+import PreviewPaymentSection from '@/components/home/PreviewPaymentSection';
+import SuitableForSection from '@/components/home/SuitableForSection';
+import FooterCTASection from '@/components/home/FooterCTASection';
 import FAQSection from '@/components/home/FAQSection';
 
 const STORAGE_KEY = 'ats_cv_form_data';
