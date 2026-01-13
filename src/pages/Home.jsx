@@ -127,36 +127,26 @@ export default function Home() {
   };
 
   const handlePayment = async () => {
+    // Check if running in iframe
+    if (window.self !== window.top) {
+      alert('Payment checkout is only available in the published app. Please open the app in a new tab to complete your purchase.');
+      return;
+    }
+
     setIsProcessingPayment(true);
     
     try {
       const submissionId = localStorage.getItem(SUBMISSION_KEY);
       
-      // Create Stripe checkout session
-      const response = await base44.stripe.createCheckoutSession({
-        lineItems: [
-          {
-            price_data: {
-              currency: 'eur',
-              product_data: {
-                name: 'ATS CV Generator',
-                description: 'PDF + Copyable Text CV Download'
-              },
-              unit_amount: 399 // €3.99 in cents
-            },
-            quantity: 1
-          }
-        ],
-        mode: 'payment',
+      // Create Stripe checkout session via backend function
+      const response = await base44.functions.invoke('createCheckout', {
+        submissionId,
         successUrl: `${window.location.origin}/Success?submission_id=${submissionId}`,
-        cancelUrl: window.location.href,
-        metadata: {
-          submission_id: submissionId
-        }
+        cancelUrl: window.location.href
       });
       
       // Redirect to Stripe checkout
-      window.location.href = response.url;
+      window.location.href = response.data.url;
       
     } catch (error) {
       console.error('Payment error:', error);
