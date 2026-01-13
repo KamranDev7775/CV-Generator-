@@ -4,28 +4,28 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 export default function FAQSection() {
   const faqs = [
     {
-      question: "Why single-column format?",
-      answer: "Single-column CVs are machine-readable by Applicant Tracking Systems (ATS). Multi-column designs often break the parsing logic, causing your CV to be rejected before a human sees it. Our format ensures compatibility with corporate hiring software."
+      question: "What format will my CV be in?",
+      answer: "Your CV is generated in a clean, single-column layout optimized for professional applications. You receive it as a downloadable PDF and can also copy it as plain text for online application forms."
     },
     {
-      question: "Is this ATS-friendly?",
-      answer: "Yes. We avoid tables, text boxes, headers/footers, and complex layouts that confuse ATS parsers. The CV uses clean headings, standard sections, and plain text formatting—exactly what recruiters and ATS systems expect."
+      question: "Is this CV compatible with Applicant Tracking Systems (ATS)?",
+      answer: "Yes. We use a simple, machine-readable format without tables, graphics, or complex layouts that ATS systems struggle to parse. This ensures your CV passes automated screening and reaches human recruiters."
     },
     {
-      question: "Is this good for Big4?",
-      answer: "Absolutely. Big4 firms (Deloitte, PwC, KPMG, EY) and large corporations prefer minimalist, professional CVs. Our format matches their expectations: clean structure, bullet points, quantifiable achievements, and no unnecessary design."
+      question: "Can I edit my CV after generating it?",
+      answer: "Absolutely. As long as your subscription is active, you can edit your CV unlimited times and regenerate it instantly. All your data is saved securely in your account."
     },
     {
-      question: "Do I need an account?",
-      answer: "Yes. An account lets you save your CV, make edits anytime, and manage your subscription. Registration is quick—just email and password."
+      question: "Do I need to create an account?",
+      answer: "Yes. An account is required to save your CV data, make future edits, and manage your subscription. Registration is quick and only requires an email and password."
     },
     {
-      question: "Is the price final?",
-      answer: "Yes. Trial plan: €2.99 for 14 days, then €6.99/month unless canceled. Monthly plan: €6.99/month. No hidden fees, no surprise charges. Cancel anytime from your dashboard."
+      question: "Are there any hidden fees or subscription traps?",
+      answer: "No. Our pricing is completely transparent. Trial: €2.99 for 14 days, then €6.99/month. Monthly: €6.99/month ongoing. No surprise charges, no hidden fees. You can cancel anytime from your dashboard."
     },
     {
-      question: "Can I edit after downloading?",
-      answer: "Yes. As long as your subscription is active, you can edit your CV unlimited times and regenerate it. Your data is saved in your account."
+      question: "What download formats are available?",
+      answer: "Once you complete payment, you can download your CV as a PDF for applications and also copy the full text format for pasting into online forms or job portals."
     }
   ];
 
