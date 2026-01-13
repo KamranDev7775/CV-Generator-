@@ -17,10 +17,22 @@ export default function Layout({ children, currentPageName }) {
             </div>
             <nav className="flex flex-wrap justify-center gap-6 text-sm">
               <Link 
+                to={createPageUrl('Home')} 
+                className="text-gray-500 hover:text-gray-900 transition-colors"
+              >
+                Home
+              </Link>
+              <Link 
                 to={createPageUrl('Pricing')} 
                 className="text-gray-500 hover:text-gray-900 transition-colors"
               >
                 Pricing
+              </Link>
+              <Link 
+                to={createPageUrl('Dashboard')} 
+                className="text-gray-500 hover:text-gray-900 transition-colors"
+              >
+                Dashboard
               </Link>
               <Link 
                 to={createPageUrl('PrivacyPolicy')} 

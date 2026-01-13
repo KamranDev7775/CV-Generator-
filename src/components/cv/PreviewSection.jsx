@@ -19,27 +19,15 @@ export default function PreviewSection({ cvData, onPayment, isProcessingPayment 
           <CVDocument data={cvData} showWatermark={true} />
         </div>
 
-        {/* Features */}
-        <div className="mb-12">
-          <h3 className="text-xs uppercase tracking-widest text-gray-400 mb-4">What you get</h3>
-          <ul className="space-y-3">
-            <li className="flex items-start">
-              <span className="text-gray-300 mr-4">—</span>
-              <span className="text-gray-700">Clean, ATS-optimized PDF download</span>
-            </li>
-            <li className="flex items-start">
-              <span className="text-gray-300 mr-4">—</span>
-              <span className="text-gray-700">Copyable plain text for online applications</span>
-            </li>
-            <li className="flex items-start">
-              <span className="text-gray-300 mr-4">—</span>
-              <span className="text-gray-700">No tables, icons, or graphics that break ATS</span>
-            </li>
-            <li className="flex items-start">
-              <span className="text-gray-300 mr-4">—</span>
-              <span className="text-gray-700">Professional structure for Big4 & corporate roles</span>
-            </li>
-          </ul>
+        {/* Unlock info */}
+        <div className="mb-12 p-6 border border-gray-200 bg-gray-50">
+          <p className="text-sm text-gray-700 mb-4">
+            <strong>Preview state:</strong> Full CV is visible above with watermark overlay. 
+            PDF export and copy features are disabled until you subscribe.
+          </p>
+          <p className="text-sm text-gray-600">
+            Subscribe to unlock PDF download and copyable text output.
+          </p>
         </div>
 
         {/* CTA */}
@@ -54,9 +42,12 @@ export default function PreviewSection({ cvData, onPayment, isProcessingPayment 
               Processing...
             </>
           ) : (
-            'Pay €3.99 and Download CV'
+            'Unlock PDF for €2.99'
           )}
         </Button>
+        <p className="text-xs text-gray-500 text-center mt-4">
+          Or subscribe for unlimited access at €6.99/month
+        </p>
       </div>
     </section>
   );

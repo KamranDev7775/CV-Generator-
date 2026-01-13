@@ -8,7 +8,7 @@ import ExperienceEntry from './ExperienceEntry';
 import EducationEntry from './EducationEntry';
 import { Loader2 } from "lucide-react";
 
-export default function CVForm({ formData, setFormData, onSubmit, isGenerating }) {
+export default function CVForm({ formData, setFormData, onSubmit, isGenerating, generateCoverLetter, setGenerateCoverLetter }) {
   const updateField = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
@@ -290,6 +290,21 @@ export default function CVForm({ formData, setFormData, onSubmit, isGenerating }
             </div>
           </div>
 
+          {/* Cover Letter Option */}
+          <div>
+            <h3 className="text-xs uppercase tracking-widest text-gray-400 mb-6">Additional Options</h3>
+            <div className="flex items-center space-x-3">
+              <Checkbox
+                id="cover-letter"
+                checked={generateCoverLetter || false}
+                onCheckedChange={setGenerateCoverLetter}
+              />
+              <label htmlFor="cover-letter" className="text-sm text-gray-600 cursor-pointer">
+                Generate a matching cover letter
+              </label>
+            </div>
+          </div>
+
           {/* Submit */}
           <div className="pt-8">
             <Button 
@@ -307,8 +322,8 @@ export default function CVForm({ formData, setFormData, onSubmit, isGenerating }
               )}
             </Button>
           </div>
-        </form>
-      </div>
-    </section>
-  );
-}
+          </form>
+          </div>
+          </section>
+          );
+          }

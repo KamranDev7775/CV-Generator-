@@ -1,14 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
+import { useNavigate } from 'react-router-dom';
+import { createPageUrl } from '../utils';
 import LandingSection from '@/components/cv/LandingSection';
 import CVForm from '@/components/cv/CVForm';
 import PreviewSection from '@/components/cv/PreviewSection';
+import FeaturesSection from '@/components/home/FeaturesSection';
+import FAQSection from '@/components/home/FAQSection';
 
 const STORAGE_KEY = 'ats_cv_form_data';
 const SUBMISSION_KEY = 'ats_cv_submission_id';
 
 export default function Home() {
+  const navigate = useNavigate();
   const [step, setStep] = useState('landing'); // landing, form, preview
+  const [user, setUser] = useState(null);
   const [formData, setFormData] = useState({
     full_name: '',
     target_position: '',
@@ -29,9 +35,11 @@ export default function Home() {
   const [generatedCV, setGeneratedCV] = useState(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+  const [generateCoverLetter, setGenerateCoverLetter] = useState(false);
 
-  // Load saved form data on mount
+  // Load user and saved form data on mount
   useEffect(() => {
+    loadUser();
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
       try {
@@ -48,12 +56,27 @@ export default function Home() {
     }
   }, []);
 
+  const loadUser = async () => {
+    try {
+      const currentUser = await base44.auth.me();
+      setUser(currentUser);
+    } catch (error) {
+      // User not logged in
+      setUser(null);
+    }
+  };
+
   // Save form data on change
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(formData));
   }, [formData]);
 
-  const scrollToForm = () => {
+  const scrollToForm = async () => {
+    // Check if user is logged in
+    if (!user) {
+      await base44.auth.redirectToLogin(window.location.href);
+      return;
+    }
     setStep('form');
     setTimeout(() => {
       document.getElementById('cv-form')?.scrollIntoView({ behavior: 'smooth' });
@@ -164,20 +187,25 @@ export default function Home() {
           <section className="px-6 md:px-12 lg:px-24 py-16 bg-gray-50">
             <div className="max-w-5xl mx-auto">
               <h3 className="text-center text-sm uppercase tracking-widest text-gray-400 mb-8">
-                Trusted by applicants targeting companies like:
+                Used by applicants targeting companies like:
               </h3>
-              <div className="grid grid-cols-2 md:grid-cols-5 gap-8 items-center justify-items-center">
-                <div className="text-2xl font-light text-gray-300">Deloitte</div>
-                <div className="text-2xl font-light text-gray-300">Lufthansa</div>
-                <div className="text-2xl font-light text-gray-300">PwC</div>
-                <div className="text-2xl font-light text-gray-300">BMW</div>
-                <div className="text-2xl font-light text-gray-300">SAP</div>
+              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-6 items-center justify-items-center">
+                <div className="text-xl font-light text-gray-300">Deloitte</div>
+                <div className="text-xl font-light text-gray-300">PwC</div>
+                <div className="text-xl font-light text-gray-300">KPMG</div>
+                <div className="text-xl font-light text-gray-300">EY</div>
+                <div className="text-xl font-light text-gray-300">BMW</div>
+                <div className="text-xl font-light text-gray-300">SAP</div>
+                <div className="text-xl font-light text-gray-300">Lufthansa</div>
               </div>
               <p className="text-xs text-gray-400 text-center mt-8 leading-relaxed max-w-3xl mx-auto">
                 *The names and logos of the companies mentioned above are registered trademarks belonging to their respective owners. Unless otherwise noted, these references in no way aim to suggest an affiliation or association with Makemycv.
               </p>
             </div>
           </section>
+
+          <FeaturesSection />
+          <FAQSection />
         </>
       )}
       
@@ -196,6 +224,8 @@ export default function Home() {
             setFormData={setFormData}
             onSubmit={generateCV}
             isGenerating={isGenerating}
+            generateCoverLetter={generateCoverLetter}
+            setGenerateCoverLetter={setGenerateCoverLetter}
           />
         </>
       )}

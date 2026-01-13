@@ -22,7 +22,7 @@ export default function CVDocument({ data, showWatermark = false }) {
       {showWatermark && (
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           <div className="transform -rotate-45 text-gray-200 text-2xl md:text-4xl font-sans font-bold text-center leading-relaxed whitespace-nowrap opacity-60">
-            Pay €3.99 to download<br />PDF and copy text
+            Unlock PDF for €2.99
           </div>
         </div>
       )}

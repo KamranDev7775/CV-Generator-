@@ -31,12 +31,11 @@ export default function Pricing() {
   };
 
   const features = [
-    'ATS-friendly CV builder — clean formatting optimized for Applicant Tracking Systems and corporate hiring',
-    'Cover letter generator — matching cover letter based on profile and target role',
-    'Unlimited edits & regenerations — modify details and regenerate at any time',
-    'PDF download — export documents in PDF format',
-    'Copyable text output — paste into Word or online application forms',
-    'Basic resume checker (ATS feedback) — simple keyword and formatting suggestions',
+    'ATS-friendly CV builder',
+    'Clean single-column corporate formatting',
+    'Unlimited edits & regenerations',
+    'PDF export',
+    'Copyable plain text export',
     'Email support'
   ];
 
@@ -68,14 +67,10 @@ export default function Pricing() {
                 <span className="text-gray-500 ml-2">one-time</span>
               </div>
               
-              <p className="text-sm text-gray-600 mb-6 leading-relaxed">
-                Full access for 14 days. After the trial ends, billing continues at €6.99/month unless canceled.
-              </p>
-
               <Button
                 onClick={() => handleSubscribe('trial')}
                 disabled={loadingPlan !== null}
-                className="w-full bg-black text-white hover:bg-gray-900 py-6 text-base font-normal rounded-none mb-8"
+                className="w-full bg-black text-white hover:bg-gray-900 py-6 text-base font-normal rounded-none mb-6"
               >
                 {loadingPlan === 'trial' ? (
                   <>
@@ -86,6 +81,29 @@ export default function Pricing() {
                   'Start 14-day trial for €2.99'
                 )}
               </Button>
+
+              <div className="space-y-2 mb-8 text-sm text-gray-600">
+                <p className="flex items-center gap-2">
+                  <Check className="h-4 w-4 text-gray-400" />
+                  Full access for 14 days
+                </p>
+                <p className="flex items-center gap-2">
+                  <Check className="h-4 w-4 text-gray-400" />
+                  Cancel anytime
+                </p>
+                <p className="flex items-center gap-2">
+                  <Check className="h-4 w-4 text-gray-400" />
+                  No hidden fees
+                </p>
+                <p className="flex items-center gap-2">
+                  <Check className="h-4 w-4 text-gray-400" />
+                  Final price shown before download
+                </p>
+              </div>
+              
+              <p className="text-xs text-gray-500 mb-8 leading-relaxed">
+                Full access for 14 days. After the trial ends, billing continues at €6.99/month unless canceled.
+              </p>
 
               <div className="space-y-3">
                 {features.map((feature, idx) => (
