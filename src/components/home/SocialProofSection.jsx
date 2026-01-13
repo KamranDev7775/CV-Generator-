@@ -15,7 +15,7 @@ export default function SocialProofSection() {
           <div className="text-3xl font-bold text-gray-800">Deutsche Bank</div>
         </div>
         <p className="text-xs text-gray-400 text-center leading-relaxed max-w-4xl mx-auto">
-          *The names and logos of the companies mentioned above are registered trademarks belonging to their respective owners. Unless otherwise noted, these references in no way aim to suggest an affiliation or association with Makemycv.
+          *The names and logos of the companies mentioned above are registered trademarks belonging to their respective owners. Unless otherwise noted, these references in no way aim to suggest an affiliation or association with ATS CV Generator.
         </p>
       </div>
     </section>
