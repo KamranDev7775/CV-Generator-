@@ -189,30 +189,15 @@ export default function Home() {
       {step === 'landing' && (
         <>
           <LandingSection onStart={scrollToForm} />
-          
-          {/* Company Logos Section */}
-          <section className="px-6 md:px-12 lg:px-24 py-16 bg-gray-50">
-            <div className="max-w-5xl mx-auto">
-              <h3 className="text-center text-sm uppercase tracking-widest text-gray-400 mb-8">
-                Used by applicants targeting companies like:
-              </h3>
-              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-6 items-center justify-items-center">
-                <div className="text-xl font-light text-gray-300">Deloitte</div>
-                <div className="text-xl font-light text-gray-300">PwC</div>
-                <div className="text-xl font-light text-gray-300">KPMG</div>
-                <div className="text-xl font-light text-gray-300">EY</div>
-                <div className="text-xl font-light text-gray-300">BMW</div>
-                <div className="text-xl font-light text-gray-300">SAP</div>
-                <div className="text-xl font-light text-gray-300">Lufthansa</div>
-              </div>
-              <p className="text-xs text-gray-400 text-center mt-8 leading-relaxed max-w-3xl mx-auto">
-                *The names and logos of the companies mentioned above are registered trademarks belonging to their respective owners. Unless otherwise noted, these references in no way aim to suggest an affiliation or association with Makemycv.
-              </p>
-            </div>
-          </section>
-
-          <FeaturesSection />
+          <SocialProofSection />
+          <CorporateDesignSection onStart={scrollToForm} />
+          <WhyItWorksSection />
+          <TransparentPricingSection />
+          <CVIncludesSection />
+          <PreviewPaymentSection onStart={scrollToForm} />
+          <SuitableForSection />
           <FAQSection />
+          <FooterCTASection onStart={scrollToForm} />
         </>
       )}
       
