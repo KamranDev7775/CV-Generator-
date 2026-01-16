@@ -107,7 +107,7 @@ export default function Home() {
           .map(e => `${e.degree} from ${e.university}`)
           .join(', ');
         
-        const prompt = `You are an expert CV writer specializing in Big4, consulting, and Fortune 500 applications.
+        const prompt = `You are an expert CV writer specializing in top consulting firms, tech companies, and Fortune 500 applications.
 
 Generate a compelling professional summary (4-6 sentences, ~100 words) that will impress recruiters and pass ATS systems.
 
