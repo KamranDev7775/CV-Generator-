@@ -3,6 +3,18 @@ import { Button } from "@/components/ui/button";
 import { Eye } from 'lucide-react';
 
 export default function PreviewPaymentSection({ onStart }) {
+  const [isLoading, setIsLoading] = React.useState(false);
+
+  const handleStart = async () => {
+    if (isLoading) return;
+    setIsLoading(true);
+    try {
+      await onStart();
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <section className="py-20 bg-gray-50">
       <div className="max-w-4xl mx-auto px-6 md:px-12">
@@ -20,10 +32,11 @@ export default function PreviewPaymentSection({ onStart }) {
             You can preview your full CV before you pay. No surprises.
           </p>
           <Button 
-            onClick={onStart}
-            className="bg-black text-white hover:bg-gray-900 px-8 py-6 text-base font-normal rounded-none"
+            onClick={handleStart}
+            disabled={isLoading}
+            className="bg-black text-white hover:bg-gray-900 px-8 py-6 text-base font-normal rounded-none disabled:opacity-70 disabled:cursor-not-allowed"
           >
-            Start now for €2.99
+            {isLoading ? 'Loading...' : 'Get your CV now'}
           </Button>
         </div>
       </div>

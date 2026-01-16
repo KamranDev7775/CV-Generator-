@@ -2,6 +2,18 @@ import React from 'react';
 import { Button } from "@/components/ui/button";
 
 export default function CorporateDesignSection({ onStart }) {
+  const [isLoading, setIsLoading] = React.useState(false);
+
+  const handleStart = async () => {
+    if (isLoading) return;
+    setIsLoading(true);
+    try {
+      await onStart();
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <section className="py-20 bg-white">
       <div className="max-w-6xl mx-auto px-6 md:px-12">
@@ -29,10 +41,11 @@ export default function CorporateDesignSection({ onStart }) {
               </li>
             </ul>
             <Button 
-              onClick={onStart}
-              className="bg-black text-white hover:bg-gray-900 px-8 py-6 text-base font-normal rounded-none"
+              onClick={handleStart}
+              disabled={isLoading}
+              className="bg-black text-white hover:bg-gray-900 px-8 py-6 text-base font-normal rounded-none disabled:opacity-70 disabled:cursor-not-allowed"
             >
-              Start for €2.99
+              {isLoading ? 'Loading...' : 'Get your CV now'}
             </Button>
           </div>
           <div className="relative">
