@@ -1,8 +1,8 @@
-import React from 'react';
+import React from "react";
 import { Button } from "@/components/ui/button";
-import { Link } from 'react-router-dom';
-import { createPageUrl } from '../../utils';
-import { ArrowRight } from 'lucide-react';
+import { Link } from "react-router-dom";
+import { createPageUrl } from "../../utils";
+import { ArrowRight } from "lucide-react";
 
 export default function FooterCTASection({ onStart }) {
   const [isLoading, setIsLoading] = React.useState(false);
@@ -27,17 +27,17 @@ export default function FooterCTASection({ onStart }) {
           Transparent pricing. No hidden subscriptions.
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Button 
+          <Button
             onClick={handleStart}
             disabled={isLoading}
             className="bg-white text-black hover:bg-gray-100 px-8 py-6 text-base font-normal rounded-none disabled:opacity-70 disabled:cursor-not-allowed"
           >
-            {isLoading ? 'Loading...' : 'Get your CV now'}
+            {isLoading ? "Loading..." : "Get your CV now"}
           </Button>
-          <Link to={createPageUrl('Pricing')} className="sm:w-auto w-full">
-            <Button 
+          <Link to={createPageUrl("Pricing")} className="sm:w-auto w-full">
+            <Button
               variant="outline"
-              className="w-full border-white text-white hover:bg-white hover:text-black px-8 py-6 text-base font-normal rounded-none"
+              className="w-full border-white text-black hover:bg-white hover:text-black px-8 py-6 text-base font-normal rounded-none"
             >
               See pricing
             </Button>
