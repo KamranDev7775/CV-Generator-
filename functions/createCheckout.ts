@@ -16,7 +16,7 @@ Deno.serve(async (req) => {
               name: 'ATS CV Generator',
               description: 'PDF + Copyable Text CV Download'
             },
-            unit_amount: 399
+            unit_amount: 199
           },
           quantity: 1
         }

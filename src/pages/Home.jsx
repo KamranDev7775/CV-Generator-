@@ -3,7 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '../utils';
 import LandingSection from '@/components/cv/LandingSection';
-import CVForm from '@/components/cv/CVForm';
+import CVFormWithPreview from '@/components/cv/CVFormWithPreview';
 import PreviewSection from '@/components/cv/PreviewSection';
 import SocialProofSection from '@/components/home/SocialProofSection';
 import CorporateDesignSection from '@/components/home/CorporateDesignSection';
@@ -134,6 +134,7 @@ REQUIREMENTS:
 - Focus on value proposition and impact
 - Use active, powerful verbs
 - Keep it concise but impactful
+- Tailor to consulting, tech, and corporate roles in Europe
 
 Generate a professional summary that will make recruiters want to interview this candidate.`;
         
@@ -236,15 +237,15 @@ Generate a professional summary that will make recruiters want to interview this
       
       {step === 'form' && (
         <>
-          <div className="px-6 md:px-12 lg:px-24 py-8 border-b border-gray-100">
+          <div className="px-6 md:px-12 py-8 bg-white border-b border-gray-100">
             <button 
               onClick={() => setStep('landing')}
-              className="text-sm text-gray-400 hover:text-gray-600 transition-colors"
+              className="text-sm text-gray-500 hover:text-gray-900 transition-colors font-medium"
             >
-              ← Back
+              ← Back to Home
             </button>
           </div>
-          <CVForm 
+          <CVFormWithPreview 
             formData={formData}
             setFormData={setFormData}
             onSubmit={generateCV}

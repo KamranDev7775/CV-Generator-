@@ -20,7 +20,7 @@ export default function CorporateDesignSection({ onStart }) {
         <div className="grid md:grid-cols-2 gap-12 items-center">
           <div>
             <h2 className="text-3xl md:text-4xl font-light text-black mb-8">
-              Designed for corporate & consulting roles
+              Designed for professional roles
             </h2>
             <ul className="space-y-4 mb-8">
               <li className="flex items-start">

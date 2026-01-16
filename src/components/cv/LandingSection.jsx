@@ -41,7 +41,7 @@ export default function LandingSection({ onStart }) {
         
         <p className="text-xl md:text-2xl text-gray-600 mb-12 font-normal leading-relaxed max-w-2xl">
           Create a professional, ATS-friendly resume in minutes. No design skills needed. 
-          <span className="block mt-2 text-gray-500">€2.99 • Ready in 2 minutes</span>
+          <span className="block mt-2 text-gray-500">€1.99 • Ready in 2 minutes</span>
         </p>
         
         <div className="grid sm:grid-cols-3 gap-6 mb-12 max-w-2xl">
@@ -56,7 +56,7 @@ export default function LandingSection({ onStart }) {
             <div className="flex-shrink-0 w-1 h-12 bg-purple-600 rounded-full" />
             <div>
               <div className="font-semibold text-black mb-1">Corporate Ready</div>
-              <div className="text-sm text-gray-600">Perfect for Big4 & Fortune 500</div>
+              <div className="text-sm text-gray-600">Perfect for top companies & consulting</div>
             </div>
           </div>
           <div className="flex items-start gap-3">

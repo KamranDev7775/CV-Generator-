@@ -24,7 +24,7 @@ export default function Layout({ children, currentPageName }) {
               </Link>
               <Link 
                 to={createPageUrl('Pricing')} 
-                className="text-gray-500 hover:text-gray-900 transition-colors hover:underline"
+                className="text-gray-500 hover:text-gray-900 transition-all hover:underline"
               >
                 Pricing
               </Link>

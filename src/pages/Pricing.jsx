@@ -61,55 +61,45 @@ export default function Pricing() {
                 Most popular
               </div>
               
-              <h2 className="text-2xl font-light text-black mb-2">Trial Access</h2>
+              <h2 className="text-2xl font-light text-black mb-2">One-Time Purchase</h2>
               <div className="mb-6">
-                <span className="text-4xl font-light text-black">€2.99</span>
+                <span className="text-5xl font-light text-black">€1.99</span>
                 <span className="text-gray-500 ml-2">one-time</span>
               </div>
               
               <Button
                 onClick={() => handleSubscribe('trial')}
                 disabled={loadingPlan !== null}
-                className="w-full bg-black text-white hover:bg-gray-900 py-6 text-base font-normal rounded-none mb-6"
+                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700 py-7 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all mb-8"
               >
                 {loadingPlan === 'trial' ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                     Processing...
                   </>
                 ) : (
-                  'Start 14-day trial for €2.99'
+                  'Get your CV for €1.99'
                 )}
               </Button>
 
-              <div className="space-y-2 mb-8 text-sm text-gray-600">
-                <p className="flex items-center gap-2">
-                  <Check className="h-4 w-4 text-gray-400" />
-                  Full access for 14 days
-                </p>
-                <p className="flex items-center gap-2">
-                  <Check className="h-4 w-4 text-gray-400" />
-                  Cancel anytime
-                </p>
-                <p className="flex items-center gap-2">
-                  <Check className="h-4 w-4 text-gray-400" />
-                  No hidden fees
-                </p>
-                <p className="flex items-center gap-2">
-                  <Check className="h-4 w-4 text-gray-400" />
-                  Final price shown before download
-                </p>
+              <div className="grid grid-cols-2 gap-3 mb-8">
+                <div className="bg-blue-50 p-4 rounded-lg text-center">
+                  <div className="text-2xl font-bold text-blue-600 mb-1">14</div>
+                  <div className="text-xs text-gray-600">Days Access</div>
+                </div>
+                <div className="bg-purple-50 p-4 rounded-lg text-center">
+                  <div className="text-2xl font-bold text-purple-600 mb-1">∞</div>
+                  <div className="text-xs text-gray-600">Edits & Downloads</div>
+                </div>
               </div>
-              
-              <p className="text-xs text-gray-500 mb-8 leading-relaxed">
-                Full access for 14 days. After the trial ends, billing continues at €6.99/month unless canceled.
-              </p>
 
-              <div className="space-y-3">
+              <div className="space-y-4">
                 {features.map((feature, idx) => (
-                  <div key={idx} className="flex items-start gap-3">
-                    <Check className="h-5 w-5 text-black flex-shrink-0 mt-0.5" />
-                    <span className="text-sm text-gray-700 leading-relaxed">{feature}</span>
+                  <div key={idx} className="flex items-start gap-3 group">
+                    <div className="flex-shrink-0 w-6 h-6 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center mt-0.5">
+                      <Check className="h-4 w-4 text-white" />
+                    </div>
+                    <span className="text-sm text-gray-700 leading-relaxed group-hover:text-black transition-colors">{feature}</span>
                   </div>
                 ))}
               </div>
