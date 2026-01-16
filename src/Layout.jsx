@@ -18,31 +18,31 @@ export default function Layout({ children, currentPageName }) {
             <nav className="flex flex-wrap justify-center gap-6 text-sm">
               <Link 
                 to={createPageUrl('Home')} 
-                className="text-gray-500 hover:text-gray-900 transition-colors"
+                className="text-gray-500 hover:text-gray-900 transition-colors hover:underline"
               >
                 Home
               </Link>
               <Link 
                 to={createPageUrl('Pricing')} 
-                className="text-gray-500 hover:text-gray-900 transition-colors"
+                className="text-gray-500 hover:text-gray-900 transition-colors hover:underline"
               >
                 Pricing
               </Link>
               <Link 
                 to={createPageUrl('Dashboard')} 
-                className="text-gray-500 hover:text-gray-900 transition-colors"
+                className="text-gray-500 hover:text-gray-900 transition-colors hover:underline"
               >
                 Dashboard
               </Link>
               <Link 
                 to={createPageUrl('PrivacyPolicy')} 
-                className="text-gray-500 hover:text-gray-900 transition-colors"
+                className="text-gray-500 hover:text-gray-900 transition-colors hover:underline"
               >
                 Privacy Policy
               </Link>
               <Link 
                 to={createPageUrl('TermsConditions')} 
-                className="text-gray-500 hover:text-gray-900 transition-colors"
+                className="text-gray-500 hover:text-gray-900 transition-colors hover:underline"
               >
                 Terms & Conditions
               </Link>

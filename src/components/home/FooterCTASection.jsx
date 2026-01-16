@@ -2,6 +2,7 @@ import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '../../utils';
+import { ArrowRight } from 'lucide-react';
 
 export default function FooterCTASection({ onStart }) {
   return (

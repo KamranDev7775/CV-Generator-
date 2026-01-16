@@ -52,11 +52,7 @@ export default function Home() {
       try {
         const parsed = JSON.parse(saved);
         setFormData(parsed);
-        // If we have generated CV data, go to preview
-        if (parsed.generated_cv) {
-          setGeneratedCV(parsed);
-          setStep('preview');
-        }
+        // Don't auto-navigate to preview on refresh - let user stay on landing
       } catch (e) {
         console.log('Could not parse saved data');
       }
@@ -79,11 +75,7 @@ export default function Home() {
   }, [formData]);
 
   const scrollToForm = async () => {
-    // Check if user is logged in
-    if (!user) {
-      await base44.auth.redirectToLogin(window.location.href);
-      return;
-    }
+    // Don't require login at start - let users fill the form first
     setStep('form');
     setTimeout(() => {
       document.getElementById('cv-form')?.scrollIntoView({ behavior: 'smooth' });
@@ -91,30 +83,59 @@ export default function Home() {
   };
 
   const generateCV = async () => {
+    if (isGenerating) return; // Prevent double-clicks
     setIsGenerating(true);
     
     try {
+      // Check if user is logged in, if not - prompt login
+      if (!user) {
+        await base44.auth.redirectToLogin(window.location.href);
+        return;
+      }
+
       let summary = formData.summary;
       
-      // Auto-generate summary if requested
+      // Auto-generate HIGH QUALITY summary if requested
       if (formData.auto_generate_summary) {
         const experienceText = formData.experiences
           .filter(e => e.job_title || e.company)
-          .map(e => `${e.job_title} at ${e.company}`)
+          .map(e => `${e.job_title} at ${e.company}: ${e.achievements || 'No details provided'}`)
+          .join('\n');
+        
+        const educationText = formData.education
+          .filter(e => e.degree || e.university)
+          .map(e => `${e.degree} from ${e.university}`)
           .join(', ');
         
-        const prompt = `Generate a professional summary (3-5 sentences) for a CV. 
-          Name: ${formData.full_name}
-          Target Position: ${formData.target_position || 'Not specified'}
-          Target Country: ${formData.target_country}
-          Seniority: ${formData.seniority_level}
-          Skills: ${formData.skills || 'Not specified'}
-          Experience: ${experienceText || 'Not specified'}
-          ${formData.job_description ? `Job Description to tailor for: ${formData.job_description}` : ''}
-          
-          Write in a professional tone suitable for Big4 and corporate applications in Europe. 
-          Focus on quantifiable achievements and key competencies.
-          Do NOT use first person pronouns.`;
+        const prompt = `You are an expert CV writer specializing in Big4, consulting, and Fortune 500 applications.
+
+Generate a compelling professional summary (4-6 sentences, ~100 words) that will impress recruiters and pass ATS systems.
+
+CANDIDATE INFORMATION:
+Name: ${formData.full_name}
+Target Position: ${formData.target_position || 'Professional role'}
+Target Country: ${formData.target_country}
+Seniority Level: ${formData.seniority_level}
+Core Skills: ${formData.skills || 'General business skills'}
+Education: ${educationText || 'Not specified'}
+
+PROFESSIONAL EXPERIENCE:
+${experienceText || 'Entry-level professional'}
+
+${formData.job_description ? `TARGET JOB DESCRIPTION:\n${formData.job_description}` : ''}
+
+REQUIREMENTS:
+- Write in third person (no "I", "my", etc.)
+- Start with years of experience or key expertise area
+- Highlight 2-3 quantifiable achievements or key strengths
+- Include relevant industry keywords for ATS
+- Match tone to target role and seniority
+- Make it compelling and confident
+- Focus on value proposition and impact
+- Use active, powerful verbs
+- Keep it concise but impactful
+
+Generate a professional summary that will make recruiters want to interview this candidate.`;
         
         const result = await base44.integrations.Core.InvokeLLM({
           prompt,
@@ -131,7 +152,7 @@ export default function Home() {
 
       const cvData = { ...formData, summary, generated_cv: summary };
       
-      // Save to database
+      // Save to database only if user is authenticated
       const submission = await base44.entities.CVSubmission.create({
         ...cvData,
         payment_status: 'pending'
@@ -148,18 +169,30 @@ export default function Home() {
       
     } catch (error) {
       console.error('Error generating CV:', error);
-      // Still show preview with entered data
-      setGeneratedCV(formData);
-      setStep('preview');
+      if (error.message?.includes('auth') || error.message?.includes('login')) {
+        await base44.auth.redirectToLogin(window.location.href);
+      } else {
+        // Still show preview with entered data
+        setGeneratedCV(formData);
+        setStep('preview');
+      }
     } finally {
       setIsGenerating(false);
     }
   };
 
   const handlePayment = async () => {
+    if (isProcessingPayment) return; // Prevent double-clicks
+
     // Check if running in iframe
     if (window.self !== window.top) {
       alert('Payment checkout is only available in the published app. Please open the app in a new tab to complete your purchase.');
+      return;
+    }
+
+    // Ensure user is logged in before payment
+    if (!user) {
+      await base44.auth.redirectToLogin(window.location.href);
       return;
     }
 

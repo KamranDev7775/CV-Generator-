@@ -1,51 +1,95 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '../../utils';
+import { ArrowRight, CheckCircle2 } from 'lucide-react';
 
 export default function LandingSection({ onStart }) {
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleStart = async () => {
+    if (isLoading) return;
+    setIsLoading(true);
+    try {
+      await onStart();
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
-    <section className="min-h-screen flex flex-col justify-center px-6 md:px-12 lg:px-24 py-20">
-      <div className="max-w-2xl">
-        <h1 className="text-4xl md:text-5xl lg:text-6xl font-light text-black leading-tight mb-6">
-          Generate an ATS-friendly CV in 2 minutes for €2.99
+    <section className="relative min-h-screen flex flex-col justify-center px-6 md:px-12 lg:px-24 py-20 bg-gradient-to-b from-white to-gray-50">
+      {/* Background Pattern */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-blue-50 rounded-full blur-3xl opacity-30" />
+        <div className="absolute bottom-0 left-0 w-96 h-96 bg-purple-50 rounded-full blur-3xl opacity-30" />
+      </div>
+
+      <div className="relative max-w-4xl">
+        {/* Trust Badge */}
+        <div className="inline-flex items-center gap-2 bg-blue-50 text-blue-700 px-4 py-2 rounded-full text-sm mb-8 font-medium">
+          <CheckCircle2 className="w-4 h-4" />
+          Trusted by 10,000+ professionals
+        </div>
+
+        <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-black leading-[1.1] mb-6 tracking-tight">
+          Land your dream job with an{' '}
+          <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            ATS-optimized CV
+          </span>
         </h1>
         
-        <p className="text-lg md:text-xl text-gray-500 mb-12 font-light">
-          Clean structure, corporate-friendly formatting, optimized for Europe.
+        <p className="text-xl md:text-2xl text-gray-600 mb-12 font-normal leading-relaxed max-w-2xl">
+          Create a professional, ATS-friendly resume in minutes. No design skills needed. 
+          <span className="block mt-2 text-gray-500">€2.99 • Ready in 2 minutes</span>
         </p>
         
-        <ul className="space-y-4 mb-12">
-          <li className="flex items-start">
-            <span className="text-gray-300 mr-4">—</span>
-            <span className="text-gray-700">Perfect for Big4 & corporate applications</span>
-          </li>
-          <li className="flex items-start">
-            <span className="text-gray-300 mr-4">—</span>
-            <span className="text-gray-700">ATS-friendly (no tables, icons, or graphics)</span>
-          </li>
-          <li className="flex items-start">
-            <span className="text-gray-300 mr-4">—</span>
-            <span className="text-gray-700">PDF + copyable text after purchase</span>
-          </li>
-        </ul>
+        <div className="grid sm:grid-cols-3 gap-6 mb-12 max-w-2xl">
+          <div className="flex items-start gap-3">
+            <div className="flex-shrink-0 w-1 h-12 bg-blue-600 rounded-full" />
+            <div>
+              <div className="font-semibold text-black mb-1">ATS-Optimized</div>
+              <div className="text-sm text-gray-600">Pass automated screening systems</div>
+            </div>
+          </div>
+          <div className="flex items-start gap-3">
+            <div className="flex-shrink-0 w-1 h-12 bg-purple-600 rounded-full" />
+            <div>
+              <div className="font-semibold text-black mb-1">Corporate Ready</div>
+              <div className="text-sm text-gray-600">Perfect for Big4 & Fortune 500</div>
+            </div>
+          </div>
+          <div className="flex items-start gap-3">
+            <div className="flex-shrink-0 w-1 h-12 bg-pink-600 rounded-full" />
+            <div>
+              <div className="font-semibold text-black mb-1">Instant Download</div>
+              <div className="text-sm text-gray-600">PDF + copyable text format</div>
+            </div>
+          </div>
+        </div>
         
         <div className="flex flex-col sm:flex-row gap-4">
           <Button 
-            onClick={onStart}
-            className="bg-black text-white hover:bg-gray-900 px-8 py-6 text-base font-normal rounded-none"
+            onClick={handleStart}
+            disabled={isLoading}
+            className="bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700 px-8 py-7 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 group disabled:opacity-70 disabled:cursor-not-allowed"
           >
-            Start now
+            {isLoading ? 'Loading...' : 'Get your CV now'}
+            {!isLoading && <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />}
           </Button>
-          <Link to={createPageUrl('Pricing')}>
+          <Link to={createPageUrl('Pricing')} className="sm:w-auto w-full">
             <Button 
               variant="outline"
-              className="w-full border-gray-200 text-black hover:bg-gray-50 px-8 py-6 text-base font-normal rounded-none"
+              className="w-full border-2 border-gray-300 text-black hover:bg-gray-100 hover:border-gray-400 px-8 py-7 text-lg font-semibold rounded-xl transition-all duration-300"
             >
               See pricing
             </Button>
           </Link>
         </div>
+
+        <p className="text-sm text-gray-500 mt-6">
+          No credit card required to preview • One-time payment
+        </p>
       </div>
     </section>
   );
