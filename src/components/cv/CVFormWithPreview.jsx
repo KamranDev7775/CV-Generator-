@@ -335,7 +335,7 @@ export default function CVFormWithPreview({ formData, setFormData, onSubmit, isG
               <h3 className="text-lg font-semibold text-gray-900">Live Preview</h3>
             </div>
             <div className="border border-gray-200 rounded-lg p-6 bg-gray-50">
-              <CVDocument cvData={formData} showWatermark={true} />
+              <CVDocument data={formData} showWatermark={true} />
             </div>
             <p className="text-xs text-gray-500 text-center mt-4">
               Preview updates as you type • Final version available after payment
