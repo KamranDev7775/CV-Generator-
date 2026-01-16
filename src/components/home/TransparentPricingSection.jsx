@@ -9,7 +9,7 @@ export default function TransparentPricingSection() {
     },
     {
       traditional: 'Trial turning into subscription',
-      ours: 'Flat €2.99'
+      ours: 'Flat €1.99'
     },
     {
       traditional: 'Pay before preview',
