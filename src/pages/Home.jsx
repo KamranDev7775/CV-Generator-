@@ -42,6 +42,7 @@ export default function Home() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const [generateCoverLetter, setGenerateCoverLetter] = useState(false);
+  const [importError, setImportError] = useState(null);
 
   // Load user and saved form data on mount
   useEffect(() => {
@@ -79,6 +80,101 @@ export default function Home() {
     setTimeout(() => {
       document.getElementById('cv-form')?.scrollIntoView({ behavior: 'smooth' });
     }, 100);
+  };
+
+  const handleImportCV = async (file) => {
+    setImportError(null);
+    
+    try {
+      // Upload the file first
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      
+      // Extract data from the uploaded CV
+      const result = await base44.integrations.Core.ExtractDataFromUploadedFile({
+        file_url,
+        json_schema: {
+          type: "object",
+          properties: {
+            full_name: { type: "string" },
+            email: { type: "string" },
+            phone: { type: "string" },
+            linkedin_url: { type: "string" },
+            location: { type: "string" },
+            target_position: { type: "string" },
+            summary: { type: "string" },
+            skills: { type: "string" },
+            experiences: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  job_title: { type: "string" },
+                  company: { type: "string" },
+                  location: { type: "string" },
+                  start_date: { type: "string" },
+                  end_date: { type: "string" },
+                  achievements: { type: "string" }
+                }
+              }
+            },
+            education: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  degree: { type: "string" },
+                  university: { type: "string" },
+                  location: { type: "string" },
+                  start_date: { type: "string" },
+                  end_date: { type: "string" }
+                }
+              }
+            },
+            languages: { type: "string" }
+          }
+        }
+      });
+
+      if (result.status === 'error') {
+        setImportError('Could not read this file. Please try another one.');
+        return;
+      }
+
+      // Merge extracted data with default form structure
+      const extractedData = result.output || {};
+      const newFormData = {
+        full_name: extractedData.full_name || '',
+        target_position: extractedData.target_position || '',
+        location: extractedData.location || '',
+        email: extractedData.email || '',
+        phone: extractedData.phone || '',
+        linkedin_url: extractedData.linkedin_url || '',
+        summary: extractedData.summary || '',
+        auto_generate_summary: false,
+        skills: extractedData.skills || '',
+        experiences: (extractedData.experiences && extractedData.experiences.length > 0) 
+          ? extractedData.experiences 
+          : [{ job_title: '', company: '', location: '', start_date: '', end_date: '', achievements: '' }],
+        education: (extractedData.education && extractedData.education.length > 0) 
+          ? extractedData.education 
+          : [{ degree: '', university: '', location: '', start_date: '', end_date: '' }],
+        languages: extractedData.languages || '',
+        languagesList: [],
+        target_country: 'Germany',
+        seniority_level: 'Mid',
+        job_description: ''
+      };
+
+      setFormData(newFormData);
+      setStep('form');
+      setTimeout(() => {
+        document.getElementById('cv-form')?.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+      
+    } catch (error) {
+      console.error('Import error:', error);
+      setImportError('Could not read this file. Please try another one.');
+    }
   };
 
   const generateCV = async () => {
@@ -221,7 +317,14 @@ Generate a professional summary that will make recruiters want to interview this
     <div className="min-h-screen bg-white">
       {step === 'landing' && (
         <>
-          <LandingSection onStart={scrollToForm} />
+          <LandingSection onStart={scrollToForm} onImport={handleImportCV} />
+          {importError && (
+            <div className="max-w-4xl mx-auto px-6 md:px-12 lg:px-24 -mt-12 mb-8">
+              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+                {importError}
+              </div>
+            </div>
+          )}
           <SocialProofSection />
           <CorporateDesignSection onStart={scrollToForm} />
           <WhyItWorksSection />

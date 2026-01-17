@@ -2,10 +2,11 @@ import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '../../utils';
-import { ArrowRight, CheckCircle2 } from 'lucide-react';
+import { ArrowRight, CheckCircle2, Upload } from 'lucide-react';
 
-export default function LandingSection({ onStart }) {
+export default function LandingSection({ onStart, onImport }) {
   const [isLoading, setIsLoading] = useState(false);
+  const [isImporting, setIsImporting] = useState(false);
 
   const handleStart = async () => {
     if (isLoading) return;
@@ -15,6 +16,25 @@ export default function LandingSection({ onStart }) {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleImport = async () => {
+    if (isImporting) return;
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.pdf,.docx';
+    input.onchange = async (e) => {
+      const file = e.target.files?.[0];
+      if (file) {
+        setIsImporting(true);
+        try {
+          await onImport(file);
+        } finally {
+          setIsImporting(false);
+        }
+      }
+    };
+    input.click();
   };
 
   return (
@@ -71,13 +91,21 @@ export default function LandingSection({ onStart }) {
         <div className="flex flex-col sm:flex-row gap-4">
           <Button 
             onClick={handleStart}
-            disabled={isLoading}
-className="bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700 px-14 py-7 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 group disabled:opacity-70 disabled:cursor-not-allowed"
+            disabled={isLoading || isImporting}
+            className="bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700 px-14 py-7 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 group disabled:opacity-70 disabled:cursor-not-allowed"
           >
             {isLoading ? 'Loading...' : 'Get your CV now'}
             {!isLoading && <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />}
           </Button>
-         
+          
+          <Button 
+            onClick={handleImport}
+            disabled={isLoading || isImporting}
+            className="bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700 px-14 py-7 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 group disabled:opacity-70 disabled:cursor-not-allowed"
+          >
+            {isImporting ? 'Importing...' : 'Import CV'}
+            {!isImporting && <Upload className="ml-2 w-5 h-5 group-hover:translate-y-[-2px] transition-transform" />}
+          </Button>
         </div>
 
         <p className="text-sm text-gray-500 mt-6">
