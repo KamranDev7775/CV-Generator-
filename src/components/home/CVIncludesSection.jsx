@@ -114,20 +114,16 @@ export default function CVIncludesSection() {
           </div>
 
           {/* Right: Sections List */}
-          <div className="space-y-6">
+          <div className="space-y-3 pt-12 lg:pt-0">
             {sections.map((section, idx) => (
               <div 
                 key={idx}
-                className="flex items-start gap-4 p-6 rounded-2xl bg-white hover:shadow-lg transition-all duration-300 cursor-default group"
+                className="flex items-center gap-3 py-1"
               >
-                <div className="flex-shrink-0 w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                  <CheckCircle2 className="w-6 h-6 text-white" strokeWidth={2.5} />
-                </div>
-                <div className="pt-2">
-                  <h3 className="text-lg font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
-                    {section}
-                  </h3>
-                </div>
+                <CheckCircle2 className="w-5 h-5 text-blue-500 flex-shrink-0" strokeWidth={2} />
+                <p className="text-base text-gray-700">
+                  {section}
+                </p>
               </div>
             ))}
           </div>
