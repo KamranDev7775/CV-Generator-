@@ -77,14 +77,7 @@ export default function LandingSection({ onStart }) {
             {isLoading ? 'Loading...' : 'Get your CV now'}
             {!isLoading && <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />}
           </Button>
-          <Link to={createPageUrl('Pricing')} className="sm:w-auto w-full">
-            <Button 
-              variant="outline"
-              className="w-full border-2 border-gray-300 text-black hover:bg-gray-100 hover:border-gray-400 px-8 py-7 text-lg font-semibold rounded-xl transition-all duration-300"
-            >
-              See pricing
-            </Button>
-          </Link>
+         
         </div>
 
         <p className="text-sm text-gray-500 mt-6">
