@@ -46,7 +46,7 @@ export default function CorporateDesignSection({ onStart }) {
                     Single-Column Format
                   </h3>
                   <p className="text-gray-600 leading-relaxed">
-                    Maximizes readability and ATS compatibility, presenting your information with perfect clarity and structure.
+                    Easy to read. Works well with screening tools.
                   </p>
                 </div>
               </div>
@@ -62,7 +62,7 @@ export default function CorporateDesignSection({ onStart }) {
                     Professional Design
                   </h3>
                   <p className="text-gray-600 leading-relaxed">
-                    Clean, modern layout with professional fonts that work perfectly for any industry - from tech startups to established corporations.
+                    Clean layout and fonts — suitable for any role.
                   </p>
                 </div>
               </div>
