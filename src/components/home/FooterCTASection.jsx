@@ -18,31 +18,24 @@ export default function FooterCTASection({ onStart }) {
   };
 
   return (
-    <section className="py-20 bg-black text-white">
+    <section className="py-24 bg-gradient-to-b from-white to-gray-100">
       <div className="max-w-4xl mx-auto px-6 md:px-12 text-center">
-        <h2 className="text-3xl md:text-4xl lg:text-5xl font-light mb-4">
+        <h2 className="text-4xl md:text-5xl font-bold text-black mb-6">
           Get your ATS-friendly CV in minutes
         </h2>
-        <p className="text-lg text-gray-400 mb-12">
+        <p className="text-xl text-gray-600 mb-12">
           Transparent pricing. No hidden subscriptions.
         </p>
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Button
-            onClick={handleStart}
-            disabled={isLoading}
-            className="bg-white text-black hover:bg-gray-100 px-8 py-6 text-base font-normal rounded-none disabled:opacity-70 disabled:cursor-not-allowed"
-          >
-            {isLoading ? "Loading..." : "Get your CV now"}
-          </Button>
-          <Link to={createPageUrl("Pricing")} className="sm:w-auto w-full">
-            <Button
-              variant="outline"
-              className="w-full border-white text-black hover:bg-white hover:text-black px-8 py-6 text-base font-normal rounded-none"
-            >
-              See pricing
-            </Button>
-          </Link>
-        </div>
+        <Button
+          onClick={handleStart}
+          disabled={isLoading}
+          className="bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700 px-12 py-7 text-lg font-semibold rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 disabled:opacity-70 disabled:cursor-not-allowed"
+        >
+          {isLoading ? "Loading..." : "Get your CV now"}
+        </Button>
+        <p className="text-sm text-gray-500 mt-6">
+          No credit card required • Ready in 2 minutes
+        </p>
       </div>
     </section>
   );

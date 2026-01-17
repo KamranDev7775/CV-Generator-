@@ -12,6 +12,7 @@ export default function Success() {
   const [isLoading, setIsLoading] = useState(true);
   const [copied, setCopied] = useState(false);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+  const [accessDenied, setAccessDenied] = useState(false);
   const cvRef = useRef(null);
 
   useEffect(() => {
@@ -24,12 +25,24 @@ export default function Success() {
       const urlParams = new URLSearchParams(window.location.search);
       const submissionId = urlParams.get('submission_id');
 
-      if (submissionId) {
-        // Update payment status
-        await base44.entities.CVSubmission.update(submissionId, {
-          payment_status: 'completed'
-        });
+      if (!submissionId) {
+        setAccessDenied(true);
+        setIsLoading(false);
+        return;
       }
+
+      // Check if payment was completed
+      const submission = await base44.entities.CVSubmission.filter({ id: submissionId });
+      if (!submission || submission.length === 0 || submission[0].payment_status !== 'completed') {
+        setAccessDenied(true);
+        setIsLoading(false);
+        return;
+      }
+
+      // Update payment status
+      await base44.entities.CVSubmission.update(submissionId, {
+        payment_status: 'completed'
+      });
 
       // Load from localStorage
       const saved = localStorage.getItem(STORAGE_KEY);
@@ -38,11 +51,7 @@ export default function Success() {
       }
     } catch (error) {
       console.error('Error loading CV data:', error);
-      // Try localStorage as fallback
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) {
-        setCvData(JSON.parse(saved));
-      }
+      setAccessDenied(true);
     } finally {
       setIsLoading(false);
     }
@@ -301,12 +310,12 @@ export default function Success() {
     );
   }
 
-  if (!cvData) {
+  if (accessDenied || !cvData) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center px-6">
         <div className="text-center">
-          <h1 className="text-2xl font-light text-black mb-4">No CV data found</h1>
-          <p className="text-gray-500 mb-8">Please generate a CV first.</p>
+          <h1 className="text-2xl font-light text-black mb-4">Access Denied</h1>
+          <p className="text-gray-500 mb-8">This page is only accessible after successful payment.</p>
           <a href="/" className="text-black underline hover:no-underline">
             Go back to start
           </a>

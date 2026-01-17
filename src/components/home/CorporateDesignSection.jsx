@@ -29,7 +29,7 @@ export default function CorporateDesignSection({ onStart }) {
                 </span>
               </h2>
               <p className="text-xl text-gray-600 leading-relaxed">
-                Метiculously crafted to meet the highest industry standards, ensuring your application stands out.
+                Expertly crafted to meet modern recruitment standards, ensuring your application gets noticed by hiring managers and passes automated screening systems.
               </p>
             </div>
 
@@ -46,7 +46,7 @@ export default function CorporateDesignSection({ onStart }) {
                     Single-Column Format
                   </h3>
                   <p className="text-gray-600 leading-relaxed">
-                    Maximizes readability and ATS compatibility, presenting your information with perfect clarity.
+                    Maximizes readability and ATS compatibility, presenting your information with perfect clarity and structure.
                   </p>
                 </div>
               </div>
@@ -59,10 +59,10 @@ export default function CorporateDesignSection({ onStart }) {
                 </div>
                 <div className="flex-1 pt-1">
                   <h3 className="text-lg font-semibold text-gray-900 mb-1 group-hover:text-purple-600 transition-colors">
-                    Corporate-Appropriate Design
+                    Professional Design
                   </h3>
                   <p className="text-gray-600 leading-relaxed">
-                    Professional fonts and layout suitable for top-tier consulting firms and Fortune 500 companies.
+                    Clean, modern layout with professional fonts that work perfectly for any industry - from tech startups to established corporations.
                   </p>
                 </div>
               </div>
@@ -75,10 +75,10 @@ export default function CorporateDesignSection({ onStart }) {
                 </div>
                 <div className="flex-1 pt-1">
                   <h3 className="text-lg font-semibold text-gray-900 mb-1 group-hover:text-pink-600 transition-colors">
-                    EU/UK Optimized
+                    Globally Recognized Format
                   </h3>
                   <p className="text-gray-600 leading-relaxed">
-                    Crafted to meet European recruitment standards and pass ATS screening systems effortlessly.
+                    Follows international best practices and passes ATS screening systems used by top companies worldwide.
                   </p>
                 </div>
               </div>
