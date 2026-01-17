@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import ExperienceEntry from './ExperienceEntry';
 import EducationEntry from './EducationEntry';
 import CVDocument from './CVDocument';
+import LanguageSelector from './LanguageSelector';
 import { Loader2, Eye } from "lucide-react";
 
 export default function CVFormWithPreview({ formData, setFormData, onSubmit, isGenerating, generateCoverLetter, setGenerateCoverLetter }) {
@@ -243,69 +244,16 @@ export default function CVFormWithPreview({ formData, setFormData, onSubmit, isG
               {/* Languages */}
               <div>
                 <h3 className="text-sm font-semibold uppercase tracking-wider text-blue-600 mb-4">Languages</h3>
-                <Textarea
-                  value={formData.languages || ''}
-                  onChange={(e) => updateField('languages', e.target.value)}
-                  placeholder="English — C1; German — B2; French — A2"
-                  rows={2}
-                  className="border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-lg resize-none"
+                <LanguageSelector 
+                  languages={formData.languagesList || []}
+                  onChange={(langs) => {
+                    const languagesString = langs
+                      .map(l => `${l.language} — ${l.level}`)
+                      .join('; ');
+                    updateField('languages', languagesString);
+                    updateField('languagesList', langs);
+                  }}
                 />
-              </div>
-
-              {/* Generation Settings */}
-              <div>
-                <h3 className="text-sm font-semibold uppercase tracking-wider text-blue-600 mb-4">
-                  Generation Settings
-                </h3>
-                <div className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Target Country</label>
-                      <Select
-                        value={formData.target_country || 'Germany'}
-                        onValueChange={(value) => updateField('target_country', value)}
-                      >
-                        <SelectTrigger className="border-gray-300 focus:ring-blue-500 rounded-lg">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Germany">Germany</SelectItem>
-                          <SelectItem value="Austria">Austria</SelectItem>
-                          <SelectItem value="EU">EU</SelectItem>
-                          <SelectItem value="Other">Other</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Seniority Level</label>
-                      <Select
-                        value={formData.seniority_level || 'Mid'}
-                        onValueChange={(value) => updateField('seniority_level', value)}
-                      >
-                        <SelectTrigger className="border-gray-300 focus:ring-blue-500 rounded-lg">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Intern">Intern</SelectItem>
-                          <SelectItem value="Junior">Junior</SelectItem>
-                          <SelectItem value="Mid">Mid</SelectItem>
-                          <SelectItem value="Senior">Senior</SelectItem>
-                          <SelectItem value="Lead">Lead</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Job Description (optional)</label>
-                    <Textarea
-                      value={formData.job_description || ''}
-                      onChange={(e) => updateField('job_description', e.target.value)}
-                      placeholder="Paste the job description here to tailor your CV..."
-                      rows={4}
-                      className="border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-lg resize-none"
-                    />
-                  </div>
-                </div>
               </div>
 
               {/* Submit */}

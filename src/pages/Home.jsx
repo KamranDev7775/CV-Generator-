@@ -33,6 +33,7 @@ export default function Home() {
     experiences: [{ job_title: '', company: '', location: '', start_date: '', end_date: '', achievements: '' }],
     education: [{ degree: '', university: '', location: '', start_date: '', end_date: '' }],
     languages: '',
+    languagesList: [],
     target_country: 'Germany',
     seniority_level: 'Mid',
     job_description: ''
