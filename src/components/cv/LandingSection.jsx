@@ -109,7 +109,7 @@ export default function LandingSection({ onStart, onImport }) {
         </div>
 
         <p className="text-sm text-gray-500 mt-6">
-          No credit card required to preview • One-time payment
+          No credit card required to preview
         </p>
       </div>
     </section>
