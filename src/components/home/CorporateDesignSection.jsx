@@ -29,7 +29,7 @@ export default function CorporateDesignSection({ onStart }) {
                 </span>
               </h2>
               <p className="text-xl text-gray-600 leading-relaxed">
-                Expertly crafted to meet modern recruitment standards, ensuring your application gets noticed by hiring managers and passes automated screening systems.
+                A clean, recruiter-friendly CV that helps you stand out in seconds
               </p>
             </div>
 
