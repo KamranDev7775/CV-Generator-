@@ -1,69 +1,80 @@
 import React from 'react';
-import { X, Check } from 'lucide-react';
+import { ShieldCheck, CreditCard, Eye, X as XIcon, DollarSign } from 'lucide-react';
 
 export default function TransparentPricingSection() {
-  const comparisons = [
+  const features = [
     {
-      traditional: 'Hidden subscriptions',
-      ours: 'No hidden subscriptions'
+      icon: ShieldCheck,
+      title: 'No hidden subscriptions',
+      description: 'One-time payment, no recurring charges',
+      gradient: 'from-blue-500 to-blue-600',
+      bg: 'bg-blue-50'
     },
     {
-      traditional: 'Trial turning into subscription',
-      ours: 'Flat €1.99'
+      icon: CreditCard,
+      title: 'Flat €1.99',
+      description: 'No trials turning into subscriptions',
+      gradient: 'from-purple-500 to-purple-600',
+      bg: 'bg-purple-50'
     },
     {
-      traditional: 'Pay before preview',
-      ours: 'Preview before payment'
+      icon: Eye,
+      title: 'Preview before payment',
+      description: 'See your CV before you pay',
+      gradient: 'from-pink-500 to-pink-600',
+      bg: 'bg-pink-50'
     },
     {
-      traditional: 'Complex cancellation',
-      ours: 'Cancel anytime'
+      icon: XIcon,
+      title: 'Cancel anytime',
+      description: 'No complex cancellation process',
+      gradient: 'from-indigo-500 to-indigo-600',
+      bg: 'bg-indigo-50'
     },
     {
-      traditional: 'Surprise charges',
-      ours: 'Final price shown upfront'
+      icon: DollarSign,
+      title: 'Final price shown upfront',
+      description: 'No surprise charges or hidden fees',
+      gradient: 'from-green-500 to-green-600',
+      bg: 'bg-green-50'
     }
   ];
 
   return (
-    <section className="py-24 bg-white">
-      <div className="max-w-4xl mx-auto px-6 md:px-12">
-        <h2 className="text-3xl md:text-4xl font-light text-black mb-3 text-center">
-          Transparent Pricing
-        </h2>
-        <p className="text-gray-500 text-center mb-16">
-          No tricks. No hidden fees. Just honest pricing.
-        </p>
-        
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-          <div className="grid md:grid-cols-2">
-            <div className="p-8 border-r border-gray-200">
-              <h3 className="text-base font-medium text-gray-500 text-center">
-                Generic CV platforms
-              </h3>
-            </div>
-            <div className="p-8 bg-gray-50">
-              <h3 className="text-base font-medium text-black text-center">
-                This CV Generator
-              </h3>
-            </div>
-          </div>
-          
-          {comparisons.map((item, idx) => (
-            <div key={idx} className="grid md:grid-cols-2 border-t border-gray-200">
-              <div className="p-6 flex items-start gap-4 border-r border-gray-200">
-                <X className="h-5 w-5 text-gray-400 flex-shrink-0 mt-0.5" />
-                <span className="text-sm text-gray-600 leading-relaxed">{item.traditional}</span>
-              </div>
-              <div className="p-6 flex items-start gap-4 bg-gray-50">
-                <Check className="h-5 w-5 text-black flex-shrink-0 mt-0.5" />
-                <span className="text-sm text-gray-900 leading-relaxed">{item.ours}</span>
-              </div>
-            </div>
-          ))}
+    <section className="py-24 bg-gradient-to-b from-white to-gray-50">
+      <div className="max-w-6xl mx-auto px-6 md:px-12">
+        <div className="text-center mb-16">
+          <h2 className="text-4xl md:text-5xl font-bold text-black mb-4">
+            Transparent Pricing
+          </h2>
+          <p className="text-xl text-gray-600">
+            No tricks. No hidden fees. Just honest pricing.
+          </p>
         </div>
         
-        <p className="text-xs text-gray-400 text-center mt-8 leading-relaxed">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {features.map((feature, idx) => {
+            const Icon = feature.icon;
+            return (
+              <div 
+                key={idx}
+                className={`${feature.bg} rounded-2xl p-8 hover:shadow-lg transition-all duration-300 group cursor-default`}
+              >
+                <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center mb-6 shadow-lg group-hover:scale-110 transition-transform duration-300`}>
+                  <Icon className="w-8 h-8 text-white" strokeWidth={2.5} />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">
+                  {feature.title}
+                </h3>
+                <p className="text-gray-600 leading-relaxed">
+                  {feature.description}
+                </p>
+              </div>
+            );
+          })}
+        </div>
+        
+        <p className="text-sm text-gray-500 text-center mt-12 leading-relaxed">
           No auto-renewal, no surprise charges. Final price shown before checkout.
         </p>
       </div>
