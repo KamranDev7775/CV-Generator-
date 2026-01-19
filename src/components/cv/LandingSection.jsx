@@ -150,42 +150,21 @@ export default function LandingSection({ onStart, onImport }) {
             </div>
           </div>
 
-          {/* CV Preview Examples */}
+          {/* CV Preview Example */}
           <div className="space-y-3">
             <div className="text-sm font-medium text-gray-900 mb-4">Recent CVs created:</div>
-            <div className="grid grid-cols-2 gap-3">
-              {/* CV Preview 1 */}
-              <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden hover:shadow-md transition-shadow">
-                <div className="p-4 text-xs">
-                  <div className="font-bold text-black text-sm mb-1">Emma Rodriguez</div>
-                  <div className="text-[10px] text-gray-500 mb-3">Financial Analyst</div>
-                  <div className="space-y-2">
-                    <div className="h-1.5 bg-gray-200 rounded w-full"></div>
+            <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden hover:shadow-md transition-shadow">
+              <div className="p-6 text-xs">
+                <div className="font-bold text-black text-base mb-1">Emma Rodriguez</div>
+                <div className="text-xs text-gray-500 mb-4">Financial Analyst</div>
+                <div className="space-y-2.5">
+                  <div className="h-2 bg-gray-200 rounded w-full"></div>
+                  <div className="h-2 bg-gray-200 rounded w-5/6"></div>
+                  <div className="h-2 bg-gray-200 rounded w-4/6"></div>
+                  <div className="mt-4 pt-3 border-t border-gray-100">
+                    <div className="h-1.5 bg-gray-200 rounded w-3/4 mb-2"></div>
+                    <div className="h-1.5 bg-gray-200 rounded w-full mb-2"></div>
                     <div className="h-1.5 bg-gray-200 rounded w-5/6"></div>
-                    <div className="h-1.5 bg-gray-200 rounded w-4/6"></div>
-                    <div className="mt-3 pt-2 border-t border-gray-100">
-                      <div className="h-1 bg-gray-200 rounded w-3/4 mb-1.5"></div>
-                      <div className="h-1 bg-gray-200 rounded w-full mb-1.5"></div>
-                      <div className="h-1 bg-gray-200 rounded w-5/6"></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* CV Preview 2 */}
-              <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden hover:shadow-md transition-shadow">
-                <div className="p-4 text-xs">
-                  <div className="font-bold text-black text-sm mb-1">James Anderson</div>
-                  <div className="text-[10px] text-gray-500 mb-3">IT Consultant</div>
-                  <div className="space-y-2">
-                    <div className="h-1.5 bg-gray-200 rounded w-full"></div>
-                    <div className="h-1.5 bg-gray-200 rounded w-5/6"></div>
-                    <div className="h-1.5 bg-gray-200 rounded w-4/6"></div>
-                    <div className="mt-3 pt-2 border-t border-gray-100">
-                      <div className="h-1 bg-gray-200 rounded w-3/4 mb-1.5"></div>
-                      <div className="h-1 bg-gray-200 rounded w-full mb-1.5"></div>
-                      <div className="h-1 bg-gray-200 rounded w-5/6"></div>
-                    </div>
                   </div>
                 </div>
               </div>
