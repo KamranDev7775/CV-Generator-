@@ -113,6 +113,88 @@ export default function LandingSection({ onStart, onImport }) {
         <p className="text-sm text-gray-500 mt-6">
           No credit card required to preview
         </p>
+        </div>
+
+        {/* Right Column - Trust Elements */}
+        <div className="hidden lg:flex flex-col gap-8">
+          {/* Testimonials */}
+          <div className="space-y-4">
+            <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 border border-gray-100 shadow-sm">
+              <div className="flex items-center gap-1 mb-3">
+                {[...Array(5)].map((_, i) => (
+                  <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                ))}
+              </div>
+              <p className="text-gray-700 mb-3 leading-relaxed">
+                "Got my McKinsey interview within a week. The CV format is exactly what they expect."
+              </p>
+              <div className="text-sm">
+                <div className="font-semibold text-black">Sarah Chen</div>
+                <div className="text-gray-500">Strategy Consultant</div>
+              </div>
+            </div>
+
+            <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 border border-gray-100 shadow-sm">
+              <div className="flex items-center gap-1 mb-3">
+                {[...Array(5)].map((_, i) => (
+                  <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                ))}
+              </div>
+              <p className="text-gray-700 mb-3 leading-relaxed">
+                "Perfect for Big4 applications. Clean, professional, and ATS-friendly."
+              </p>
+              <div className="text-sm">
+                <div className="font-semibold text-black">Michael Torres</div>
+                <div className="text-gray-500">Senior Auditor, Deloitte</div>
+              </div>
+            </div>
+          </div>
+
+          {/* CV Preview Examples */}
+          <div className="space-y-3">
+            <div className="text-sm font-medium text-gray-900 mb-4">Recent CVs created:</div>
+            <div className="grid grid-cols-2 gap-3">
+              {/* CV Preview 1 */}
+              <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden hover:shadow-md transition-shadow">
+                <div className="p-4 text-xs">
+                  <div className="font-bold text-black text-sm mb-1">Emma Rodriguez</div>
+                  <div className="text-[10px] text-gray-500 mb-3">Financial Analyst</div>
+                  <div className="space-y-2">
+                    <div className="h-1.5 bg-gray-200 rounded w-full"></div>
+                    <div className="h-1.5 bg-gray-200 rounded w-5/6"></div>
+                    <div className="h-1.5 bg-gray-200 rounded w-4/6"></div>
+                    <div className="mt-3 pt-2 border-t border-gray-100">
+                      <div className="h-1 bg-gray-200 rounded w-3/4 mb-1.5"></div>
+                      <div className="h-1 bg-gray-200 rounded w-full mb-1.5"></div>
+                      <div className="h-1 bg-gray-200 rounded w-5/6"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* CV Preview 2 */}
+              <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden hover:shadow-md transition-shadow">
+                <div className="p-4 text-xs">
+                  <div className="font-bold text-black text-sm mb-1">James Anderson</div>
+                  <div className="text-[10px] text-gray-500 mb-3">IT Consultant</div>
+                  <div className="space-y-2">
+                    <div className="h-1.5 bg-gray-200 rounded w-full"></div>
+                    <div className="h-1.5 bg-gray-200 rounded w-5/6"></div>
+                    <div className="h-1.5 bg-gray-200 rounded w-4/6"></div>
+                    <div className="mt-3 pt-2 border-t border-gray-100">
+                      <div className="h-1 bg-gray-200 rounded w-3/4 mb-1.5"></div>
+                      <div className="h-1 bg-gray-200 rounded w-full mb-1.5"></div>
+                      <div className="h-1 bg-gray-200 rounded w-5/6"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="text-xs text-gray-500 text-center mt-3">
+              Join 10,000+ professionals who landed their dream jobs
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   );
