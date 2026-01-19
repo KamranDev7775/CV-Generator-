@@ -141,7 +141,7 @@ export default function LandingSection({ onStart, onImport }) {
                 ))}
               </div>
               <p className="text-gray-700 mb-3 leading-relaxed">
-                "Perfect for Big4 applications. Clean, professional, and ATS-friendly."
+                "Simple, professional format that works well for corporate applications."
               </p>
               <div className="text-sm">
                 <div className="font-semibold text-black">Michael Torres</div>
