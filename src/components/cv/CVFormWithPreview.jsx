@@ -8,8 +8,6 @@ import ExperienceEntry from './ExperienceEntry';
 import EducationEntry from './EducationEntry';
 import CVDocument from './CVDocument';
 import LanguageSelector from './LanguageSelector';
-import SkillsSelector from './SkillsSelector';
-import ToolsTechSelector from './ToolsTechSelector';
 import { Loader2, Eye } from "lucide-react";
 
 export default function CVFormWithPreview({ formData, setFormData, onSubmit, isGenerating, generateCoverLetter, setGenerateCoverLetter }) {
@@ -178,62 +176,17 @@ export default function CVFormWithPreview({ formData, setFormData, onSubmit, isG
                 </div>
               </div>
 
-              {/* Additional Section */}
+              {/* Skills */}
               <div>
-                <h3 className="text-sm font-semibold uppercase tracking-wider text-blue-600 mb-4">Additional</h3>
-
-                {/* Skills */}
-                <div className="mb-6">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Skills</label>
-                  <SkillsSelector
-                    skills={formData.skillsList || []}
-                    onChange={(skillsList) => {
-                      const skillsString = skillsList.join(', ');
-                      updateField('skills', skillsString);
-                      updateField('skillsList', skillsList);
-                    }}
-                  />
-                </div>
-
-                {/* Languages */}
-                <div className="mb-6">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Languages</label>
-                  <LanguageSelector 
-                    languages={formData.languagesList || []}
-                    onChange={(langs) => {
-                      const languagesString = langs
-                        .map(l => `${l.language} — ${l.level}`)
-                        .join('; ');
-                      updateField('languages', languagesString);
-                      updateField('languagesList', langs);
-                    }}
-                  />
-                </div>
-
-                {/* Tools & Tech */}
-                <div className="mb-6">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Tools & Tech</label>
-                  <ToolsTechSelector
-                    tools={formData.toolsList || []}
-                    onChange={(toolsList) => {
-                      const toolsString = toolsList.join(', ');
-                      updateField('tools_tech', toolsString);
-                      updateField('toolsList', toolsList);
-                    }}
-                  />
-                </div>
-
-                {/* Additional Information (free text) */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Additional Information (Optional)</label>
-                  <Textarea
-                    value={formData.additional_info || ''}
-                    onChange={(e) => updateField('additional_info', e.target.value)}
-                    placeholder="Certifications, awards, publications, etc."
-                    rows={3}
-                    className="border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-lg resize-none"
-                  />
-                </div>
+                <h3 className="text-sm font-semibold uppercase tracking-wider text-blue-600 mb-4">Skills</h3>
+                <Textarea
+                  value={formData.skills || ''}
+                  onChange={(e) => updateField('skills', e.target.value)}
+                  placeholder="IT Audit, SOX, SAP, SQL, Excel, Power BI"
+                  rows={2}
+                  className="border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-lg resize-none"
+                />
+                <p className="text-xs text-gray-500 mt-2">Comma-separated list</p>
               </div>
 
               {/* Professional Experience */}
@@ -288,7 +241,20 @@ export default function CVFormWithPreview({ formData, setFormData, onSubmit, isG
                 </Button>
               </div>
 
-
+              {/* Languages */}
+              <div>
+                <h3 className="text-sm font-semibold uppercase tracking-wider text-blue-600 mb-4">Languages</h3>
+                <LanguageSelector 
+                  languages={formData.languagesList || []}
+                  onChange={(langs) => {
+                    const languagesString = langs
+                      .map(l => `${l.language} — ${l.level}`)
+                      .join('; ');
+                    updateField('languages', languagesString);
+                    updateField('languagesList', langs);
+                  }}
+                />
+              </div>
 
               {/* Submit */}
               <div className="pt-4 sticky bottom-0 bg-white pb-4">
