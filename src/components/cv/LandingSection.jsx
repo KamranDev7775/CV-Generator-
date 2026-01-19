@@ -145,7 +145,7 @@ export default function LandingSection({ onStart, onImport }) {
               </p>
               <div className="text-sm">
                 <div className="font-semibold text-black">Michael Torres</div>
-                <div className="text-gray-500">Senior Auditor, Deloitte</div>
+                <div className="text-gray-500">Senior Financial Analyst</div>
               </div>
             </div>
           </div>
