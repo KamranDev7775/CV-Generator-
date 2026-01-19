@@ -27,12 +27,13 @@ export default function Home() {
     email: '',
     phone: '',
     linkedin_url: '',
+    summary: '',
+    auto_generate_summary: false,
+    skills: '',
     experiences: [{ job_title: '', company: '', location: '', start_date: '', end_date: '', achievements: '' }],
     education: [{ degree: '', university: '', location: '', start_date: '', end_date: '' }],
-    skills: [],
-    languages: [],
-    tools_tech: [],
-    additional_info: '',
+    languages: '',
+    languagesList: [],
     target_country: 'Germany',
     seniority_level: 'Mid',
     job_description: ''
@@ -148,16 +149,17 @@ export default function Home() {
         email: extractedData.email || '',
         phone: extractedData.phone || '',
         linkedin_url: extractedData.linkedin_url || '',
+        summary: extractedData.summary || '',
+        auto_generate_summary: false,
+        skills: extractedData.skills || '',
         experiences: (extractedData.experiences && extractedData.experiences.length > 0) 
           ? extractedData.experiences 
           : [{ job_title: '', company: '', location: '', start_date: '', end_date: '', achievements: '' }],
         education: (extractedData.education && extractedData.education.length > 0) 
           ? extractedData.education 
           : [{ degree: '', university: '', location: '', start_date: '', end_date: '' }],
-        skills: extractedData.skills ? extractedData.skills.split(',').map(s => s.trim()) : [],
-        languages: extractedData.languages ? [{ language: extractedData.languages, level: 'Native' }] : [],
-        tools_tech: [],
-        additional_info: '',
+        languages: extractedData.languages || '',
+        languagesList: [],
         target_country: 'Germany',
         seniority_level: 'Mid',
         job_description: ''
@@ -186,7 +188,65 @@ export default function Home() {
         return;
       }
 
-      const cvData = { ...formData };
+      let summary = formData.summary;
+      
+      // Auto-generate HIGH QUALITY summary if requested
+      if (formData.auto_generate_summary) {
+        const experienceText = formData.experiences
+          .filter(e => e.job_title || e.company)
+          .map(e => `${e.job_title} at ${e.company}: ${e.achievements || 'No details provided'}`)
+          .join('\n');
+        
+        const educationText = formData.education
+          .filter(e => e.degree || e.university)
+          .map(e => `${e.degree} from ${e.university}`)
+          .join(', ');
+        
+        const prompt = `You are an expert CV writer specializing in top consulting firms, tech companies, and Fortune 500 applications.
+
+Generate a compelling professional summary (4-6 sentences, ~100 words) that will impress recruiters and pass ATS systems.
+
+CANDIDATE INFORMATION:
+Name: ${formData.full_name}
+Target Position: ${formData.target_position || 'Professional role'}
+Target Country: ${formData.target_country}
+Seniority Level: ${formData.seniority_level}
+Core Skills: ${formData.skills || 'General business skills'}
+Education: ${educationText || 'Not specified'}
+
+PROFESSIONAL EXPERIENCE:
+${experienceText || 'Entry-level professional'}
+
+${formData.job_description ? `TARGET JOB DESCRIPTION:\n${formData.job_description}` : ''}
+
+REQUIREMENTS:
+- Write in third person (no "I", "my", etc.)
+- Start with years of experience or key expertise area
+- Highlight 2-3 quantifiable achievements or key strengths
+- Include relevant industry keywords for ATS
+- Match tone to target role and seniority
+- Make it compelling and confident
+- Focus on value proposition and impact
+- Use active, powerful verbs
+- Keep it concise but impactful
+- Tailor to consulting, tech, and corporate roles in Europe
+
+Generate a professional summary that will make recruiters want to interview this candidate.`;
+        
+        const result = await base44.integrations.Core.InvokeLLM({
+          prompt,
+          response_json_schema: {
+            type: "object",
+            properties: {
+              summary: { type: "string" }
+            }
+          }
+        });
+        
+        summary = result.summary;
+      }
+
+      const cvData = { ...formData, summary, generated_cv: summary };
       
       // Save to database only if user is authenticated
       const submission = await base44.entities.CVSubmission.create({

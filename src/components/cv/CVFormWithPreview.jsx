@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import ExperienceEntry from './ExperienceEntry';
 import EducationEntry from './EducationEntry';
 import CVDocument from './CVDocument';
-import AdditionalSection from './AdditionalSection';
+import LanguageSelector from './LanguageSelector';
 import { Loader2, Eye } from "lucide-react";
 
 export default function CVFormWithPreview({ formData, setFormData, onSubmit, isGenerating, generateCoverLetter, setGenerateCoverLetter }) {
@@ -149,6 +149,46 @@ export default function CVFormWithPreview({ formData, setFormData, onSubmit, isG
                 </div>
               </div>
 
+              {/* Professional Summary */}
+              <div>
+                <h3 className="text-sm font-semibold uppercase tracking-wider text-blue-600 mb-4">
+                  Professional Summary
+                </h3>
+                <div className="space-y-3">
+                  <Textarea
+                    value={formData.summary || ''}
+                    onChange={(e) => updateField('summary', e.target.value)}
+                    placeholder="Brief professional summary (3-5 sentences)..."
+                    rows={4}
+                    disabled={formData.auto_generate_summary}
+                    className="border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-lg resize-none disabled:bg-gray-100"
+                  />
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="auto-summary"
+                      checked={formData.auto_generate_summary || false}
+                      onCheckedChange={(checked) => updateField('auto_generate_summary', checked)}
+                    />
+                    <label htmlFor="auto-summary" className="text-sm text-gray-700 cursor-pointer">
+                      Auto-generate summary with AI
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              {/* Skills */}
+              <div>
+                <h3 className="text-sm font-semibold uppercase tracking-wider text-blue-600 mb-4">Skills</h3>
+                <Textarea
+                  value={formData.skills || ''}
+                  onChange={(e) => updateField('skills', e.target.value)}
+                  placeholder="IT Audit, SOX, SAP, SQL, Excel, Power BI"
+                  rows={2}
+                  className="border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-lg resize-none"
+                />
+                <p className="text-xs text-gray-500 mt-2">Comma-separated list</p>
+              </div>
+
               {/* Professional Experience */}
               <div>
                 <h3 className="text-sm font-semibold uppercase tracking-wider text-blue-600 mb-4">
@@ -201,10 +241,19 @@ export default function CVFormWithPreview({ formData, setFormData, onSubmit, isG
                 </Button>
               </div>
 
-              {/* Additional Section */}
+              {/* Languages */}
               <div>
-                <h3 className="text-sm font-semibold uppercase tracking-wider text-blue-600 mb-4">Additional</h3>
-                <AdditionalSection formData={formData} updateField={updateField} />
+                <h3 className="text-sm font-semibold uppercase tracking-wider text-blue-600 mb-4">Languages</h3>
+                <LanguageSelector 
+                  languages={formData.languagesList || []}
+                  onChange={(langs) => {
+                    const languagesString = langs
+                      .map(l => `${l.language} — ${l.level}`)
+                      .join('; ');
+                    updateField('languages', languagesString);
+                    updateField('languagesList', langs);
+                  }}
+                />
               </div>
 
               {/* Submit */}
