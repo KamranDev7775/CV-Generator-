@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '../../utils';
-import { ArrowRight, CheckCircle2, Upload } from 'lucide-react';
+import { ArrowRight, CheckCircle2, Upload, Star } from 'lucide-react';
 
 export default function LandingSection({ onStart, onImport }) {
   const [isLoading, setIsLoading] = useState(false);
