@@ -38,14 +38,16 @@ export default function LandingSection({ onStart, onImport }) {
   };
 
   return (
-    <section className="relative min-h-screen flex flex-col justify-center px-6 md:px-12 lg:px-24 py-20 bg-gradient-to-b from-white to-gray-50">
+    <section className="relative min-h-screen flex items-center px-6 md:px-12 lg:px-24 py-20 bg-gradient-to-b from-white to-gray-50">
       {/* Background Pattern */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-0 right-0 w-96 h-96 bg-blue-50 rounded-full blur-3xl opacity-30" />
         <div className="absolute bottom-0 left-0 w-96 h-96 bg-purple-50 rounded-full blur-3xl opacity-30" />
       </div>
 
-      <div className="relative max-w-4xl">
+      <div className="relative max-w-7xl mx-auto w-full grid lg:grid-cols-2 gap-16 items-center">
+        {/* Left Column - Main Content */}
+        <div>
         {/* Trust Badge */}
         <div className="inline-flex items-center gap-2 bg-blue-50 text-blue-700 px-4 py-2 rounded-full text-sm mb-8 font-medium">
           <CheckCircle2 className="w-4 h-4" />
