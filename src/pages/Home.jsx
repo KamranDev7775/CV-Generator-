@@ -39,7 +39,8 @@ export default function Home() {
     target_country: 'Germany',
     seniority_level: 'Mid',
     job_description: '',
-    template: 'classic'
+    template: 'classic',
+    style: 'professional'
   });
   const [generatedCV, setGeneratedCV] = useState(null);
   const [isGenerating, setIsGenerating] = useState(false);

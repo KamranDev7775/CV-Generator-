@@ -411,38 +411,71 @@ export default function CVForm({ formData, setFormData, onSubmit, isGenerating, 
           <div>
             <h3 className="text-xs uppercase tracking-widest text-gray-400 mb-6">Generation Settings</h3>
             <div className="space-y-5">
-              <div>
-                <label className="block text-sm text-gray-600 mb-2">CV Template Style</label>
-                <Select
-                  value={formData.template || 'classic'}
-                  onValueChange={(value) => updateField('template', value)}
-                >
-                  <SelectTrigger className="border-gray-200 focus:ring-0 rounded-none">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="classic">
-                      <div className="flex items-center">
-                        <span className="font-medium">Classic</span>
-                        <span className="ml-2 text-xs text-gray-500">Traditional & Professional</span>
-                      </div>
-                    </SelectItem>
-                    <SelectItem value="modern">
-                      <div className="flex items-center">
-                        <span className="font-medium">Modern</span>
-                        <span className="ml-2 text-xs text-gray-500">Clean & Contemporary</span>
-                      </div>
-                    </SelectItem>
-                    <SelectItem value="minimal">
-                      <div className="flex items-center">
-                        <span className="font-medium">Minimal</span>
-                        <span className="ml-2 text-xs text-gray-500">Ultra-Clean Design</span>
-                      </div>
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-                <p className="text-xs text-gray-400 mt-2">All templates are ATS-friendly and optimized for applicant tracking systems</p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div>
+                  <label className="block text-sm text-gray-600 mb-2">CV Template</label>
+                  <Select
+                    value={formData.template || 'classic'}
+                    onValueChange={(value) => updateField('template', value)}
+                  >
+                    <SelectTrigger className="border-gray-200 focus:ring-0 rounded-none">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="classic">
+                        <div className="flex items-center">
+                          <span className="font-medium">Classic</span>
+                          <span className="ml-2 text-xs text-gray-500">Traditional Layout</span>
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="modern">
+                        <div className="flex items-center">
+                          <span className="font-medium">Modern</span>
+                          <span className="ml-2 text-xs text-gray-500">Centered Layout</span>
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="minimal">
+                        <div className="flex items-center">
+                          <span className="font-medium">Minimal</span>
+                          <span className="ml-2 text-xs text-gray-500">Clean Layout</span>
+                        </div>
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <label className="block text-sm text-gray-600 mb-2">CV Style</label>
+                  <Select
+                    value={formData.style || 'professional'}
+                    onValueChange={(value) => updateField('style', value)}
+                  >
+                    <SelectTrigger className="border-gray-200 focus:ring-0 rounded-none">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="professional">
+                        <div className="flex items-center">
+                          <span className="font-medium">Professional</span>
+                          <span className="ml-2 text-xs text-gray-500">Serif, Classic Colors</span>
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="elegant">
+                        <div className="flex items-center">
+                          <span className="font-medium">Elegant</span>
+                          <span className="ml-2 text-xs text-gray-500">Sans-serif, Slate Tones</span>
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="bold">
+                        <div className="flex items-center">
+                          <span className="font-medium">Bold</span>
+                          <span className="ml-2 text-xs text-gray-500">Sans-serif, Strong Contrast</span>
+                        </div>
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
+              <p className="text-xs text-gray-400">All 9 combinations (3 templates × 3 styles) are ATS-friendly and optimized for applicant tracking systems</p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div>
                   <label className="block text-sm text-gray-600 mb-2">Target Country</label>
