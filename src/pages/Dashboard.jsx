@@ -150,11 +150,21 @@ export default function Dashboard() {
                 
                 {cvSubmissions.length > 0 && (
                   <div className="pt-4 border-t border-gray-100">
-                    <p className="text-sm text-gray-500 mb-3">Past purchases ({cvSubmissions.length})</p>
-                    {cvSubmissions.slice(0, 3).map((cv) => (
-                      <div key={cv.id} className="flex justify-between items-center py-2 text-sm">
-                        <span className="text-gray-700">{cv.full_name || 'CV'}</span>
-                        <span className="text-gray-400">{new Date(cv.created_date).toLocaleDateString()}</span>
+                    <p className="text-sm text-gray-500 mb-3">Your CVs ({cvSubmissions.length})</p>
+                    {cvSubmissions.map((cv) => (
+                      <div key={cv.id} className="flex justify-between items-center py-3 border-b border-gray-100 last:border-0">
+                        <div>
+                          <span className="text-gray-900 font-medium">{cv.full_name || 'CV'}</span>
+                          <p className="text-xs text-gray-400">{new Date(cv.created_date).toLocaleDateString()}</p>
+                        </div>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => navigate(createPageUrl('Success') + `?submission_id=${cv.id}`)}
+                          className="border-gray-200 text-gray-700 hover:bg-gray-50 rounded-none"
+                        >
+                          View & Download
+                        </Button>
                       </div>
                     ))}
                   </div>
