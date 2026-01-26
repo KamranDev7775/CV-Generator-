@@ -300,6 +300,7 @@ Generate a professional summary that will make recruiters want to interview this
       // Create Stripe checkout session via backend function
       const response = await base44.functions.invoke('createCheckout', {
         submissionId,
+        customerEmail: formData.email || user?.email,
         successUrl: `${window.location.origin}/Success?submission_id=${submissionId}`,
         cancelUrl: window.location.href
       });
