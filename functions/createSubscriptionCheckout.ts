@@ -21,7 +21,7 @@ Deno.serve(async (req) => {
     let sessionConfig = {
       payment_method_types: ['card'],
       customer_email: customerEmail,
-      success_url: successUrl,
+      success_url: successUrl.replace('SESSION_PLACEHOLDER', '{CHECKOUT_SESSION_ID}'),
       cancel_url: cancelUrl,
       metadata: {
         base44_app_id: Deno.env.get('BASE44_APP_ID'),
@@ -59,9 +59,7 @@ Deno.serve(async (req) => {
       idempotencyKey: idempotencyKey
     });
 
-    // Append session_id to success URL for tracking
-    const successUrlWithSession = sessionConfig.success_url + `&session_id=${session.id}`;
-    return Response.json({ url: session.url, sessionId: session.id });
+    return Response.json({ url: session.url });
   } catch (error) {
     console.error('Subscription checkout error:', error);
     return Response.json({ error: error.message }, { status: 500 });

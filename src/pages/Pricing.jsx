@@ -33,11 +33,13 @@ export default function Pricing() {
       const response = await base44.functions.invoke('createSubscriptionCheckout', {
         planType,
         customerEmail: userEmail,
-        successUrl: `${window.location.origin}${createPageUrl('PaymentSuccess')}?type=${planType}`,
+        successUrl: `${window.location.origin}${createPageUrl('PaymentSuccess')}?type=${planType}&session_id=SESSION_PLACEHOLDER`,
         cancelUrl: window.location.href
       });
 
-      window.location.href = response.data.url;
+      // Replace placeholder with actual session ID in the redirect URL
+      const redirectUrl = response.data.url;
+      window.location.href = redirectUrl;
     } catch (error) {
       console.error('Checkout error:', error);
       setLoadingPlan(null);
