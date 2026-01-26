@@ -21,16 +21,20 @@ export default function Dashboard() {
     try {
       const currentUser = await base44.auth.me();
       setUser(currentUser);
+      console.log('Current user email:', currentUser.email);
       
       // Fetch user's subscription
       const subs = await base44.entities.Subscription.filter({ user_email: currentUser.email });
+      console.log('Found subscriptions:', subs);
       const activeSub = subs.find(s => s.status === 'active' || s.status === 'trialing');
+      console.log('Active subscription:', activeSub);
       setSubscription(activeSub || null);
       
       // Fetch user's CV submissions
       const submissions = await base44.entities.CVSubmission.filter({ created_by: currentUser.email });
       setCvSubmissions(submissions.filter(s => s.payment_status === 'completed'));
     } catch (error) {
+      console.error('Dashboard load error:', error);
       navigate(createPageUrl('Home'));
     } finally {
       setLoading(false);
