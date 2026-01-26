@@ -12,6 +12,7 @@ export default function Success() {
   const [isLoading, setIsLoading] = useState(true);
   const [copied, setCopied] = useState(false);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+  const [paymentPending, setPaymentPending] = useState(false);
   const cvRef = useRef(null);
 
   useEffect(() => {
@@ -20,25 +21,46 @@ export default function Success() {
 
   const loadCVData = async () => {
     try {
-      // Get submission ID from URL
       const urlParams = new URLSearchParams(window.location.search);
       const submissionId = urlParams.get('submission_id');
 
-      if (submissionId) {
-        // Update payment status
-        await base44.entities.CVSubmission.update(submissionId, {
-          payment_status: 'completed'
-        });
+      if (!submissionId) {
+        setIsLoading(false);
+        return;
       }
 
-      // Load from localStorage
+      // Poll for payment completion (webhook updates the status)
+      let attempts = 0;
+      const maxAttempts = 10;
+      
+      while (attempts < maxAttempts) {
+        const submissions = await base44.entities.CVSubmission.filter({ id: submissionId });
+        
+        if (submissions?.length > 0 && submissions[0].payment_status === 'completed') {
+          // Payment confirmed by webhook - load CV data
+          const saved = localStorage.getItem(STORAGE_KEY);
+          if (saved) {
+            setCvData(JSON.parse(saved));
+          }
+          setIsLoading(false);
+          return;
+        }
+        
+        attempts++;
+        if (attempts < maxAttempts) {
+          await new Promise(resolve => setTimeout(resolve, 1500)); // Wait 1.5s between checks
+        }
+      }
+      
+      // Payment not yet confirmed after polling
+      setPaymentPending(true);
+      // Still show CV from localStorage as fallback
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
         setCvData(JSON.parse(saved));
       }
     } catch (error) {
       console.error('Error loading CV data:', error);
-      // Try localStorage as fallback
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
         setCvData(JSON.parse(saved));

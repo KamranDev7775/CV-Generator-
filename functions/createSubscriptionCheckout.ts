@@ -1,7 +1,7 @@
 import Stripe from 'npm:stripe';
 
-// Use live key if available, fallback to test key
-const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') || Deno.env.get('STRIPE_TEST_SECRET_KEY'));
+// Use test key for sandbox testing
+const stripe = new Stripe(Deno.env.get('STRIPE_TEST_SECRET_KEY'));
 
 // Price IDs from Stripe
 const TRIAL_PRICE_ID = 'price_1Sp7ZCBJbYwh3WQ7E6BHPOri'; // €2.99 one-time
