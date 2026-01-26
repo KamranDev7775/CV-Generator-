@@ -31,53 +31,23 @@ export default function Success() {
         return;
       }
 
-      // Query submission
-      const submissions = await base44.entities.CVSubmission.filter({ id: submissionId });
-      
-      if (!submissions || submissions.length === 0) {
+      // Check if payment was completed
+      const submission = await base44.entities.CVSubmission.filter({ id: submissionId });
+      if (!submission || submission.length === 0 || submission[0].payment_status !== 'completed') {
         setAccessDenied(true);
         setIsLoading(false);
         return;
       }
 
-      let submission = submissions[0];
-
-      // Check payment status - should be 'completed' if webhook processed successfully
-      if (submission.payment_status !== 'completed') {
-        // Payment not completed - could be webhook hasn't processed yet (race condition)
-        // Wait and retry a few times
-        for (let i = 0; i < 3; i++) {
-          await new Promise(resolve => setTimeout(resolve, 2000));
-          
-          const retrySubmissions = await base44.entities.CVSubmission.filter({ id: submissionId });
-          if (retrySubmissions && retrySubmissions.length > 0) {
-            submission = retrySubmissions[0];
-            if (submission.payment_status === 'completed') {
-              break;
-            }
-          }
-        }
-        
-        if (submission.payment_status !== 'completed') {
-          setAccessDenied(true);
-          setIsLoading(false);
-          return;
-        }
-      }
+      // Update payment status
+      await base44.entities.CVSubmission.update(submissionId, {
+        payment_status: 'completed'
+      });
 
       // Load from localStorage
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
         setCvData(JSON.parse(saved));
-      } else {
-        // No localStorage data - try to use submission data if available
-        if (submission.generated_cv) {
-          setCvData(submission);
-        } else {
-          setAccessDenied(true);
-          setIsLoading(false);
-          return;
-        }
       }
     } catch (error) {
       console.error('Error loading CV data:', error);
