@@ -4,9 +4,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
 
-export default function ExperienceEntry({ experience, index, onChange, onRemove, canRemove }) {
+export default function ExperienceEntry({ experience, index, onChange, onRemove, canRemove, errors = {}, onErrorClear }) {
   const handleChange = (field, value) => {
     onChange(index, { ...experience, [field]: value });
+    // Clear error when user starts typing
+    if (onErrorClear && (field === 'start_date' || field === 'end_date')) {
+      onErrorClear(field);
+    }
   };
 
   return (
@@ -64,8 +68,9 @@ export default function ExperienceEntry({ experience, index, onChange, onRemove,
               value={experience.start_date || ''}
               onChange={(e) => handleChange('start_date', e.target.value)}
               placeholder="Jan 2020"
-              className="border-gray-200 focus:border-gray-400 focus:ring-0"
+              className={`border-gray-200 focus:border-gray-400 focus:ring-0 ${errors.start_date ? 'border-red-300' : ''}`}
             />
+            {errors.start_date && <p className="text-xs text-red-500 mt-1">{errors.start_date}</p>}
           </div>
           <div>
             <label className="block text-sm text-gray-600 mb-2">End Date</label>
@@ -73,8 +78,9 @@ export default function ExperienceEntry({ experience, index, onChange, onRemove,
               value={experience.end_date || ''}
               onChange={(e) => handleChange('end_date', e.target.value)}
               placeholder="Present"
-              className="border-gray-200 focus:border-gray-400 focus:ring-0"
+              className={`border-gray-200 focus:border-gray-400 focus:ring-0 ${errors.end_date ? 'border-red-300' : ''}`}
             />
+            {errors.end_date && <p className="text-xs text-red-500 mt-1">{errors.end_date}</p>}
           </div>
         </div>
         

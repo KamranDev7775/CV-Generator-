@@ -3,11 +3,10 @@ import { base44 } from '@/api/base44Client';
 import { Button } from "@/components/ui/button";
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '../utils';
+import { getSecureStorage, removeSecureStorage } from '../utils/storage';
 import CVDocument from '@/components/cv/CVDocument';
 import { Check, Copy, Download, Loader2, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
-
-const STORAGE_KEY = 'ats_cv_form_data';
 
 export default function PaymentSuccess() {
   const [isLoading, setIsLoading] = useState(true);
@@ -41,10 +40,27 @@ export default function PaymentSuccess() {
           
           if (submissions?.length > 0 && submissions[0].payment_status === 'completed') {
             setVerificationStatus('success');
-            const saved = localStorage.getItem(STORAGE_KEY);
-            if (saved) {
-              setCvData(JSON.parse(saved));
-            }
+            // Load from database (primary source)
+            const submission = submissions[0];
+            const cvDataFromDb = {
+              full_name: submission.full_name,
+              target_position: submission.target_position,
+              location: submission.location,
+              email: submission.email,
+              phone: submission.phone,
+              linkedin_url: submission.linkedin_url,
+              summary: submission.summary || submission.generated_cv,
+              skills: submission.skills,
+              experiences: submission.experiences || [],
+              education: submission.education || [],
+              languages: submission.languages,
+              cover_letter: submission.cover_letter || null,
+              template: submission.template || 'classic'
+            };
+            setCvData(cvDataFromDb);
+            // Clear encrypted localStorage after successful payment
+            removeSecureStorage('form_data');
+            removeSecureStorage('submission_id');
             setIsLoading(false);
             return;
           }
@@ -58,11 +74,42 @@ export default function PaymentSuccess() {
         }
       }
       
-      // Still show CV but mark as pending
+      // Still show CV but mark as pending - try to load from database, fallback to encrypted localStorage
       setVerificationStatus('pending');
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) {
-        setCvData(JSON.parse(saved));
+      try {
+        const submissions = await base44.entities.CVSubmission.filter({ id: submissionId });
+        if (submissions?.length > 0) {
+          const submission = submissions[0];
+          const cvDataFromDb = {
+            full_name: submission.full_name,
+            target_position: submission.target_position,
+            location: submission.location,
+            email: submission.email,
+            phone: submission.phone,
+            linkedin_url: submission.linkedin_url,
+            summary: submission.summary || submission.generated_cv,
+            skills: submission.skills,
+            experiences: submission.experiences || [],
+            education: submission.education || [],
+            languages: submission.languages,
+            cover_letter: submission.cover_letter || null,
+            template: submission.template || 'classic'
+          };
+          setCvData(cvDataFromDb);
+        } else {
+          // Fallback to encrypted localStorage if database unavailable
+          const saved = getSecureStorage('form_data');
+          if (saved) {
+            setCvData(saved);
+          }
+        }
+      } catch (e) {
+        console.error('Error loading CV from database:', e);
+        // Fallback to encrypted localStorage if database unavailable
+        const saved = getSecureStorage('form_data');
+        if (saved) {
+          setCvData(saved);
+        }
       }
     } else if (type === 'trial' || type === 'monthly') {
       // For subscriptions, create subscription record from frontend

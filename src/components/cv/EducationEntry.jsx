@@ -3,9 +3,13 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
 
-export default function EducationEntry({ education, index, onChange, onRemove, canRemove }) {
+export default function EducationEntry({ education, index, onChange, onRemove, canRemove, errors = {}, onErrorClear }) {
   const handleChange = (field, value) => {
     onChange(index, { ...education, [field]: value });
+    // Clear error when user starts typing
+    if (onErrorClear && (field === 'start_date' || field === 'end_date')) {
+      onErrorClear(field);
+    }
   };
 
   return (
@@ -63,8 +67,9 @@ export default function EducationEntry({ education, index, onChange, onRemove, c
               value={education.start_date || ''}
               onChange={(e) => handleChange('start_date', e.target.value)}
               placeholder="Oct 2015"
-              className="border-gray-200 focus:border-gray-400 focus:ring-0"
+              className={`border-gray-200 focus:border-gray-400 focus:ring-0 ${errors.start_date ? 'border-red-300' : ''}`}
             />
+            {errors.start_date && <p className="text-xs text-red-500 mt-1">{errors.start_date}</p>}
           </div>
           <div>
             <label className="block text-sm text-gray-600 mb-2">End Date</label>
@@ -72,8 +77,9 @@ export default function EducationEntry({ education, index, onChange, onRemove, c
               value={education.end_date || ''}
               onChange={(e) => handleChange('end_date', e.target.value)}
               placeholder="Sep 2017"
-              className="border-gray-200 focus:border-gray-400 focus:ring-0"
+              className={`border-gray-200 focus:border-gray-400 focus:ring-0 ${errors.end_date ? 'border-red-300' : ''}`}
             />
+            {errors.end_date && <p className="text-xs text-red-500 mt-1">{errors.end_date}</p>}
           </div>
         </div>
       </div>

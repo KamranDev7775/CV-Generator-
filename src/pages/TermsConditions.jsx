@@ -38,10 +38,7 @@ export default function TermsConditions() {
             <section>
               <h2 className="text-xl font-medium text-black mb-3">3. Payment Terms</h2>
               <p>
-                <strong>Trial Access:</strong> €2.99 for 14 days of full access. After the trial period ends, your subscription will automatically renew at €6.99/month unless canceled before the trial ends.
-              </p>
-              <p>
-                <strong>Monthly Access:</strong> €6.99/month, billed monthly. You may cancel at any time. Cancellation takes effect at the end of the current billing period.
+                <strong>One-Time Payment:</strong> €1.99 for complete CV download (PDF + copyable text). This is a one-time payment with no recurring charges, no subscriptions, and no auto-renewal.
               </p>
               <p>
                 All payments are processed securely through Stripe. Refunds are provided on a case-by-case basis.

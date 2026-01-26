@@ -4,8 +4,15 @@ import { Button } from "@/components/ui/button";
 import CVDocument from '@/components/cv/CVDocument';
 import { Check, Copy, Download, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { removeSecureStorage, getSecureStorage } from '../utils/storage';
 
-const STORAGE_KEY = 'ats_cv_form_data';
+// HTML escaping function to prevent XSS
+const escapeHtml = (text) => {
+  if (!text) return '';
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+};
 
 export default function Success() {
   const [cvData, setCvData] = useState(null);
@@ -36,14 +43,35 @@ export default function Success() {
       while (attempts < maxAttempts) {
         const submissions = await base44.entities.CVSubmission.filter({ id: submissionId });
         
-        if (submissions?.length > 0 && submissions[0].payment_status === 'completed') {
-          // Payment confirmed by webhook - load CV data
-          const saved = localStorage.getItem(STORAGE_KEY);
-          if (saved) {
-            setCvData(JSON.parse(saved));
+        if (submissions?.length > 0) {
+          const submission = submissions[0];
+          
+          if (submission.payment_status === 'completed') {
+            // Payment confirmed by webhook - load CV data from database
+            // Extract CV data from submission (all form fields are stored in submission)
+            const cvDataFromDb = {
+              full_name: submission.full_name,
+              target_position: submission.target_position,
+              location: submission.location,
+              email: submission.email,
+              phone: submission.phone,
+              linkedin_url: submission.linkedin_url,
+              summary: submission.summary || submission.generated_cv,
+              skills: submission.skills,
+              experiences: submission.experiences || [],
+              education: submission.education || [],
+              languages: submission.languages,
+              cover_letter: submission.cover_letter || null,
+              template: submission.template || 'classic'
+            };
+            
+            setCvData(cvDataFromDb);
+            // Clear encrypted localStorage after successful payment (data is now in database)
+            removeSecureStorage('form_data');
+            removeSecureStorage('submission_id');
+            setIsLoading(false);
+            return;
           }
-          setIsLoading(false);
-          return;
         }
         
         attempts++;
@@ -52,18 +80,42 @@ export default function Success() {
         }
       }
       
-      // Payment not yet confirmed after polling
-      setPaymentPending(true);
-      // Still show CV from localStorage as fallback
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) {
-        setCvData(JSON.parse(saved));
+      // Payment not yet confirmed after polling - try to load from database anyway
+      const submissions = await base44.entities.CVSubmission.filter({ id: submissionId });
+      if (submissions?.length > 0) {
+        const submission = submissions[0];
+        const cvDataFromDb = {
+          full_name: submission.full_name,
+          target_position: submission.target_position,
+          location: submission.location,
+          email: submission.email,
+          phone: submission.phone,
+          linkedin_url: submission.linkedin_url,
+          summary: submission.summary || submission.generated_cv,
+          skills: submission.skills,
+          experiences: submission.experiences || [],
+          education: submission.education || [],
+          languages: submission.languages,
+          cover_letter: submission.cover_letter || null,
+          template: submission.template || 'classic'
+        };
+        setCvData(cvDataFromDb);
+        setPaymentPending(true);
+      } else {
+        // Database load failed - fallback to encrypted localStorage
+        const saved = getSecureStorage('form_data');
+        if (saved) {
+          setCvData(saved);
+          setPaymentPending(true);
+        }
       }
     } catch (error) {
       console.error('Error loading CV data:', error);
-      const saved = localStorage.getItem(STORAGE_KEY);
+      // Database load failed - fallback to encrypted localStorage
+      const saved = getSecureStorage('form_data');
       if (saved) {
-        setCvData(JSON.parse(saved));
+        setCvData(saved);
+        setPaymentPending(true);
       }
     } finally {
       setIsLoading(false);
@@ -147,6 +199,83 @@ export default function Success() {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const downloadCoverLetterPDF = async () => {
+    if (!cvData.cover_letter) return;
+    
+    setIsGeneratingPDF(true);
+    
+    try {
+      const printWindow = window.open('', '_blank');
+      
+      const htmlContent = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>${escapeHtml(cvData.full_name || 'CV')} - Cover Letter</title>
+          <style>
+            * {
+              margin: 0;
+              padding: 0;
+              box-sizing: border-box;
+            }
+            body {
+              font-family: 'Times New Roman', Times, serif;
+              font-size: 11pt;
+              line-height: 1.6;
+              color: #000;
+              background: #fff;
+              padding: 40px 50px;
+            }
+            .header {
+              margin-bottom: 30px;
+            }
+            .contact-info {
+              font-size: 10pt;
+              color: #555;
+              margin-bottom: 20px;
+            }
+            .date {
+              margin-bottom: 20px;
+            }
+            .content {
+              white-space: pre-line;
+              margin-bottom: 20px;
+            }
+            @media print {
+              body {
+                padding: 0;
+              }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <div class="contact-info">
+              ${escapeHtml(cvData.full_name || '')}<br>
+              ${cvData.email ? escapeHtml(cvData.email) : ''}${cvData.phone ? ' | ' + escapeHtml(cvData.phone) : ''}${cvData.location ? ' | ' + escapeHtml(cvData.location) : ''}
+            </div>
+            <div class="date">${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</div>
+          </div>
+          <div class="content">${escapeHtml(cvData.cover_letter)}</div>
+        </body>
+        </html>
+      `;
+
+      printWindow.document.write(htmlContent);
+      printWindow.document.close();
+      
+      printWindow.onload = () => {
+        printWindow.print();
+        setIsGeneratingPDF(false);
+      };
+      
+    } catch (error) {
+      console.error('Error generating cover letter PDF:', error);
+      toast.error('Error generating cover letter PDF. Please try again.');
+      setIsGeneratingPDF(false);
+    }
+  };
+
   const downloadPDF = async () => {
     setIsGeneratingPDF(true);
     
@@ -158,7 +287,7 @@ export default function Success() {
         <!DOCTYPE html>
         <html>
         <head>
-          <title>${cvData.full_name} - CV</title>
+          <title>${escapeHtml(cvData.full_name || 'CV')} - CV</title>
           <style>
             * {
               margin: 0;
@@ -239,22 +368,22 @@ export default function Success() {
         </head>
         <body>
           <header>
-            <h1>${cvData.full_name || ''}</h1>
-            ${cvData.target_position ? `<div class="position">${cvData.target_position}</div>` : ''}
-            <div class="contact">${[cvData.email, cvData.phone, cvData.linkedin_url, cvData.location].filter(Boolean).join(' | ')}</div>
+            <h1>${escapeHtml(cvData.full_name || '')}</h1>
+            ${cvData.target_position ? `<div class="position">${escapeHtml(cvData.target_position)}</div>` : ''}
+            <div class="contact">${[cvData.email, cvData.phone, cvData.linkedin_url, cvData.location].filter(Boolean).map(escapeHtml).join(' | ')}</div>
           </header>
 
           ${cvData.summary ? `
           <section>
             <h2>Professional Summary</h2>
-            <p>${cvData.summary}</p>
+            <p>${escapeHtml(cvData.summary)}</p>
           </section>
           ` : ''}
 
           ${cvData.skills ? `
           <section>
             <h2>Skills</h2>
-            <p>${cvData.skills}</p>
+            <p>${escapeHtml(cvData.skills)}</p>
           </section>
           ` : ''}
 
@@ -264,12 +393,12 @@ export default function Success() {
             ${cvData.experiences.filter(e => e.job_title || e.company).map(exp => `
               <div class="experience-item">
                 <div class="experience-header">
-                  ${exp.start_date || exp.end_date ? `<span class="dates">${exp.start_date} — ${exp.end_date || 'Present'}</span>` : ''}
-                  <span class="job-title">${exp.job_title}</span>${exp.company ? `, ${exp.company}` : ''}${exp.location ? `, ${exp.location}` : ''}
+                  ${exp.start_date || exp.end_date ? `<span class="dates">${escapeHtml(exp.start_date)} — ${escapeHtml(exp.end_date || 'Present')}</span>` : ''}
+                  <span class="job-title">${escapeHtml(exp.job_title || '')}</span>${exp.company ? `, ${escapeHtml(exp.company)}` : ''}${exp.location ? `, ${escapeHtml(exp.location)}` : ''}
                 </div>
                 ${exp.achievements ? `
                 <ul>
-                  ${exp.achievements.split('\n').filter(a => a.trim()).map(a => `<li>${a.trim()}</li>`).join('')}
+                  ${exp.achievements.split('\n').filter(a => a.trim()).map(a => `<li>${escapeHtml(a.trim())}</li>`).join('')}
                 </ul>
                 ` : ''}
               </div>
@@ -282,8 +411,8 @@ export default function Success() {
             <h2>Education</h2>
             ${cvData.education.filter(e => e.degree || e.university).map(edu => `
               <div class="education-item">
-                ${edu.start_date || edu.end_date ? `<span class="dates">${edu.start_date} — ${edu.end_date}</span>` : ''}
-                <span class="job-title">${edu.degree}</span>${edu.university ? `, ${edu.university}` : ''}${edu.location ? `, ${edu.location}` : ''}
+                ${edu.start_date || edu.end_date ? `<span class="dates">${escapeHtml(edu.start_date || '')} — ${escapeHtml(edu.end_date || '')}</span>` : ''}
+                <span class="job-title">${escapeHtml(edu.degree || '')}</span>${edu.university ? `, ${escapeHtml(edu.university)}` : ''}${edu.location ? `, ${escapeHtml(edu.location)}` : ''}
               </div>
             `).join('')}
           </section>
@@ -292,7 +421,7 @@ export default function Success() {
           ${cvData.languages ? `
           <section>
             <h2>Languages</h2>
-            <p>${cvData.languages}</p>
+            <p>${escapeHtml(cvData.languages)}</p>
           </section>
           ` : ''}
         </body>
@@ -326,12 +455,31 @@ export default function Success() {
   if (!cvData) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center px-6">
-        <div className="text-center">
-          <h1 className="text-2xl font-light text-black mb-4">No CV data found</h1>
-          <p className="text-gray-500 mb-8">Please generate a CV first.</p>
-          <a href="/" className="text-black underline hover:no-underline">
-            Go back to start
-          </a>
+        <div className="text-center max-w-md">
+          <h1 className="text-2xl font-light text-black mb-4">CV Not Found</h1>
+          <p className="text-gray-500 mb-2">
+            We couldn't load your CV. This may happen if:
+          </p>
+          <ul className="text-sm text-gray-500 mb-6 text-left list-disc list-inside space-y-1">
+            <li>The payment is still processing (please wait a few moments and refresh)</li>
+            <li>The submission ID is invalid or expired</li>
+            <li>There was a connection issue</li>
+            <li>Your browser data was cleared</li>
+          </ul>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <a 
+              href="/" 
+              className="text-black underline hover:no-underline"
+            >
+              Go back to start
+            </a>
+            <button
+              onClick={() => window.location.reload()}
+              className="text-black underline hover:no-underline"
+            >
+              Refresh page
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -369,7 +517,7 @@ export default function Success() {
               ) : (
                 <>
                   <Download className="mr-2 h-4 w-4" />
-                  Download PDF
+                  Download CV PDF
                 </>
               )}
             </Button>
@@ -391,6 +539,38 @@ export default function Success() {
               )}
             </Button>
           </div>
+
+          {/* Cover Letter Section */}
+          {cvData.cover_letter && (
+            <div className="mb-12">
+              <div className="border-t border-gray-200 pt-12">
+                <h2 className="text-2xl font-light text-black mb-6">Cover Letter</h2>
+                <div className="bg-gray-50 p-6 mb-6 border border-gray-200">
+                  <div className="whitespace-pre-line text-gray-800 leading-relaxed">
+                    {cvData.cover_letter}
+                  </div>
+                </div>
+                <Button 
+                  onClick={downloadCoverLetterPDF}
+                  disabled={isGeneratingPDF}
+                  variant="outline"
+                  className="w-full border-gray-200 text-gray-700 hover:bg-gray-50 py-4 text-base font-normal rounded-none"
+                >
+                  {isGeneratingPDF ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Generating...
+                    </>
+                  ) : (
+                    <>
+                      <Download className="mr-2 h-4 w-4" />
+                      Download Cover Letter PDF
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
+          )}
 
           {/* CV Preview */}
           <div className="border border-gray-200 shadow-sm" ref={cvRef}>
