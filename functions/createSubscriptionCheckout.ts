@@ -8,10 +8,13 @@ const MONTHLY_PRICE_ID = 'price_1Sp7ZCBJbYwh3WQ7W840G2IK'; // €6.99/month
 
 Deno.serve(async (req) => {
   try {
-    const { planType, successUrl, cancelUrl } = await req.json();
+    const { planType, successUrl, cancelUrl, customerEmail } = await req.json();
+
+    const idempotencyKey = `sub_${planType}_${Date.now()}`;
 
     let sessionConfig = {
       payment_method_types: ['card'],
+      customer_email: customerEmail || undefined,
       success_url: successUrl,
       cancel_url: cancelUrl,
       metadata: {
@@ -46,7 +49,9 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Invalid plan type' }, { status: 400 });
     }
 
-    const session = await stripe.checkout.sessions.create(sessionConfig);
+    const session = await stripe.checkout.sessions.create(sessionConfig, {
+      idempotencyKey: idempotencyKey
+    });
 
     return Response.json({ url: session.url });
   } catch (error) {

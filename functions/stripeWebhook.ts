@@ -1,24 +1,37 @@
 import Stripe from 'npm:stripe';
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
 
-const stripe = new Stripe(Deno.env.get('STRIPE_TEST_SECRET_KEY'));
-const webhookSecret = Deno.env.get('STRIPE_WEBHOOK_SECRET');
-
 Deno.serve(async (req) => {
+  // Get secrets inside handler to ensure fresh values
+  const stripe = new Stripe(Deno.env.get('STRIPE_TEST_SECRET_KEY'));
+  const webhookSecret = Deno.env.get('STRIPE_WEBHOOK_SECRET');
+  
   try {
     const base44 = createClientFromRequest(req);
     const body = await req.text();
     const signature = req.headers.get('stripe-signature');
 
-    console.log('Webhook received, signature:', signature ? 'present' : 'missing');
-    console.log('Webhook secret configured:', webhookSecret ? 'yes' : 'NO - MISSING!');
+    console.log('Webhook received');
+    console.log('Signature present:', !!signature);
+    console.log('Webhook secret length:', webhookSecret?.length || 0);
+    console.log('Body length:', body?.length || 0);
+
+    if (!webhookSecret) {
+      console.error('STRIPE_WEBHOOK_SECRET is not configured!');
+      return Response.json({ error: 'Webhook secret not configured' }, { status: 500 });
+    }
+
+    if (!signature) {
+      console.error('No stripe-signature header present');
+      return Response.json({ error: 'No signature' }, { status: 400 });
+    }
 
     let event;
     try {
       event = await stripe.webhooks.constructEventAsync(body, signature, webhookSecret);
     } catch (err) {
-      console.error('Webhook signature verification failed:', err.message);
-      console.error('Make sure STRIPE_WEBHOOK_SECRET matches the webhook endpoint in Stripe Dashboard');
+      console.error('Signature verification failed:', err.message);
+      console.error('Expected secret starts with:', webhookSecret?.substring(0, 10));
       return Response.json({ error: 'Invalid signature' }, { status: 400 });
     }
 
