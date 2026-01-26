@@ -60,20 +60,33 @@ Deno.serve(async (req) => {
 
       // Handle subscription checkout
       if (session.mode === 'subscription' && session.subscription) {
+        const customerEmail = session.customer_email || session.customer_details?.email;
+        console.log('Processing subscription for email:', customerEmail);
+        console.log('Subscription ID:', session.subscription);
+        console.log('Customer ID:', session.customer);
+        
         try {
           const subscription = await stripe.subscriptions.retrieve(session.subscription);
-          await base44.asServiceRole.entities.Subscription.create({
-            user_email: session.customer_email || session.customer_details?.email,
+          console.log('Retrieved subscription status:', subscription.status);
+          console.log('Period start:', subscription.current_period_start);
+          console.log('Period end:', subscription.current_period_end);
+          
+          const subscriptionData = {
+            user_email: customerEmail,
             stripe_customer_id: session.customer,
             stripe_subscription_id: session.subscription,
             plan_type: planType || 'monthly',
             status: subscription.status,
             current_period_start: new Date(subscription.current_period_start * 1000).toISOString(),
             current_period_end: new Date(subscription.current_period_end * 1000).toISOString()
-          });
-          console.log('Created subscription record');
+          };
+          console.log('Creating subscription with data:', JSON.stringify(subscriptionData));
+          
+          const created = await base44.asServiceRole.entities.Subscription.create(subscriptionData);
+          console.log('Successfully created subscription record with ID:', created.id);
         } catch (subError) {
-          console.error('Error creating subscription:', subError);
+          console.error('Error creating subscription:', subError.message);
+          console.error('Full error:', JSON.stringify(subError));
         }
       }
 
