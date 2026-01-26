@@ -31,18 +31,25 @@ export default function Success() {
         return;
       }
 
-      // Check if payment was completed
-      const submission = await base44.entities.CVSubmission.filter({ id: submissionId });
-      if (!submission || submission.length === 0 || submission[0].payment_status !== 'completed') {
+      // Check if payment was completed via Stripe webhook
+      const submissions = await base44.entities.CVSubmission.filter({ id: submissionId });
+      
+      if (!submissions || submissions.length === 0) {
+        console.error('Submission not found');
         setAccessDenied(true);
         setIsLoading(false);
         return;
       }
 
-      // Update payment status
-      await base44.entities.CVSubmission.update(submissionId, {
-        payment_status: 'completed'
-      });
+      const submission = submissions[0];
+      
+      // Verify payment was completed by webhook
+      if (submission.payment_status !== 'completed') {
+        console.error('Payment not completed yet');
+        setAccessDenied(true);
+        setIsLoading(false);
+        return;
+      }
 
       // Load from localStorage
       const saved = localStorage.getItem(STORAGE_KEY);
