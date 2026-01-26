@@ -1,6 +1,6 @@
 import Stripe from 'npm:stripe';
 
-const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY'));
+const stripe = new Stripe(Deno.env.get('STRIPE_TEST_SECRET_KEY'));
 
 Deno.serve(async (req) => {
   try {
