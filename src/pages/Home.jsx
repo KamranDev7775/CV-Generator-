@@ -301,7 +301,7 @@ Generate a professional summary that will make recruiters want to interview this
       const response = await base44.functions.invoke('createCheckout', {
         submissionId,
         customerEmail: formData.email || user?.email,
-        successUrl: `${window.location.origin}/Success?submission_id=${submissionId}`,
+        successUrl: `${window.location.origin}${createPageUrl('PaymentSuccess')}?type=cv&submission_id=${submissionId}`,
         cancelUrl: window.location.href
       });
       

@@ -4,6 +4,7 @@ import Pricing from './pages/Pricing';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import Success from './pages/Success';
 import TermsConditions from './pages/TermsConditions';
+import PaymentSuccess from './pages/PaymentSuccess';
 import __Layout from './Layout.jsx';
 
 
@@ -14,6 +15,7 @@ export const PAGES = {
     "PrivacyPolicy": PrivacyPolicy,
     "Success": Success,
     "TermsConditions": TermsConditions,
+    "PaymentSuccess": PaymentSuccess,
 }
 
 export const pagesConfig = {

@@ -33,7 +33,7 @@ export default function Pricing() {
       const response = await base44.functions.invoke('createSubscriptionCheckout', {
         planType,
         customerEmail: userEmail,
-        successUrl: `${window.location.origin}${createPageUrl('Dashboard')}`,
+        successUrl: `${window.location.origin}${createPageUrl('PaymentSuccess')}?type=${planType}`,
         cancelUrl: window.location.href
       });
 
