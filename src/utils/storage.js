@@ -56,17 +56,68 @@ function getOrCreateEncryptionKey() {
   return key;
 }
 
+// Convert string to UTF-8 bytes, then to Base64 (handles Unicode properly)
+function utf8ToBase64(str) {
+  try {
+    // Use TextEncoder if available (modern browsers)
+    if (typeof TextEncoder !== 'undefined') {
+      const encoder = new TextEncoder();
+      const bytes = encoder.encode(str);
+      // Convert bytes to binary string for btoa
+      let binary = '';
+      for (let i = 0; i < bytes.length; i++) {
+        binary += String.fromCharCode(bytes[i]);
+      }
+      return btoa(binary);
+    } else {
+      // Fallback for older browsers: use encodeURIComponent
+      return btoa(unescape(encodeURIComponent(str)));
+    }
+  } catch (error) {
+    // If all else fails, try the old method (may fail with Unicode)
+    return btoa(str);
+  }
+}
+
+// Convert Base64 to UTF-8 string (handles Unicode properly)
+function base64ToUtf8(base64) {
+  try {
+    // Use TextDecoder if available (modern browsers)
+    if (typeof TextDecoder !== 'undefined') {
+      const binary = atob(base64);
+      const bytes = new Uint8Array(binary.length);
+      for (let i = 0; i < binary.length; i++) {
+        bytes[i] = binary.charCodeAt(i);
+      }
+      const decoder = new TextDecoder();
+      return decoder.decode(bytes);
+    } else {
+      // Fallback for older browsers: use decodeURIComponent
+      return decodeURIComponent(escape(atob(base64)));
+    }
+  } catch (error) {
+    // If all else fails, try the old method (may fail with Unicode)
+    return atob(base64);
+  }
+}
+
 // Simple XOR encryption (lightweight, sufficient for localStorage obfuscation)
 // Note: This is obfuscation, not military-grade encryption, but sufficient for preventing casual access
 function simpleEncrypt(text, key) {
   if (!text) return '';
-  // Try session key first, then fallback to strong default key
-  const keyStr = key || getOrCreateEncryptionKey() || getStrongDefaultKey();
-  let result = '';
-  for (let i = 0; i < text.length; i++) {
-    result += String.fromCharCode(text.charCodeAt(i) ^ keyStr.charCodeAt(i % keyStr.length));
+  try {
+    // Try session key first, then fallback to strong default key
+    const keyStr = key || getOrCreateEncryptionKey() || getStrongDefaultKey();
+    let result = '';
+    for (let i = 0; i < text.length; i++) {
+      result += String.fromCharCode(text.charCodeAt(i) ^ keyStr.charCodeAt(i % keyStr.length));
+    }
+    // Use UTF-8 safe Base64 encoding to handle Unicode characters
+    return utf8ToBase64(result);
+  } catch (error) {
+    console.error('Encryption error:', error);
+    throw error;
   }
-  return btoa(result); // Base64 encode
 }
 
 function simpleDecrypt(encrypted, key) {
@@ -83,14 +134,15 @@ function simpleDecrypt(encrypted, key) {
   try {
     // Try session key first, then fallback to strong default key
     const keyStr = key || getOrCreateEncryptionKey() || getStrongDefaultKey();
-    const decoded = atob(encrypted);
+    // Use UTF-8 safe Base64 decoding to handle Unicode characters
+    const decoded = base64ToUtf8(encrypted);
     let result = '';
     for (let i = 0; i < decoded.length; i++) {
       result += String.fromCharCode(decoded.charCodeAt(i) ^ keyStr.charCodeAt(i % keyStr.length));
     }
     return result;
   } catch (error) {
-    // If atob fails, this might be old unencrypted data or corrupted data
+    // If decoding fails, this might be old unencrypted data or corrupted data
     console.warn('Decryption error (might be unencrypted data):', error.message);
     return null; // Signal that decryption failed
   }

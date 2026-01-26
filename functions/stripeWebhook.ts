@@ -40,6 +40,8 @@ Deno.serve(async (req) => {
     }
 
     console.log('Received Stripe event:', event.type);
+    console.log('Event ID:', event.id);
+    console.log('Event created:', new Date(event.created * 1000).toISOString());
 
     // Handle checkout session completed (one-time payments & subscription starts)
     if (event.type === 'checkout.session.completed') {
@@ -48,18 +50,37 @@ Deno.serve(async (req) => {
       const planType = session.metadata?.plan_type;
 
       console.log('Checkout completed - mode:', session.mode, 'planType:', planType);
+      console.log('Session ID:', session.id);
+      console.log('Submission ID:', submissionId);
+      console.log('Payment status:', session.payment_status);
 
       // Handle one-time CV payment
       if (submissionId) {
         try {
-          await base44.asServiceRole.entities.CVSubmission.update(submissionId, {
-            payment_status: 'completed',
-            stripe_session_id: session.id
-          });
-          console.log('Updated submission payment status to completed');
+          // Idempotency: Check if already processed by checking payment_status
+          // This prevents duplicate processing if webhook is called multiple times
+          const existing = await base44.asServiceRole.entities.CVSubmission.filter({ id: submissionId });
+          if (existing.length > 0 && existing[0].payment_status === 'completed') {
+            console.log('Submission already marked as completed, skipping update (idempotency)');
+            console.log('Existing payment_status:', existing[0].payment_status);
+            console.log('Existing stripe_session_id:', existing[0].stripe_session_id);
+          } else {
+            console.log('Attempting to update CVSubmission:', submissionId);
+            const updated = await base44.asServiceRole.entities.CVSubmission.update(submissionId, {
+              payment_status: 'completed',
+              stripe_session_id: session.id
+            });
+            console.log('Successfully updated submission payment status to completed');
+            console.log('Updated submission:', updated.id);
+          }
         } catch (updateError) {
           console.error('Error updating submission:', updateError);
+          console.error('Error details:', JSON.stringify(updateError, null, 2));
+          // Don't fail the webhook, but log the error
+          // The frontend will poll for payment_status anyway
         }
+      } else {
+        console.log('No submission_id in metadata, skipping CV payment update');
       }
 
       // Handle subscription checkout
@@ -177,9 +198,20 @@ Deno.serve(async (req) => {
       }
     }
 
-    return Response.json({ received: true });
+    // Return success response
+    console.log('Webhook processed successfully');
+    return Response.json({ 
+      received: true,
+      processed: true,
+      event_type: event.type
+    });
   } catch (error) {
     console.error('Webhook error:', error);
-    return Response.json({ error: error.message }, { status: 500 });
+    console.error('Error stack:', error.stack);
+    console.error('Error details:', JSON.stringify(error, null, 2));
+    return Response.json({ 
+      error: error.message,
+      received: false 
+    }, { status: 500 });
   }
 });

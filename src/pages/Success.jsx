@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 import CVDocument from '@/components/cv/CVDocument';
-import { Check, Copy, Download, Loader2 } from "lucide-react";
+import { Check, Copy, Download, Loader2, Edit2, Save } from "lucide-react";
 import { toast } from "sonner";
 import { removeSecureStorage, getSecureStorage } from '../utils/storage';
 
@@ -20,6 +21,9 @@ export default function Success() {
   const [copied, setCopied] = useState(false);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   const [paymentPending, setPaymentPending] = useState(false);
+  const [isEditingCoverLetter, setIsEditingCoverLetter] = useState(false);
+  const [editedCoverLetter, setEditedCoverLetter] = useState('');
+  const [isSavingCoverLetter, setIsSavingCoverLetter] = useState(false);
   const cvRef = useRef(null);
 
   useEffect(() => {
@@ -563,15 +567,104 @@ export default function Success() {
           {cvData.cover_letter && (
             <div className="mb-12">
               <div className="border-t border-gray-200 pt-12">
-                <h2 className="text-2xl font-light text-black mb-6">Cover Letter</h2>
-                <div className="bg-gray-50 p-6 mb-6 border border-gray-200">
-                  <div className="whitespace-pre-line text-gray-800 leading-relaxed">
-                    {cvData.cover_letter}
-                  </div>
+                <div className="flex justify-between items-center mb-6">
+                  <h2 className="text-2xl font-light text-black">Cover Letter</h2>
+                  {!isEditingCoverLetter ? (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setEditedCoverLetter(cvData.cover_letter);
+                        setIsEditingCoverLetter(true);
+                      }}
+                      className="border-gray-200 text-gray-600 hover:bg-gray-50 rounded-none"
+                    >
+                      <Edit2 className="h-4 w-4 mr-1" />
+                      Edit
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={async () => {
+                        setIsSavingCoverLetter(true);
+                        try {
+                          // Update local state
+                          setCvData(prev => ({ ...prev, cover_letter: editedCoverLetter }));
+                          
+                          // Update in database if we have submission_id
+                          const urlParams = new URLSearchParams(window.location.search);
+                          const submissionId = urlParams.get('submission_id');
+                          if (submissionId) {
+                            try {
+                              const currentUser = await base44.auth.me();
+                              if (currentUser) {
+                                const submissions = await base44.entities.CVSubmission.filter({ 
+                                  id: submissionId,
+                                  created_by: currentUser.email 
+                                });
+                                if (submissions?.length > 0) {
+                                  await base44.entities.CVSubmission.update(submissionId, {
+                                    cover_letter: editedCoverLetter
+                                  });
+                                  toast.success('Cover letter updated successfully');
+                                }
+                              }
+                            } catch (error) {
+                              console.error('Error updating cover letter in database:', error);
+                              toast.error('Failed to save to database, but changes are saved locally');
+                            }
+                          }
+                          
+                          setIsEditingCoverLetter(false);
+                        } catch (error) {
+                          console.error('Error saving cover letter:', error);
+                          toast.error('Failed to save cover letter');
+                        } finally {
+                          setIsSavingCoverLetter(false);
+                        }
+                      }}
+                      disabled={isSavingCoverLetter}
+                      className="border-green-200 text-green-600 hover:bg-green-50 rounded-none"
+                    >
+                      {isSavingCoverLetter ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                          Saving...
+                        </>
+                      ) : (
+                        <>
+                          <Save className="h-4 w-4 mr-1" />
+                          Save
+                        </>
+                      )}
+                    </Button>
+                  )}
                 </div>
+                
+                {isEditingCoverLetter ? (
+                  <div className="mb-6">
+                    <Textarea
+                      value={editedCoverLetter}
+                      onChange={(e) => setEditedCoverLetter(e.target.value)}
+                      className="min-h-[300px] border-gray-200 focus:ring-0 rounded-none text-sm"
+                      placeholder="Edit your cover letter..."
+                    />
+                    <p className="text-xs text-gray-500 mt-2">
+                      Make your edits and click Save to update your cover letter
+                    </p>
+                  </div>
+                ) : (
+                  <div className="bg-gray-50 p-6 mb-6 border border-gray-200">
+                    <div className="whitespace-pre-line text-gray-800 leading-relaxed">
+                      {cvData.cover_letter}
+                    </div>
+                  </div>
+                )}
+                
                 <Button 
                   onClick={downloadCoverLetterPDF}
-                  disabled={isGeneratingPDF}
+                  disabled={isGeneratingPDF || isEditingCoverLetter}
                   variant="outline"
                   className="w-full border-gray-200 text-gray-700 hover:bg-gray-50 py-4 text-base font-normal rounded-none"
                 >
