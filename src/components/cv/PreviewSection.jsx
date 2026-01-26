@@ -9,6 +9,8 @@ import { createPageUrl } from '../../utils';
 export default function PreviewSection({ cvData, onPayment, onSubscribe, isProcessingPayment }) {
   const [hasSubscription, setHasSubscription] = useState(false);
   const [checkingSubscription, setCheckingSubscription] = useState(true);
+  const [copied, setCopied] = useState(false);
+  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
 
   useEffect(() => {
     checkSubscription();
