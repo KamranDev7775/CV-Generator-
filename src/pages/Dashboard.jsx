@@ -30,9 +30,15 @@ export default function Dashboard() {
       console.log('Active subscription:', activeSub);
       setSubscription(activeSub || null);
       
-      // Fetch user's CV submissions
+      // Fetch user's CV submissions - show all for subscribers, only paid for others
       const submissions = await base44.entities.CVSubmission.filter({ created_by: currentUser.email });
-      setCvSubmissions(submissions.filter(s => s.payment_status === 'completed'));
+      if (activeSub) {
+        // Subscribers see all their CVs
+        setCvSubmissions(submissions);
+      } else {
+        // Non-subscribers only see paid CVs
+        setCvSubmissions(submissions.filter(s => s.payment_status === 'completed'));
+      }
     } catch (error) {
       console.error('Dashboard load error:', error);
       navigate(createPageUrl('Home'));

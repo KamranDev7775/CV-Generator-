@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import CVDocument from './CVDocument';
-import { Loader2 } from "lucide-react";
+import { Loader2, Download, Copy, Check } from "lucide-react";
 import { base44 } from '@/api/base44Client';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '../../utils';
+import { jsPDF } from 'jspdf';
 
 export default function PreviewSection({ cvData, onPayment, onSubscribe, isProcessingPayment }) {
   const [hasSubscription, setHasSubscription] = useState(false);
@@ -71,11 +72,142 @@ export default function PreviewSection({ cvData, onPayment, onSubscribe, isProce
 
   const downloadPDF = async () => {
     setIsGeneratingPDF(true);
-    const printWindow = window.open('', '_blank');
-    const htmlContent = `<!DOCTYPE html><html><head><title>${cvData?.full_name || 'CV'} - CV</title><style>@page{size:A4;margin:0}*{margin:0;padding:0;box-sizing:border-box}body{font-family:'Times New Roman',Times,serif;font-size:11pt;line-height:1.4;color:#000;background:#fff;padding:40px 50px}header{margin-bottom:20px;padding-bottom:15px;border-bottom:1px solid #ccc}h1{font-size:18pt;font-weight:bold;margin-bottom:5px}.position{font-size:12pt;color:#333;margin-bottom:8px}.contact{font-size:10pt;color:#555}section{margin-bottom:18px}h2{font-size:10pt;font-weight:bold;text-transform:uppercase;letter-spacing:1px;color:#555;margin-bottom:8px;font-family:Arial,sans-serif}p{margin-bottom:8px}.experience-item{margin-bottom:12px}.experience-header{margin-bottom:5px}.job-title{font-weight:bold}.dates{float:right;font-size:10pt;color:#555}ul{margin-left:20px}li{margin-bottom:3px}.education-item{margin-bottom:8px}@media print{@page{size:A4;margin:15mm}body{padding:0;-webkit-print-color-adjust:exact;print-color-adjust:exact}}</style></head><body><header><h1>${cvData?.full_name || ''}</h1>${cvData?.target_position ? `<div class="position">${cvData.target_position}</div>` : ''}<div class="contact">${[cvData?.email, cvData?.phone, cvData?.linkedin_url, cvData?.location].filter(Boolean).join(' | ')}</div></header>${cvData?.summary ? `<section><h2>Professional Summary</h2><p>${cvData.summary}</p></section>` : ''}${cvData?.skills ? `<section><h2>Skills</h2><p>${cvData.skills}</p></section>` : ''}${cvData?.experiences?.length && cvData.experiences.some(e => e.job_title || e.company) ? `<section><h2>Professional Experience</h2>${cvData.experiences.filter(e => e.job_title || e.company).map(exp => `<div class="experience-item"><div class="experience-header">${exp.start_date || exp.end_date ? `<span class="dates">${exp.start_date} — ${exp.end_date || 'Present'}</span>` : ''}<span class="job-title">${exp.job_title}</span>${exp.company ? `, ${exp.company}` : ''}${exp.location ? `, ${exp.location}` : ''}</div>${exp.achievements ? `<ul>${exp.achievements.split('\n').filter(a => a.trim()).map(a => `<li>${a.trim()}</li>`).join('')}</ul>` : ''}</div>`).join('')}</section>` : ''}${cvData?.education?.length && cvData.education.some(e => e.degree || e.university) ? `<section><h2>Education</h2>${cvData.education.filter(e => e.degree || e.university).map(edu => `<div class="education-item">${edu.start_date || edu.end_date ? `<span class="dates">${edu.start_date} — ${edu.end_date}</span>` : ''}<span class="job-title">${edu.degree}</span>${edu.university ? `, ${edu.university}` : ''}${edu.location ? `, ${edu.location}` : ''}</div>`).join('')}</section>` : ''}${cvData?.languages ? `<section><h2>Languages</h2><p>${cvData.languages}</p></section>` : ''}</body></html>`;
-    printWindow.document.write(htmlContent);
-    printWindow.document.close();
-    printWindow.onload = () => { printWindow.print(); setIsGeneratingPDF(false); };
+    try {
+      const doc = new jsPDF('p', 'mm', 'a4');
+      const pageWidth = 210;
+      const margin = 20;
+      const contentWidth = pageWidth - 2 * margin;
+      let y = 20;
+
+      // Helper to add text with word wrap
+      const addText = (text, fontSize, isBold = false, color = [0, 0, 0]) => {
+        doc.setFontSize(fontSize);
+        doc.setFont('times', isBold ? 'bold' : 'normal');
+        doc.setTextColor(...color);
+        const lines = doc.splitTextToSize(text, contentWidth);
+        lines.forEach(line => {
+          if (y > 280) { doc.addPage(); y = 20; }
+          doc.text(line, margin, y);
+          y += fontSize * 0.4;
+        });
+      };
+
+      const addSection = (title) => {
+        y += 4;
+        if (y > 270) { doc.addPage(); y = 20; }
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(100, 100, 100);
+        doc.text(title.toUpperCase(), margin, y);
+        y += 6;
+      };
+
+      // Header
+      doc.setFontSize(18);
+      doc.setFont('times', 'bold');
+      doc.setTextColor(0, 0, 0);
+      doc.text(cvData?.full_name || '', margin, y);
+      y += 7;
+
+      if (cvData?.target_position) {
+        doc.setFontSize(12);
+        doc.setFont('times', 'normal');
+        doc.setTextColor(60, 60, 60);
+        doc.text(cvData.target_position, margin, y);
+        y += 5;
+      }
+
+      const contactParts = [cvData?.email, cvData?.phone, cvData?.linkedin_url, cvData?.location].filter(Boolean);
+      if (contactParts.length) {
+        doc.setFontSize(9);
+        doc.setTextColor(100, 100, 100);
+        doc.text(contactParts.join(' | '), margin, y);
+        y += 4;
+      }
+
+      // Line separator
+      y += 2;
+      doc.setDrawColor(200, 200, 200);
+      doc.line(margin, y, pageWidth - margin, y);
+      y += 6;
+
+      // Summary
+      if (cvData?.summary) {
+        addSection('Professional Summary');
+        addText(cvData.summary, 10);
+      }
+
+      // Skills
+      if (cvData?.skills) {
+        addSection('Skills');
+        addText(cvData.skills, 10);
+      }
+
+      // Experience
+      if (cvData?.experiences?.length && cvData.experiences.some(e => e.job_title || e.company)) {
+        addSection('Professional Experience');
+        cvData.experiences.filter(e => e.job_title || e.company).forEach(exp => {
+          if (y > 270) { doc.addPage(); y = 20; }
+          doc.setFontSize(10);
+          doc.setFont('times', 'bold');
+          doc.setTextColor(0, 0, 0);
+          const title = `${exp.job_title || ''}${exp.company ? `, ${exp.company}` : ''}${exp.location ? `, ${exp.location}` : ''}`;
+          doc.text(title, margin, y);
+          if (exp.start_date || exp.end_date) {
+            const dates = `${exp.start_date || ''} — ${exp.end_date || 'Present'}`;
+            doc.setFont('times', 'normal');
+            doc.setTextColor(100, 100, 100);
+            doc.text(dates, pageWidth - margin - doc.getTextWidth(dates), y);
+          }
+          y += 5;
+          if (exp.achievements) {
+            doc.setFont('times', 'normal');
+            doc.setTextColor(0, 0, 0);
+            exp.achievements.split('\n').filter(a => a.trim()).forEach(a => {
+              if (y > 280) { doc.addPage(); y = 20; }
+              const bulletLines = doc.splitTextToSize(`• ${a.trim()}`, contentWidth - 5);
+              bulletLines.forEach(line => {
+                doc.text(line, margin + 3, y);
+                y += 4;
+              });
+            });
+          }
+          y += 2;
+        });
+      }
+
+      // Education
+      if (cvData?.education?.length && cvData.education.some(e => e.degree || e.university)) {
+        addSection('Education');
+        cvData.education.filter(e => e.degree || e.university).forEach(edu => {
+          if (y > 280) { doc.addPage(); y = 20; }
+          doc.setFontSize(10);
+          doc.setFont('times', 'bold');
+          doc.setTextColor(0, 0, 0);
+          const title = `${edu.degree || ''}${edu.university ? `, ${edu.university}` : ''}${edu.location ? `, ${edu.location}` : ''}`;
+          doc.text(title, margin, y);
+          if (edu.start_date || edu.end_date) {
+            const dates = `${edu.start_date || ''} — ${edu.end_date || ''}`;
+            doc.setFont('times', 'normal');
+            doc.setTextColor(100, 100, 100);
+            doc.text(dates, pageWidth - margin - doc.getTextWidth(dates), y);
+          }
+          y += 6;
+        });
+      }
+
+      // Languages
+      if (cvData?.languages) {
+        addSection('Languages');
+        addText(cvData.languages, 10);
+      }
+
+      doc.save(`${cvData?.full_name || 'CV'}.pdf`);
+    } catch (error) {
+      console.error('PDF generation error:', error);
+    } finally {
+      setIsGeneratingPDF(false);
+    }
   };
 
   if (checkingSubscription) {
