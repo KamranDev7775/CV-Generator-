@@ -505,6 +505,7 @@ Generate a cover letter that will make recruiters want to interview this candida
           </div>
           <PreviewSection 
             cvData={generatedCV}
+            onCvDataChange={setGeneratedCV}
             onPayment={handlePayment}
             isProcessingPayment={isProcessingPayment}
           />

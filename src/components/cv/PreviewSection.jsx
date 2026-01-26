@@ -1,17 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 import CVDocument from './CVDocument';
-import { Loader2, Download, Copy, Check } from "lucide-react";
+import { Loader2, Download, Copy, Check, Edit2, Save } from "lucide-react";
 import { base44 } from '@/api/base44Client';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '../../utils';
 import { jsPDF } from 'jspdf';
 
-export default function PreviewSection({ cvData, onPayment, onSubscribe, isProcessingPayment }) {
+export default function PreviewSection({ cvData, onCvDataChange, onPayment, onSubscribe, isProcessingPayment }) {
   const [hasSubscription, setHasSubscription] = useState(false);
   const [checkingSubscription, setCheckingSubscription] = useState(true);
   const [copied, setCopied] = useState(false);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+  const [isEditingCoverLetter, setIsEditingCoverLetter] = useState(false);
+  const [editedCoverLetter, setEditedCoverLetter] = useState(cvData?.cover_letter || '');
 
   useEffect(() => {
     checkSubscription();
@@ -234,9 +237,61 @@ export default function PreviewSection({ cvData, onPayment, onSubscribe, isProce
           </p>
 
           {/* CV Preview - No watermark for subscribers */}
-          <div className="border border-gray-200 shadow-sm mb-12">
+          <div className="border border-gray-200 shadow-sm mb-8">
             <CVDocument data={cvData} showWatermark={false} />
           </div>
+
+          {/* Cover Letter Preview (if generated) - Editable for subscribers */}
+          {cvData?.cover_letter && (
+            <div className="mb-12">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-medium text-black">Cover Letter</h3>
+                {!isEditingCoverLetter ? (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setEditedCoverLetter(cvData.cover_letter);
+                      setIsEditingCoverLetter(true);
+                    }}
+                    className="border-gray-200 text-gray-600 hover:bg-gray-50 rounded-none"
+                  >
+                    <Edit2 className="h-4 w-4 mr-1" />
+                    Edit
+                  </Button>
+                ) : (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      if (onCvDataChange) {
+                        onCvDataChange({ ...cvData, cover_letter: editedCoverLetter });
+                      }
+                      setIsEditingCoverLetter(false);
+                    }}
+                    className="border-green-200 text-green-600 hover:bg-green-50 rounded-none"
+                  >
+                    <Save className="h-4 w-4 mr-1" />
+                    Save
+                  </Button>
+                )}
+              </div>
+              {isEditingCoverLetter ? (
+                <Textarea
+                  value={editedCoverLetter}
+                  onChange={(e) => setEditedCoverLetter(e.target.value)}
+                  className="min-h-[300px] border-gray-200 focus:ring-0 rounded-none text-sm"
+                  placeholder="Edit your cover letter..."
+                />
+              ) : (
+                <div className="border border-gray-200 bg-gray-50 p-6">
+                  <div className="whitespace-pre-line text-gray-800 leading-relaxed text-sm">
+                    {cvData.cover_letter}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Action buttons */}
           <div className="flex flex-col sm:flex-row gap-4">
@@ -272,9 +327,69 @@ export default function PreviewSection({ cvData, onPayment, onSubscribe, isProce
         </p>
 
         {/* CV Preview */}
-        <div className="border border-gray-200 shadow-sm mb-12">
+        <div className="border border-gray-200 shadow-sm mb-8">
           <CVDocument data={cvData} showWatermark={true} />
         </div>
+
+        {/* Cover Letter Preview (if generated) */}
+        {cvData?.cover_letter && (
+          <div className="mb-12">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-medium text-black">Cover Letter</h3>
+              {!isEditingCoverLetter ? (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setEditedCoverLetter(cvData.cover_letter);
+                    setIsEditingCoverLetter(true);
+                  }}
+                  className="border-gray-200 text-gray-600 hover:bg-gray-50 rounded-none"
+                >
+                  <Edit2 className="h-4 w-4 mr-1" />
+                  Edit
+                </Button>
+              ) : (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    if (onCvDataChange) {
+                      onCvDataChange({ ...cvData, cover_letter: editedCoverLetter });
+                    }
+                    setIsEditingCoverLetter(false);
+                  }}
+                  className="border-green-200 text-green-600 hover:bg-green-50 rounded-none"
+                >
+                  <Save className="h-4 w-4 mr-1" />
+                  Save
+                </Button>
+              )}
+            </div>
+            {isEditingCoverLetter ? (
+              <Textarea
+                value={editedCoverLetter}
+                onChange={(e) => setEditedCoverLetter(e.target.value)}
+                className="min-h-[300px] border-gray-200 focus:ring-0 rounded-none text-sm"
+                placeholder="Edit your cover letter..."
+              />
+            ) : (
+              <div className="border border-gray-200 bg-gray-50 p-6 relative">
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                  <div className="transform -rotate-45 text-gray-200 text-xl font-bold opacity-60">
+                    Unlock for €1.99
+                  </div>
+                </div>
+                <div className="whitespace-pre-line text-gray-800 leading-relaxed text-sm blur-sm select-none">
+                  {cvData.cover_letter}
+                </div>
+              </div>
+            )}
+            <p className="text-xs text-gray-500 mt-2">
+              {isEditingCoverLetter ? 'Make your edits and click Save' : 'Full cover letter available after payment'}
+            </p>
+          </div>
+        )}
 
         {/* Pricing Options */}
         <div className="grid md:grid-cols-2 gap-4 mb-8">

@@ -261,22 +261,24 @@ export default function CVFormWithPreview({ formData, setFormData, onSubmit, isG
                 <h3 className="text-sm font-semibold uppercase tracking-wider text-blue-600 mb-4">CV Template</h3>
                 <div className="grid grid-cols-3 gap-3">
                   {[
-                    { id: 'classic', name: 'Classic', desc: 'Traditional Layout' },
-                    { id: 'modern', name: 'Modern', desc: 'Centered Layout' },
-                    { id: 'minimal', name: 'Minimal', desc: 'Clean Layout' }
+                    { id: 'classic', name: 'Classic', desc: 'Traditional' },
+                    { id: 'modern', name: 'Modern', desc: 'Centered' },
+                    { id: 'minimal', name: 'Minimal', desc: 'Clean' },
+                    { id: 'executive', name: 'Executive', desc: 'Senior' },
+                    { id: 'compact', name: 'Compact', desc: 'Dense' }
                   ].map((template) => (
                     <button
                       key={template.id}
                       type="button"
                       onClick={() => updateField('template', template.id)}
-                      className={`p-4 border-2 rounded-lg text-center transition-all ${
+                      className={`p-3 border-2 rounded-lg text-center transition-all ${
                         (formData.template || 'classic') === template.id
                           ? 'border-blue-600 bg-blue-50'
                           : 'border-gray-200 hover:border-gray-300'
                       }`}
                     >
                       <div className="font-medium text-gray-900 text-sm">{template.name}</div>
-                      <div className="text-xs text-gray-500 mt-1">{template.desc}</div>
+                      <div className="text-xs text-gray-500">{template.desc}</div>
                     </button>
                   ))}
                 </div>
@@ -306,7 +308,27 @@ export default function CVFormWithPreview({ formData, setFormData, onSubmit, isG
                     </button>
                   ))}
                 </div>
-                <p className="text-xs text-gray-400 mt-3 text-center">All 9 combinations (3 templates × 3 styles) are ATS-friendly</p>
+                <p className="text-xs text-gray-400 mt-3 text-center">All 15 combinations (5 templates × 3 styles) are ATS-friendly</p>
+              </div>
+
+              {/* Cover Letter Option */}
+              <div className="bg-gradient-to-r from-purple-50 to-blue-50 p-4 rounded-xl border border-purple-100">
+                <div className="flex items-start space-x-3">
+                  <Checkbox
+                    id="cover-letter-preview"
+                    checked={generateCoverLetter || false}
+                    onCheckedChange={setGenerateCoverLetter}
+                    className="mt-1"
+                  />
+                  <div>
+                    <label htmlFor="cover-letter-preview" className="text-sm font-medium text-gray-900 cursor-pointer block">
+                      Generate a matching cover letter
+                    </label>
+                    <p className="text-xs text-gray-500 mt-1">
+                      AI will create a professional cover letter tailored to your experience and target position
+                    </p>
+                  </div>
+                </div>
               </div>
 
               {/* Submit */}

@@ -440,6 +440,18 @@ export default function CVForm({ formData, setFormData, onSubmit, isGenerating, 
                           <span className="ml-2 text-xs text-gray-500">Clean Layout</span>
                         </div>
                       </SelectItem>
+                      <SelectItem value="executive">
+                        <div className="flex items-center">
+                          <span className="font-medium">Executive</span>
+                          <span className="ml-2 text-xs text-gray-500">Senior Professional</span>
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="compact">
+                        <div className="flex items-center">
+                          <span className="font-medium">Compact</span>
+                          <span className="ml-2 text-xs text-gray-500">Dense Layout</span>
+                        </div>
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -475,7 +487,7 @@ export default function CVForm({ formData, setFormData, onSubmit, isGenerating, 
                   </Select>
                 </div>
               </div>
-              <p className="text-xs text-gray-400">All 9 combinations (3 templates × 3 styles) are ATS-friendly and optimized for applicant tracking systems</p>
+              <p className="text-xs text-gray-400">All 15 combinations (5 templates × 3 styles) are ATS-friendly and optimized for applicant tracking systems</p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div>
                   <label className="block text-sm text-gray-600 mb-2">Target Country</label>
