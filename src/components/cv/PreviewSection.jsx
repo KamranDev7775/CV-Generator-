@@ -41,6 +41,19 @@ export default function PreviewSection({ cvData, onPayment, onSubscribe, isProce
 
   // User has active subscription - show unlocked view
   if (hasSubscription) {
+    const handleDownload = async () => {
+      // Mark submission as completed and redirect to success page
+      const submissionId = localStorage.getItem('ats_cv_submission_id');
+      if (submissionId) {
+        try {
+          await base44.entities.CVSubmission.update(submissionId, { payment_status: 'completed' });
+        } catch (e) {
+          console.error('Error updating submission:', e);
+        }
+      }
+      window.location.href = createPageUrl('Success') + `?submission_id=${submissionId}`;
+    };
+
     return (
       <section className="px-6 md:px-12 lg:px-24 py-20" id="preview">
         <div className="max-w-3xl mx-auto">
@@ -58,18 +71,10 @@ export default function PreviewSection({ cvData, onPayment, onSubscribe, isProce
 
           {/* Action buttons */}
           <Button 
-            onClick={onPayment}
-            disabled={isProcessingPayment}
+            onClick={handleDownload}
             className="w-full bg-black text-white hover:bg-gray-900 py-6 text-base font-normal rounded-none"
           >
-            {isProcessingPayment ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Processing...
-              </>
-            ) : (
-              'Download PDF & Copy Text'
-            )}
+            Download PDF & Copy Text
           </Button>
         </div>
       </section>
