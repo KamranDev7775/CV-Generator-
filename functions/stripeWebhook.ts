@@ -1,14 +1,17 @@
 import Stripe from 'npm:stripe';
-import { createClient } from 'npm:@base44/sdk@0.8.6';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
 
 Deno.serve(async (req) => {
   // Get secrets inside handler to ensure fresh values (TEST MODE)
   const stripe = new Stripe(Deno.env.get('STRIPE_TEST_SECRET_KEY'));
   const webhookSecret = Deno.env.get('STRIPE_TEST_WEBHOOK_SECRET');
   
+  // Clone the request to read body for both auth init and signature verification
+  const clonedReq = req.clone();
+  
   try {
-    // For webhooks, initialize with app ID only (no user auth needed)
-    const base44 = createClient({ appId: Deno.env.get('BASE44_APP_ID') });
+    // Initialize base44 with the request for service role operations
+    const base44 = createClientFromRequest(clonedReq);
     const body = await req.text();
     const signature = req.headers.get('stripe-signature');
 
