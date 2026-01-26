@@ -2,9 +2,9 @@ import Stripe from 'npm:stripe';
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
 
 Deno.serve(async (req) => {
-  // Get secrets inside handler to ensure fresh values (use test key for sandbox)
+  // Get secrets inside handler to ensure fresh values (TEST MODE)
   const stripe = new Stripe(Deno.env.get('STRIPE_TEST_SECRET_KEY'));
-  const webhookSecret = Deno.env.get('STRIPE_WEBHOOK_SECRET');
+  const webhookSecret = Deno.env.get('STRIPE_TEST_WEBHOOK_SECRET');
   
   try {
     const base44 = createClientFromRequest(req);
