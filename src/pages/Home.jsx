@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '../utils';
@@ -50,8 +50,10 @@ export default function Home() {
   const [importError, setImportError] = useState(null);
   const [csrfToken, setCsrfToken] = useState('');
   const [remainingAIRequests, setRemainingAIRequests] = useState(null);
+  const [authCheckAttempts, setAuthCheckAttempts] = useState(0);
+  const lastAuthCheckRef = useRef(0);
 
-  // Load user and saved form data on mount
+  // Load user and saved form data on mount (only once)
   useEffect(() => {
     loadUser();
     const saved = getSecureStorage(STORAGE_KEY);
@@ -73,6 +75,11 @@ export default function Home() {
     }
     
     // Update remaining AI requests for non-logged-in users
+    setRemainingAIRequests(getRemainingRequests());
+  }, []); // Empty dependency array - only run once on mount
+
+  // Update remaining AI requests when user changes (but don't reload user)
+  useEffect(() => {
     if (!user) {
       setRemainingAIRequests(getRemainingRequests());
     }
@@ -95,12 +102,50 @@ export default function Home() {
   }, []);
 
   const loadUser = async () => {
+    // Rate limiting: Don't check auth too frequently
+    const now = Date.now();
+    const timeSinceLastCheck = now - lastAuthCheckRef.current;
+    const minInterval = 5000; // Minimum 5 seconds between auth checks
+    
+    if (timeSinceLastCheck < minInterval && authCheckAttempts > 0) {
+      // Too soon since last check, skip
+      return;
+    }
+    
+    // If we've had too many failed attempts, back off longer
+    if (authCheckAttempts >= 3) {
+      const backoffTime = Math.min(30000 * Math.pow(2, authCheckAttempts - 3), 300000); // Max 5 minutes
+      if (timeSinceLastCheck < backoffTime) {
+        return;
+      }
+    }
+    
+    lastAuthCheckRef.current = now;
+    
     try {
       const currentUser = await base44.auth.me();
       setUser(currentUser);
+      setAuthCheckAttempts(0); // Reset on success
     } catch (error) {
-      // User not logged in
-      setUser(null);
+      // Handle rate limiting specifically
+      if (error.status === 429 || error.message?.includes('429') || error.message?.includes('Too Many Requests')) {
+        console.warn('Rate limited on auth check, backing off');
+        setAuthCheckAttempts(prev => prev + 1);
+        // Set user to null but don't retry immediately
+        setUser(null);
+        return;
+      }
+      
+      // For other errors (401, 403, etc.), user is just not logged in
+      if (error.status === 401 || error.status === 403) {
+        setUser(null);
+        setAuthCheckAttempts(0); // Reset on auth errors (user just not logged in)
+      } else {
+        // Other errors - might be network issues
+        console.error('Auth check error:', error);
+        setUser(null);
+        setAuthCheckAttempts(prev => Math.min(prev + 1, 5)); // Cap at 5 attempts
+      }
     }
   };
 

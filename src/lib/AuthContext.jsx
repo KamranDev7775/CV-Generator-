@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import React, { createContext, useState, useContext, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import { appParams } from '@/lib/app-params';
 import { createAxiosClient } from '@base44/sdk/dist/utils/axios-client';
@@ -12,6 +12,8 @@ export const AuthProvider = ({ children }) => {
   const [isLoadingPublicSettings, setIsLoadingPublicSettings] = useState(true);
   const [authError, setAuthError] = useState(null);
   const [appPublicSettings, setAppPublicSettings] = useState(null); // Contains only { id, public_settings }
+  const lastAuthCheckRef = useRef(0);
+  const authCheckAttemptsRef = useRef(0);
 
   useEffect(() => {
     checkAppState();
@@ -88,6 +90,26 @@ export const AuthProvider = ({ children }) => {
   };
 
   const checkUserAuth = async () => {
+    // Rate limiting: Don't check auth too frequently
+    const now = Date.now();
+    const timeSinceLastCheck = now - lastAuthCheckRef.current;
+    const minInterval = 5000; // Minimum 5 seconds between auth checks
+    
+    if (timeSinceLastCheck < minInterval && authCheckAttemptsRef.current > 0) {
+      // Too soon since last check, skip
+      return;
+    }
+    
+    // If we've had too many failed attempts, back off longer
+    if (authCheckAttemptsRef.current >= 3) {
+      const backoffTime = Math.min(30000 * Math.pow(2, authCheckAttemptsRef.current - 3), 300000); // Max 5 minutes
+      if (timeSinceLastCheck < backoffTime) {
+        return;
+      }
+    }
+    
+    lastAuthCheckRef.current = now;
+    
     try {
       // Now check if the user is authenticated
       setIsLoadingAuth(true);
@@ -95,10 +117,18 @@ export const AuthProvider = ({ children }) => {
       setUser(currentUser);
       setIsAuthenticated(true);
       setIsLoadingAuth(false);
+      authCheckAttemptsRef.current = 0; // Reset on success
     } catch (error) {
       console.error('User auth check failed:', error);
       setIsLoadingAuth(false);
       setIsAuthenticated(false);
+      
+      // Handle rate limiting specifically
+      if (error.status === 429 || error.message?.includes('429') || error.message?.includes('Too Many Requests')) {
+        console.warn('Rate limited on auth check in AuthContext, backing off');
+        authCheckAttemptsRef.current += 1;
+        return; // Don't set auth error for rate limits
+      }
       
       // If user auth fails, it might be an expired token
       if (error.status === 401 || error.status === 403) {
@@ -106,6 +136,10 @@ export const AuthProvider = ({ children }) => {
           type: 'auth_required',
           message: 'Authentication required'
         });
+        authCheckAttemptsRef.current = 0; // Reset on auth errors (user just not logged in)
+      } else {
+        // Other errors - might be network issues
+        authCheckAttemptsRef.current = Math.min(authCheckAttemptsRef.current + 1, 5); // Cap at 5 attempts
       }
     }
   };
