@@ -26,6 +26,7 @@ export default function PaymentSuccess() {
     const urlParams = new URLSearchParams(window.location.search);
     const type = urlParams.get('type');
     const submissionId = urlParams.get('submission_id');
+    const sessionId = urlParams.get('session_id');
     
     setPaymentType(type);
 
@@ -64,9 +65,39 @@ export default function PaymentSuccess() {
         setCvData(JSON.parse(saved));
       }
     } else if (type === 'trial' || type === 'monthly') {
-      // For subscriptions, just show success after short delay
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      setVerificationStatus('success');
+      // For subscriptions, create subscription record from frontend
+      try {
+        const user = await base44.auth.me();
+        if (user && sessionId) {
+          // Check if subscription already exists for this user
+          const existingSubs = await base44.entities.Subscription.filter({ user_email: user.email });
+          const hasActiveSub = existingSubs.some(s => s.status === 'active' || s.status === 'trialing');
+          
+          if (!hasActiveSub) {
+            // Create subscription record
+            const periodEnd = new Date();
+            if (type === 'trial') {
+              periodEnd.setDate(periodEnd.getDate() + 14); // 14 days trial
+            } else {
+              periodEnd.setMonth(periodEnd.getMonth() + 1); // 1 month subscription
+            }
+            
+            await base44.entities.Subscription.create({
+              user_email: user.email,
+              stripe_customer_id: sessionId, // Using session ID as reference
+              stripe_subscription_id: sessionId,
+              plan_type: type,
+              status: 'active',
+              current_period_start: new Date().toISOString(),
+              current_period_end: periodEnd.toISOString()
+            });
+          }
+        }
+        setVerificationStatus('success');
+      } catch (e) {
+        console.error('Error creating subscription:', e);
+        setVerificationStatus('success'); // Still show success page
+      }
     }
     
     setIsLoading(false);

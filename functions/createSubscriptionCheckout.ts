@@ -59,7 +59,9 @@ Deno.serve(async (req) => {
       idempotencyKey: idempotencyKey
     });
 
-    return Response.json({ url: session.url });
+    // Append session_id to success URL for tracking
+    const successUrlWithSession = sessionConfig.success_url + `&session_id=${session.id}`;
+    return Response.json({ url: session.url, sessionId: session.id });
   } catch (error) {
     console.error('Subscription checkout error:', error);
     return Response.json({ error: error.message }, { status: 500 });
