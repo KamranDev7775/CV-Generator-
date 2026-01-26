@@ -206,6 +206,7 @@ export default function PaymentSuccess() {
   };
 
   const downloadPDF = async () => {
+    if (isGeneratingPDF) return; // Prevent double-clicks
     setIsGeneratingPDF(true);
     try {
       const doc = new jsPDF('p', 'mm', 'a4');

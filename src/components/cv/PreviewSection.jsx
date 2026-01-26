@@ -71,6 +71,7 @@ export default function PreviewSection({ cvData, onPayment, onSubscribe, isProce
   };
 
   const downloadPDF = async () => {
+    if (isGeneratingPDF) return; // Prevent double-clicks
     setIsGeneratingPDF(true);
     try {
       const doc = new jsPDF('p', 'mm', 'a4');

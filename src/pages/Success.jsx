@@ -277,6 +277,7 @@ export default function Success() {
   };
 
   const downloadPDF = async () => {
+    if (isGeneratingPDF) return; // Prevent double-clicks
     setIsGeneratingPDF(true);
     
     try {
