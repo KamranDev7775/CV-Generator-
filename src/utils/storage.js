@@ -71,6 +71,15 @@ function simpleEncrypt(text, key) {
 
 function simpleDecrypt(encrypted, key) {
   if (!encrypted) return '';
+  
+  // Validate Base64 string before attempting to decode
+  const base64Regex = /^[A-Za-z0-9+/]*={0,2}$/;
+  if (!base64Regex.test(encrypted)) {
+    // Not a valid Base64 string - might be old unencrypted data
+    console.warn('Invalid Base64 format in encrypted data, treating as unencrypted');
+    return null; // Signal that this is not encrypted data
+  }
+  
   try {
     // Try session key first, then fallback to strong default key
     const keyStr = key || getOrCreateEncryptionKey() || getStrongDefaultKey();
@@ -81,8 +90,9 @@ function simpleDecrypt(encrypted, key) {
     }
     return result;
   } catch (error) {
-    console.error('Decryption error:', error);
-    return '';
+    // If atob fails, this might be old unencrypted data or corrupted data
+    console.warn('Decryption error (might be unencrypted data):', error.message);
+    return null; // Signal that decryption failed
   }
 }
 
@@ -105,7 +115,25 @@ export function getSecureStorage(key) {
     const encrypted = localStorage.getItem(STORAGE_PREFIX + key);
     if (!encrypted) return null;
     
+    // Try to decrypt
     const decrypted = simpleDecrypt(encrypted);
+    
+    // If decryption returned null, it might be unencrypted data
+    if (decrypted === null) {
+      // Try to parse as unencrypted JSON (backward compatibility)
+      try {
+        const parsed = JSON.parse(encrypted);
+        // If successful, migrate to encrypted storage
+        setSecureStorage(key, parsed);
+        return parsed;
+      } catch (e) {
+        // Not valid JSON either - corrupted data
+        console.warn('Corrupted data in localStorage, removing:', key);
+        localStorage.removeItem(STORAGE_PREFIX + key);
+        return null;
+      }
+    }
+    
     if (!decrypted) return null;
     
     return JSON.parse(decrypted);
@@ -113,12 +141,18 @@ export function getSecureStorage(key) {
     console.error('Error getting secure storage:', error);
     // Try to read unencrypted data (for backward compatibility)
     try {
-      const unencrypted = localStorage.getItem(STORAGE_PREFIX + key);
-      if (unencrypted) {
-        return JSON.parse(unencrypted);
+      const stored = localStorage.getItem(STORAGE_PREFIX + key);
+      if (stored) {
+        // Check if it's valid JSON
+        const parsed = JSON.parse(stored);
+        // If successful, migrate to encrypted storage
+        setSecureStorage(key, parsed);
+        return parsed;
       }
     } catch (e) {
-      // Ignore
+      // Not valid JSON - corrupted data, remove it
+      console.warn('Corrupted data in localStorage, removing:', key);
+      localStorage.removeItem(STORAGE_PREFIX + key);
     }
     return null;
   }
