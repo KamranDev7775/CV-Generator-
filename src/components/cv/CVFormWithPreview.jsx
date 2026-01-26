@@ -256,6 +256,32 @@ export default function CVFormWithPreview({ formData, setFormData, onSubmit, isG
                 />
               </div>
 
+              {/* Template Selection */}
+              <div>
+                <h3 className="text-sm font-semibold uppercase tracking-wider text-blue-600 mb-4">CV Template</h3>
+                <div className="grid grid-cols-3 gap-3">
+                  {[
+                    { id: 'classic', name: 'Classic', desc: 'Traditional & Professional' },
+                    { id: 'modern', name: 'Modern', desc: 'Clean & Contemporary' },
+                    { id: 'minimal', name: 'Minimal', desc: 'Simple & Elegant' }
+                  ].map((template) => (
+                    <button
+                      key={template.id}
+                      type="button"
+                      onClick={() => updateField('template', template.id)}
+                      className={`p-4 border-2 rounded-lg text-center transition-all ${
+                        (formData.template || 'classic') === template.id
+                          ? 'border-blue-600 bg-blue-50'
+                          : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                    >
+                      <div className="font-medium text-gray-900 text-sm">{template.name}</div>
+                      <div className="text-xs text-gray-500 mt-1">{template.desc}</div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               {/* Submit */}
               <div className="pt-4 sticky bottom-0 bg-white pb-4">
                 <Button 
