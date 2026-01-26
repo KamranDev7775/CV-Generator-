@@ -31,17 +31,6 @@ export default function Success() {
         return;
       }
 
-      // Get current user to verify ownership
-      let currentUser;
-      try {
-        currentUser = await base44.auth.me();
-      } catch (error) {
-        // User not authenticated - deny access
-        setAccessDenied(true);
-        setIsLoading(false);
-        return;
-      }
-
       // Query submission
       const submissions = await base44.entities.CVSubmission.filter({ id: submissionId });
       
@@ -51,33 +40,25 @@ export default function Success() {
         return;
       }
 
-      const submission = submissions[0];
-
-      // Verify user ownership (defense-in-depth)
-      const submissionUserId = submission.created_by || submission.user_id || submission.owner_id;
-      if (submissionUserId && submissionUserId !== currentUser.email && submissionUserId !== currentUser.id) {
-        setAccessDenied(true);
-        setIsLoading(false);
-        return;
-      }
+      let submission = submissions[0];
 
       // Check payment status - should be 'completed' if webhook processed successfully
       if (submission.payment_status !== 'completed') {
         // Payment not completed - could be webhook hasn't processed yet (race condition)
-        // Wait a moment and retry once
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        
-        // Re-fetch submission to check if webhook updated it
-        const retrySubmissions = await base44.entities.CVSubmission.filter({ id: submissionId });
-        if (retrySubmissions && retrySubmissions.length > 0) {
-          const retrySubmission = retrySubmissions[0];
-          if (retrySubmission.payment_status !== 'completed') {
-            // Still not completed - deny access
-            setAccessDenied(true);
-            setIsLoading(false);
-            return;
+        // Wait and retry a few times
+        for (let i = 0; i < 3; i++) {
+          await new Promise(resolve => setTimeout(resolve, 2000));
+          
+          const retrySubmissions = await base44.entities.CVSubmission.filter({ id: submissionId });
+          if (retrySubmissions && retrySubmissions.length > 0) {
+            submission = retrySubmissions[0];
+            if (submission.payment_status === 'completed') {
+              break;
+            }
           }
-        } else {
+        }
+        
+        if (submission.payment_status !== 'completed') {
           setAccessDenied(true);
           setIsLoading(false);
           return;
