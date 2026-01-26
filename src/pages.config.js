@@ -2,8 +2,8 @@ import Dashboard from './pages/Dashboard';
 import Home from './pages/Home';
 import Pricing from './pages/Pricing';
 import PrivacyPolicy from './pages/PrivacyPolicy';
-import TermsConditions from './pages/TermsConditions';
 import Success from './pages/Success';
+import TermsConditions from './pages/TermsConditions';
 import __Layout from './Layout.jsx';
 
 
@@ -12,8 +12,8 @@ export const PAGES = {
     "Home": Home,
     "Pricing": Pricing,
     "PrivacyPolicy": PrivacyPolicy,
-    "TermsConditions": TermsConditions,
     "Success": Success,
+    "TermsConditions": TermsConditions,
 }
 
 export const pagesConfig = {

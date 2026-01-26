@@ -31,6 +31,24 @@ export default function Success() {
         return;
       }
 
+      // Verify user is authenticated
+      let currentUser;
+      try {
+        currentUser = await base44.auth.me();
+      } catch (authError) {
+        console.error('User not authenticated');
+        setAccessDenied(true);
+        setIsLoading(false);
+        return;
+      }
+
+      if (!currentUser) {
+        console.error('User not authenticated');
+        setAccessDenied(true);
+        setIsLoading(false);
+        return;
+      }
+
       // Check if payment was completed via Stripe webhook
       const submissions = await base44.entities.CVSubmission.filter({ id: submissionId });
       
@@ -42,6 +60,14 @@ export default function Success() {
       }
 
       const submission = submissions[0];
+
+      // Verify the submission belongs to the current user
+      if (submission.created_by !== currentUser.email) {
+        console.error('Submission does not belong to this user');
+        setAccessDenied(true);
+        setIsLoading(false);
+        return;
+      }
       
       // Verify payment was completed by webhook
       if (submission.payment_status !== 'completed') {
