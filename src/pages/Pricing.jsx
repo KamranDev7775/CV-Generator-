@@ -1,25 +1,57 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Button } from "@/components/ui/button";
-import { Check, Loader2 } from "lucide-react";
+import { Check, Loader2, AlertCircle } from "lucide-react";
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '../utils';
 
 export default function Pricing() {
   const [loadingPlan, setLoadingPlan] = useState(null);
   const [userEmail, setUserEmail] = useState(null);
+  const [subscription, setSubscription] = useState(null);
+  const [loadingSubscription, setLoadingSubscription] = useState(true);
+  const [cancellingSubscription, setCancellingSubscription] = useState(false);
 
   useEffect(() => {
-    const loadUser = async () => {
+    const loadUserAndSubscription = async () => {
       try {
         const user = await base44.auth.me();
         setUserEmail(user?.email);
+        
+        if (user?.email) {
+          const subs = await base44.entities.Subscription.filter({ user_email: user.email });
+          const activeSub = subs.find(s => s.status === 'active' || s.status === 'trialing');
+          setSubscription(activeSub || null);
+        }
       } catch (e) {
         // User not logged in
+      } finally {
+        setLoadingSubscription(false);
       }
     };
-    loadUser();
+    loadUserAndSubscription();
   }, []);
+
+  const handleCancelSubscription = async () => {
+    if (!subscription) return;
+    
+    const confirmed = window.confirm('Are you sure you want to cancel your subscription? You will lose access at the end of your current billing period.');
+    if (!confirmed) return;
+
+    setCancellingSubscription(true);
+    try {
+      await base44.entities.Subscription.update(subscription.id, {
+        status: 'canceled',
+        canceled_at: new Date().toISOString()
+      });
+      setSubscription({ ...subscription, status: 'canceled', canceled_at: new Date().toISOString() });
+    } catch (error) {
+      console.error('Error cancelling subscription:', error);
+      alert('Failed to cancel subscription. Please try again.');
+    } finally {
+      setCancellingSubscription(false);
+    }
+  };
 
   const handleSubscribe = async (planType) => {
     if (window.self !== window.top) {
@@ -69,6 +101,51 @@ export default function Pricing() {
             </p>
           </div>
 
+          {/* Active Subscription Banner */}
+          {subscription && subscription.status === 'active' && (
+            <div className="mb-8 p-6 border border-green-200 bg-green-50 rounded-lg">
+              <div className="flex items-start justify-between">
+                <div>
+                  <h3 className="text-lg font-medium text-green-800 mb-1">
+                    You have an active {subscription.plan_type === 'monthly' ? 'Monthly' : 'Trial'} subscription
+                  </h3>
+                  <p className="text-sm text-green-700">
+                    {subscription.plan_type === 'monthly' ? 'Renews' : 'Access until'}: {new Date(subscription.current_period_end).toLocaleDateString()}
+                  </p>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleCancelSubscription}
+                  disabled={cancellingSubscription}
+                  className="border-red-300 text-red-600 hover:bg-red-50"
+                >
+                  {cancellingSubscription ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    'Cancel Subscription'
+                  )}
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {subscription && subscription.status === 'canceled' && (
+            <div className="mb-8 p-6 border border-yellow-200 bg-yellow-50 rounded-lg">
+              <div className="flex items-start gap-3">
+                <AlertCircle className="h-5 w-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+                <div>
+                  <h3 className="text-lg font-medium text-yellow-800 mb-1">
+                    Subscription Cancelled
+                  </h3>
+                  <p className="text-sm text-yellow-700">
+                    Your access will end on {new Date(subscription.current_period_end).toLocaleDateString()}. You can resubscribe anytime.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Pricing Cards */}
           <div className="grid md:grid-cols-2 gap-8 mb-12">
             {/* Trial Plan */}
@@ -85,14 +162,16 @@ export default function Pricing() {
               
               <Button
                 onClick={() => handleSubscribe('trial')}
-                disabled={loadingPlan !== null}
-                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700 py-7 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all mb-8"
+                disabled={loadingPlan !== null || (subscription?.status === 'active')}
+                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700 py-7 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all mb-8 disabled:opacity-50"
               >
                 {loadingPlan === 'trial' ? (
                   <>
                     <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                     Processing...
                   </>
+                ) : subscription?.status === 'active' ? (
+                  'Already Subscribed'
                 ) : (
                   'Get your CV for €1.99'
                 )}
@@ -135,15 +214,17 @@ export default function Pricing() {
 
               <Button
                 onClick={() => handleSubscribe('monthly')}
-                disabled={loadingPlan !== null}
+                disabled={loadingPlan !== null || (subscription?.status === 'active' && subscription?.plan_type === 'monthly')}
                 variant="outline"
-                className="w-full border-gray-200 text-black hover:bg-gray-50 py-6 text-base font-normal rounded-none mb-8"
+                className="w-full border-gray-200 text-black hover:bg-gray-50 py-6 text-base font-normal rounded-none mb-8 disabled:opacity-50"
               >
                 {loadingPlan === 'monthly' ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Processing...
                   </>
+                ) : subscription?.status === 'active' && subscription?.plan_type === 'monthly' ? (
+                  'Currently Subscribed'
                 ) : (
                   'Subscribe for €6.99/month'
                 )}
