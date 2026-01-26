@@ -258,8 +258,9 @@ export default function CVFormWithPreview({ formData, setFormData, onSubmit, isG
 
               {/* Template Selection */}
               <div>
-                <h3 className="text-sm font-semibold uppercase tracking-wider text-blue-600 mb-4">CV Template</h3>
-                <div className="grid grid-cols-3 gap-3">
+                <h3 className="text-sm font-semibold uppercase tracking-wider text-blue-600 mb-2">CV Template</h3>
+                <p className="text-xs text-gray-500 mb-4">Select from 5 professional templates</p>
+                <div className="grid grid-cols-3 md:grid-cols-5 gap-2 md:gap-3">
                   {[
                     { id: 'classic', name: 'Classic', desc: 'Traditional' },
                     { id: 'modern', name: 'Modern', desc: 'Centered' },
@@ -277,11 +278,12 @@ export default function CVFormWithPreview({ formData, setFormData, onSubmit, isG
                           : 'border-gray-200 hover:border-gray-300'
                       }`}
                     >
-                      <div className="font-medium text-gray-900 text-sm">{template.name}</div>
-                      <div className="text-xs text-gray-500">{template.desc}</div>
+                      <div className="font-medium text-gray-900 text-xs md:text-sm">{template.name}</div>
+                      <div className="text-[10px] md:text-xs text-gray-500 mt-0.5">{template.desc}</div>
                     </button>
                   ))}
                 </div>
+                <p className="text-xs text-gray-400 mt-2">5 professional ATS-friendly templates</p>
               </div>
 
               {/* Style Selection */}
@@ -311,21 +313,22 @@ export default function CVFormWithPreview({ formData, setFormData, onSubmit, isG
                 <p className="text-xs text-gray-400 mt-3 text-center">All 15 combinations (5 templates × 3 styles) are ATS-friendly</p>
               </div>
 
-              {/* Cover Letter Option */}
-              <div className="bg-gradient-to-r from-purple-50 to-blue-50 p-4 rounded-xl border border-purple-100">
+              {/* Cover Letter Option - Prominent */}
+              <div className="bg-gradient-to-r from-purple-50 via-blue-50 to-purple-50 p-5 rounded-xl border-2 border-purple-300 shadow-md">
                 <div className="flex items-start space-x-3">
                   <Checkbox
                     id="cover-letter-preview"
                     checked={generateCoverLetter || false}
                     onCheckedChange={setGenerateCoverLetter}
-                    className="mt-1"
+                    className="mt-1 border-purple-400 data-[state=checked]:bg-purple-600 data-[state=checked]:border-purple-600"
                   />
-                  <div>
-                    <label htmlFor="cover-letter-preview" className="text-sm font-medium text-gray-900 cursor-pointer block">
-                      Generate a matching cover letter
+                  <div className="flex-1">
+                    <label htmlFor="cover-letter-preview" className="text-base font-bold text-gray-900 cursor-pointer block flex items-center gap-2">
+                      <span className="text-xl">✉️</span>
+                      <span>Generate a matching cover letter</span>
                     </label>
-                    <p className="text-xs text-gray-500 mt-1">
-                      AI will create a professional cover letter tailored to your experience and target position
+                    <p className="text-sm text-gray-700 mt-2 leading-relaxed">
+                      AI will create a professional cover letter tailored to your experience and target position. You can edit it before finalizing.
                     </p>
                   </div>
                 </div>
