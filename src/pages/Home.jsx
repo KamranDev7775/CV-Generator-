@@ -56,7 +56,15 @@ export default function Home() {
     if (saved) {
       try {
         setFormData(saved);
-        // Don't auto-navigate to preview on refresh - let user stay on landing
+        
+        // Check if coming from Dashboard edit mode
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('edit') === 'true') {
+          // Auto-navigate to form when editing existing CV
+          setStep('form');
+          // Clean up URL
+          window.history.replaceState({}, document.title, window.location.pathname);
+        }
       } catch (e) {
         console.log('Could not parse saved data');
       }

@@ -261,9 +261,9 @@ export default function CVFormWithPreview({ formData, setFormData, onSubmit, isG
                 <h3 className="text-sm font-semibold uppercase tracking-wider text-blue-600 mb-4">CV Template</h3>
                 <div className="grid grid-cols-3 gap-3">
                   {[
-                    { id: 'classic', name: 'Classic', desc: 'Traditional & Professional' },
-                    { id: 'modern', name: 'Modern', desc: 'Clean & Contemporary' },
-                    { id: 'minimal', name: 'Minimal', desc: 'Simple & Elegant' }
+                    { id: 'classic', name: 'Classic', desc: 'Traditional Layout' },
+                    { id: 'modern', name: 'Modern', desc: 'Centered Layout' },
+                    { id: 'minimal', name: 'Minimal', desc: 'Clean Layout' }
                   ].map((template) => (
                     <button
                       key={template.id}
@@ -280,6 +280,33 @@ export default function CVFormWithPreview({ formData, setFormData, onSubmit, isG
                     </button>
                   ))}
                 </div>
+              </div>
+
+              {/* Style Selection */}
+              <div>
+                <h3 className="text-sm font-semibold uppercase tracking-wider text-blue-600 mb-4">CV Style</h3>
+                <div className="grid grid-cols-3 gap-3">
+                  {[
+                    { id: 'professional', name: 'Professional', desc: 'Serif, Classic' },
+                    { id: 'elegant', name: 'Elegant', desc: 'Sans-serif, Slate' },
+                    { id: 'bold', name: 'Bold', desc: 'Sans-serif, Strong' }
+                  ].map((style) => (
+                    <button
+                      key={style.id}
+                      type="button"
+                      onClick={() => updateField('style', style.id)}
+                      className={`p-4 border-2 rounded-lg text-center transition-all ${
+                        (formData.style || 'professional') === style.id
+                          ? 'border-purple-600 bg-purple-50'
+                          : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                    >
+                      <div className="font-medium text-gray-900 text-sm">{style.name}</div>
+                      <div className="text-xs text-gray-500 mt-1">{style.desc}</div>
+                    </button>
+                  ))}
+                </div>
+                <p className="text-xs text-gray-400 mt-3 text-center">All 9 combinations (3 templates × 3 styles) are ATS-friendly</p>
               </div>
 
               {/* Submit */}

@@ -2,9 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, FileText, LogOut } from "lucide-react";
+import { Loader2, FileText, LogOut, Edit, Eye, Download } from "lucide-react";
 import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '../utils';
+import { setSecureStorage } from '../utils/storage';
 
 export default function Dashboard() {
   const [user, setUser] = useState(null);
@@ -50,6 +51,36 @@ export default function Dashboard() {
   const handleLogout = async () => {
     await base44.auth.logout();
     navigate(createPageUrl('Home'));
+  };
+
+  const handleEditCV = (cv) => {
+    // Load CV data into localStorage so Home page can pick it up
+    const formData = {
+      full_name: cv.full_name || '',
+      target_position: cv.target_position || '',
+      location: cv.location || '',
+      email: cv.email || '',
+      phone: cv.phone || '',
+      linkedin_url: cv.linkedin_url || '',
+      summary: cv.summary || cv.generated_cv || '',
+      auto_generate_summary: false,
+      skills: cv.skills || '',
+      experiences: cv.experiences || [{ job_title: '', company: '', location: '', start_date: '', end_date: '', achievements: '' }],
+      education: cv.education || [{ degree: '', university: '', location: '', start_date: '', end_date: '' }],
+      languages: cv.languages || '',
+      languagesList: [],
+      target_country: cv.target_country || 'Germany',
+      seniority_level: cv.seniority_level || 'Mid',
+      job_description: cv.job_description || '',
+      template: cv.template || 'classic',
+      style: cv.style || 'professional'
+    };
+    
+    // Store in secure localStorage
+    setSecureStorage('form_data', formData);
+    
+    // Navigate to Home with edit mode flag
+    navigate(createPageUrl('Home') + '?edit=true');
   };
 
   if (loading) {
@@ -161,16 +192,32 @@ export default function Dashboard() {
                       <div key={cv.id} className="flex justify-between items-center py-3 border-b border-gray-100 last:border-0">
                         <div>
                           <span className="text-gray-900 font-medium">{cv.full_name || 'CV'}</span>
-                          <p className="text-xs text-gray-400">{new Date(cv.created_date).toLocaleDateString()}</p>
+                          <p className="text-xs text-gray-400">
+                            {new Date(cv.created_date).toLocaleDateString()}
+                            {cv.target_position && <span className="ml-2 text-gray-500">• {cv.target_position}</span>}
+                          </p>
                         </div>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => navigate(createPageUrl('Success') + `?submission_id=${cv.id}`)}
-                          className="border-gray-200 text-gray-700 hover:bg-gray-50 rounded-none"
-                        >
-                          View & Download
-                        </Button>
+                        <div className="flex gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleEditCV(cv)}
+                            className="border-gray-200 text-gray-700 hover:bg-gray-50 rounded-none"
+                            title="Edit this CV"
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => navigate(createPageUrl('Success') + `?submission_id=${cv.id}`)}
+                            className="border-gray-200 text-gray-700 hover:bg-gray-50 rounded-none"
+                            title="View & Download"
+                          >
+                            <Eye className="h-4 w-4 mr-1" />
+                            <Download className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </div>
                     ))}
                   </div>
