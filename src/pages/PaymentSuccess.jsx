@@ -37,7 +37,19 @@ export default function PaymentSuccess() {
       
       while (attempts < maxAttempts) {
         try {
-          const submissions = await base44.entities.CVSubmission.filter({ id: submissionId });
+          // Verify user owns the submission
+          let currentUser = null;
+          try {
+            currentUser = await base44.auth.me();
+          } catch (authError) {
+            console.error('Authentication error:', authError);
+            break;
+          }
+          
+          const submissions = await base44.entities.CVSubmission.filter({ 
+            id: submissionId,
+            created_by: currentUser.email 
+          });
           
           if (submissions?.length > 0 && submissions[0].payment_status === 'completed') {
             setVerificationStatus('success');
@@ -78,26 +90,42 @@ export default function PaymentSuccess() {
       // Still show CV but mark as pending - try to load from database, fallback to encrypted localStorage
       setVerificationStatus('pending');
       try {
-        const submissions = await base44.entities.CVSubmission.filter({ id: submissionId });
-        if (submissions?.length > 0) {
-          const submission = submissions[0];
-          const cvDataFromDb = {
-            full_name: submission.full_name,
-            target_position: submission.target_position,
-            location: submission.location,
-            email: submission.email,
-            phone: submission.phone,
-            linkedin_url: submission.linkedin_url,
-            summary: submission.summary || submission.generated_cv,
-            skills: submission.skills,
-            experiences: submission.experiences || [],
-            education: submission.education || [],
-            languages: submission.languages,
-            cover_letter: submission.cover_letter || null,
-            template: submission.template || 'classic'
-          };
-          setCvData(cvDataFromDb);
-        } else {
+        // Verify user owns the submission
+        let currentUser = null;
+        try {
+          currentUser = await base44.auth.me();
+        } catch (authError) {
+          console.error('Authentication error:', authError);
+        }
+        
+        if (currentUser) {
+          const submissions = await base44.entities.CVSubmission.filter({ 
+            id: submissionId,
+            created_by: currentUser.email 
+          });
+          if (submissions?.length > 0) {
+            const submission = submissions[0];
+            const cvDataFromDb = {
+              full_name: submission.full_name,
+              target_position: submission.target_position,
+              location: submission.location,
+              email: submission.email,
+              phone: submission.phone,
+              linkedin_url: submission.linkedin_url,
+              summary: submission.summary || submission.generated_cv,
+              skills: submission.skills,
+              experiences: submission.experiences || [],
+              education: submission.education || [],
+              languages: submission.languages,
+              cover_letter: submission.cover_letter || null,
+              template: submission.template || 'classic'
+            };
+            setCvData(cvDataFromDb);
+          }
+        }
+        
+        // Fallback to encrypted localStorage if database unavailable or user not authenticated
+        if (!cvData) {
           // Fallback to encrypted localStorage if database unavailable
           const saved = getSecureStorage('form_data');
           if (saved) {

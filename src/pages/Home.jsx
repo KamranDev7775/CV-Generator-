@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '../utils';
 import { toast } from "sonner";
 import { setSecureStorage, getSecureStorage, removeSecureStorage } from '../utils/storage';
+import { canMakeAIRequest, recordAIRequest, getRemainingRequests } from '../utils/rateLimiter';
 import LandingSection from '@/components/cv/LandingSection';
 import CVFormWithPreview from '@/components/cv/CVFormWithPreview';
 import PreviewSection from '@/components/cv/PreviewSection';
@@ -48,6 +49,7 @@ export default function Home() {
   const [generateCoverLetter, setGenerateCoverLetter] = useState(false);
   const [importError, setImportError] = useState(null);
   const [csrfToken, setCsrfToken] = useState('');
+  const [remainingAIRequests, setRemainingAIRequests] = useState(null);
 
   // Load user and saved form data on mount
   useEffect(() => {
@@ -69,7 +71,12 @@ export default function Home() {
         console.log('Could not parse saved data');
       }
     }
-  }, []);
+    
+    // Update remaining AI requests for non-logged-in users
+    if (!user) {
+      setRemainingAIRequests(getRemainingRequests());
+    }
+  }, [user]);
 
   // Generate CSRF token on mount
   useEffect(() => {
@@ -236,14 +243,20 @@ export default function Home() {
     setIsGenerating(true);
     
     try {
-      // Check if user is logged in, if not - prompt login
-      if (!user) {
-        await base44.auth.redirectToLogin(window.location.href);
-        return;
-      }
-
       let summary = formData.summary;
       let coverLetter = null;
+      
+      // Rate limiting for AI features (non-logged-in users)
+      const needsAI = formData.auto_generate_summary || generateCoverLetter;
+      if (!user && needsAI) {
+        const rateLimitCheck = canMakeAIRequest();
+        if (!rateLimitCheck.allowed) {
+          toast.error(rateLimitCheck.message || 'Rate limit exceeded. Please log in for unlimited AI generation.');
+          setIsGenerating(false);
+          setRemainingAIRequests(getRemainingRequests());
+          return;
+        }
+      }
       
       // Auto-generate HIGH QUALITY summary if requested
       if (formData.auto_generate_summary) {
@@ -300,6 +313,12 @@ Generate a professional summary that will make recruiters want to interview this
           });
           
           summary = result.summary;
+          
+          // Record successful AI request for rate limiting
+          if (!user) {
+            recordAIRequest();
+            setRemainingAIRequests(getRemainingRequests());
+          }
         } catch (aiError) {
           console.error('AI summary generation failed:', aiError);
           toast.error('AI summary generation failed. Using your original summary instead.');
@@ -362,6 +381,12 @@ Generate a cover letter that will make recruiters want to interview this candida
           });
           
           coverLetter = coverLetterResult.cover_letter;
+          
+          // Record successful AI request for rate limiting
+          if (!user) {
+            recordAIRequest();
+            setRemainingAIRequests(getRemainingRequests());
+          }
         } catch (coverLetterError) {
           console.error('Cover letter generation failed:', coverLetterError);
           toast.error('Cover letter generation failed. You can still proceed without it.');
@@ -371,7 +396,15 @@ Generate a cover letter that will make recruiters want to interview this candida
 
       const cvData = { ...formData, summary, generated_cv: summary, cover_letter: coverLetter };
       
-      // Save to database only if user is authenticated
+      // Require login for saving to database and payment
+      if (!user) {
+        toast.info('Please log in to save and download your CV.');
+        await base44.auth.redirectToLogin(window.location.href);
+        setIsGenerating(false);
+        return;
+      }
+      
+      // Save to database (user is authenticated)
       const submission = await base44.entities.CVSubmission.create({
         ...cvData,
         payment_status: 'pending'
@@ -489,6 +522,8 @@ Generate a cover letter that will make recruiters want to interview this candida
             isGenerating={isGenerating}
             generateCoverLetter={generateCoverLetter}
             setGenerateCoverLetter={setGenerateCoverLetter}
+            user={user}
+            remainingAIRequests={remainingAIRequests}
           />
         </>
       )}

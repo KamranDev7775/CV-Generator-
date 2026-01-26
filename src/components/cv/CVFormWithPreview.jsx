@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -9,10 +9,163 @@ import EducationEntry from './EducationEntry';
 import CVDocument from './CVDocument';
 import LanguageSelector from './LanguageSelector';
 import { Loader2, Eye } from "lucide-react";
+import { toast } from "sonner";
 
-export default function CVFormWithPreview({ formData, setFormData, onSubmit, isGenerating, generateCoverLetter, setGenerateCoverLetter }) {
+// Validation functions
+const validateEmail = (email) => {
+  if (!email) return { valid: false, message: 'Email is required' };
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    return { valid: false, message: 'Please enter a valid email address' };
+  }
+  return { valid: true };
+};
+
+const validateURL = (url) => {
+  if (!url) return { valid: true }; // Optional field
+  try {
+    const urlToTest = url.startsWith('http') ? url : `https://${url}`;
+    new URL(urlToTest);
+    return { valid: true };
+  } catch {
+    return { valid: false, message: 'Please enter a valid URL (e.g., linkedin.com/in/yourname)' };
+  }
+};
+
+const validatePhone = (phone) => {
+  if (!phone) return { valid: true }; // Optional field
+  const phoneRegex = /^[\d\s\+\-\(\)]+$/;
+  const digitsOnly = phone.replace(/\D/g, '');
+  if (!phoneRegex.test(phone) || digitsOnly.length < 7) {
+    return { valid: false, message: 'Please enter a valid phone number' };
+  }
+  return { valid: true };
+};
+
+const validateDate = (date) => {
+  if (!date) return { valid: true }; // Optional field
+  const trimmedDate = date.trim();
+  if (trimmedDate.toLowerCase() === 'present' || trimmedDate.toLowerCase() === 'current') {
+    return { valid: true };
+  }
+  const dateRegex = /^(\d{4}-\d{2}(-\d{2})?|\d{1,2}\/\d{4}|\d{1,2}\/\d{1,2}\/\d{4}|[A-Za-z]{3}\s+\d{4})$/;
+  if (!dateRegex.test(trimmedDate)) {
+    return { valid: false, message: 'Invalid date format (use YYYY-MM, MM/YYYY, or "Jan 2020")' };
+  }
+  return { valid: true };
+};
+
+export default function CVFormWithPreview({ formData, setFormData, onSubmit, isGenerating, generateCoverLetter, setGenerateCoverLetter, user, remainingAIRequests }) {
+  const [errors, setErrors] = useState({});
+
   const updateField = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+    // Clear error when user types
+    if (errors[field]) {
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[field];
+        return newErrors;
+      });
+    }
+  };
+
+  const onErrorClear = (fieldName) => {
+    if (errors[fieldName]) {
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[fieldName];
+        return newErrors;
+      });
+    }
+  };
+
+  const validateForm = () => {
+    const newErrors = {};
+    
+    // Validate required fields
+    if (!formData.full_name || formData.full_name.trim() === '') {
+      newErrors.full_name = 'Full name is required';
+    }
+    
+    // Validate email
+    const emailValidation = validateEmail(formData.email);
+    if (!emailValidation.valid) {
+      newErrors.email = emailValidation.message;
+    }
+    
+    // Validate phone
+    if (formData.phone) {
+      const phoneValidation = validatePhone(formData.phone);
+      if (!phoneValidation.valid) {
+        newErrors.phone = phoneValidation.message;
+      }
+    }
+    
+    // Validate LinkedIn URL
+    if (formData.linkedin_url) {
+      const urlValidation = validateURL(formData.linkedin_url);
+      if (!urlValidation.valid) {
+        newErrors.linkedin_url = urlValidation.message;
+      }
+    }
+    
+    // Validate experience dates
+    formData.experiences?.forEach((exp, idx) => {
+      if (exp.start_date) {
+        const startDateValidation = validateDate(exp.start_date);
+        if (!startDateValidation.valid) {
+          newErrors[`exp_${idx}_start_date`] = startDateValidation.message;
+        }
+      }
+      if (exp.end_date) {
+        const endDateValidation = validateDate(exp.end_date);
+        if (!endDateValidation.valid) {
+          newErrors[`exp_${idx}_end_date`] = endDateValidation.message;
+        }
+      }
+    });
+    
+    // Validate education dates
+    formData.education?.forEach((edu, idx) => {
+      if (edu.start_date) {
+        const startDateValidation = validateDate(edu.start_date);
+        if (!startDateValidation.valid) {
+          newErrors[`edu_${idx}_start_date`] = startDateValidation.message;
+        }
+      }
+      if (edu.end_date) {
+        const endDateValidation = validateDate(edu.end_date);
+        if (!endDateValidation.valid) {
+          newErrors[`edu_${idx}_end_date`] = endDateValidation.message;
+        }
+      }
+    });
+    
+    setErrors(newErrors);
+    return { isValid: Object.keys(newErrors).length === 0, errors: newErrors };
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const { isValid, errors: validationErrors } = validateForm();
+    if (isValid) {
+      onSubmit();
+    } else {
+      toast.error('Please fix the validation errors before submitting');
+      // Scroll to first error
+      setTimeout(() => {
+        const firstErrorKey = Object.keys(validationErrors)[0];
+        if (firstErrorKey) {
+          const element = document.querySelector(`[name="${firstErrorKey}"]`) || 
+                         document.getElementById(firstErrorKey);
+          if (element) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            element.focus();
+          }
+        }
+      }, 100);
+    }
   };
 
   const addExperience = () => {
@@ -79,7 +232,7 @@ export default function CVFormWithPreview({ formData, setFormData, onSubmit, isG
         <div className="grid lg:grid-cols-2 gap-8">
           {/* Form Section - Left Side */}
           <div className="bg-white rounded-2xl shadow-lg p-8 lg:h-[calc(100vh-12rem)] lg:overflow-y-auto">
-            <form onSubmit={(e) => { e.preventDefault(); onSubmit(); }} className="space-y-10">
+            <form onSubmit={handleSubmit} className="space-y-10">
               
               {/* Basic Information */}
               <div>
@@ -90,11 +243,17 @@ export default function CVFormWithPreview({ formData, setFormData, onSubmit, isG
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">Full Name *</label>
                     <Input
+                      name="full_name"
                       value={formData.full_name || ''}
                       onChange={(e) => updateField('full_name', e.target.value)}
                       required
-                      className="border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-lg"
+                      className={`border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-lg ${
+                        errors.full_name ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''
+                      }`}
                     />
+                    {errors.full_name && (
+                      <p className="text-xs text-red-500 mt-1">{errors.full_name}</p>
+                    )}
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">Target Position</label>
@@ -118,32 +277,50 @@ export default function CVFormWithPreview({ formData, setFormData, onSubmit, isG
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Email *</label>
                       <Input
+                        name="email"
                         type="email"
                         value={formData.email || ''}
                         onChange={(e) => updateField('email', e.target.value)}
                         required
-                        className="border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-lg"
+                        className={`border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-lg ${
+                          errors.email ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''
+                        }`}
                       />
+                      {errors.email && (
+                        <p className="text-xs text-red-500 mt-1">{errors.email}</p>
+                      )}
                     </div>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Phone</label>
                       <Input
+                        name="phone"
                         value={formData.phone || ''}
                         onChange={(e) => updateField('phone', e.target.value)}
                         placeholder="+49 123 456 7890"
-                        className="border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-lg"
+                        className={`border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-lg ${
+                          errors.phone ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''
+                        }`}
                       />
+                      {errors.phone && (
+                        <p className="text-xs text-red-500 mt-1">{errors.phone}</p>
+                      )}
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">LinkedIn URL</label>
                       <Input
+                        name="linkedin_url"
                         value={formData.linkedin_url || ''}
                         onChange={(e) => updateField('linkedin_url', e.target.value)}
                         placeholder="linkedin.com/in/yourname"
-                        className="border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-lg"
+                        className={`border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-lg ${
+                          errors.linkedin_url ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''
+                        }`}
                       />
+                      {errors.linkedin_url && (
+                        <p className="text-xs text-red-500 mt-1">{errors.linkedin_url}</p>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -163,15 +340,25 @@ export default function CVFormWithPreview({ formData, setFormData, onSubmit, isG
                     disabled={formData.auto_generate_summary}
                     className="border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-lg resize-none disabled:bg-gray-100"
                   />
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-start space-x-2">
                     <Checkbox
                       id="auto-summary"
                       checked={formData.auto_generate_summary || false}
                       onCheckedChange={(checked) => updateField('auto_generate_summary', checked)}
+                      className="mt-1"
                     />
-                    <label htmlFor="auto-summary" className="text-sm text-gray-700 cursor-pointer">
-                      Auto-generate summary with AI
-                    </label>
+                    <div className="flex-1">
+                      <label htmlFor="auto-summary" className="text-sm text-gray-700 cursor-pointer block">
+                        Auto-generate summary with AI
+                      </label>
+                      {!user && remainingAIRequests !== null && (
+                        <p className="text-xs text-gray-500 mt-1">
+                          {remainingAIRequests > 0 
+                            ? `${remainingAIRequests} AI request(s) remaining this hour. Log in for unlimited access.`
+                            : 'Rate limit reached. Please log in for unlimited AI generation.'}
+                        </p>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -203,6 +390,8 @@ export default function CVFormWithPreview({ formData, setFormData, onSubmit, isG
                       onChange={updateExperience}
                       onRemove={removeExperience}
                       canRemove={(formData.experiences || []).length > 1}
+                      errors={errors}
+                      onErrorClear={onErrorClear}
                     />
                   ))}
                 </div>
@@ -228,6 +417,8 @@ export default function CVFormWithPreview({ formData, setFormData, onSubmit, isG
                       onChange={updateEducation}
                       onRemove={removeEducation}
                       canRemove={(formData.education || []).length > 1}
+                      errors={errors}
+                      onErrorClear={onErrorClear}
                     />
                   ))}
                 </div>
@@ -330,6 +521,13 @@ export default function CVFormWithPreview({ formData, setFormData, onSubmit, isG
                     <p className="text-sm text-gray-700 mt-2 leading-relaxed">
                       AI will create a professional cover letter tailored to your experience and target position. You can edit it before finalizing.
                     </p>
+                    {!user && remainingAIRequests !== null && (
+                      <p className="text-xs text-amber-600 mt-2 font-medium">
+                        {remainingAIRequests > 0 
+                          ? `⚠️ ${remainingAIRequests} AI request(s) remaining this hour. Log in for unlimited access.`
+                          : '⚠️ Rate limit reached. Please log in for unlimited AI generation.'}
+                      </p>
+                    )}
                   </div>
                 </div>
               </div>

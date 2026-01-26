@@ -36,12 +36,26 @@ export default function Success() {
         return;
       }
 
+      // Verify user authentication and ownership
+      let currentUser = null;
+      try {
+        currentUser = await base44.auth.me();
+      } catch (authError) {
+        console.error('Authentication error:', authError);
+        setIsLoading(false);
+        return;
+      }
+
       // Poll for payment completion (webhook updates the status)
       let attempts = 0;
       const maxAttempts = 10;
       
       while (attempts < maxAttempts) {
-        const submissions = await base44.entities.CVSubmission.filter({ id: submissionId });
+        // Verify ownership: filter by both ID and created_by
+        const submissions = await base44.entities.CVSubmission.filter({ 
+          id: submissionId,
+          created_by: currentUser.email 
+        });
         
         if (submissions?.length > 0) {
           const submission = submissions[0];
@@ -81,7 +95,11 @@ export default function Success() {
       }
       
       // Payment not yet confirmed after polling - try to load from database anyway
-      const submissions = await base44.entities.CVSubmission.filter({ id: submissionId });
+      // Verify ownership: filter by both ID and created_by
+      const submissions = await base44.entities.CVSubmission.filter({ 
+        id: submissionId,
+        created_by: currentUser.email 
+      });
       if (submissions?.length > 0) {
         const submission = submissions[0];
         const cvDataFromDb = {
