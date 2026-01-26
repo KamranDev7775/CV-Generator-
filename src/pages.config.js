@@ -1,21 +1,21 @@
 import Dashboard from './pages/Dashboard';
-import Home from './pages/Home';
 import Pricing from './pages/Pricing';
 import PrivacyPolicy from './pages/PrivacyPolicy';
+import Home from './pages/Home';
+import PaymentSuccess from './pages/PaymentSuccess';
 import Success from './pages/Success';
 import TermsConditions from './pages/TermsConditions';
-import PaymentSuccess from './pages/PaymentSuccess';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
     "Dashboard": Dashboard,
-    "Home": Home,
     "Pricing": Pricing,
     "PrivacyPolicy": PrivacyPolicy,
+    "Home": Home,
+    "PaymentSuccess": PaymentSuccess,
     "Success": Success,
     "TermsConditions": TermsConditions,
-    "PaymentSuccess": PaymentSuccess,
 }
 
 export const pagesConfig = {
