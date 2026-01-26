@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Button } from "@/components/ui/button";
 import { Check, Loader2 } from "lucide-react";
@@ -7,6 +7,19 @@ import { createPageUrl } from '../utils';
 
 export default function Pricing() {
   const [loadingPlan, setLoadingPlan] = useState(null);
+  const [userEmail, setUserEmail] = useState(null);
+
+  useEffect(() => {
+    const loadUser = async () => {
+      try {
+        const user = await base44.auth.me();
+        setUserEmail(user?.email);
+      } catch (e) {
+        // User not logged in
+      }
+    };
+    loadUser();
+  }, []);
 
   const handleSubscribe = async (planType) => {
     if (window.self !== window.top) {
@@ -19,7 +32,8 @@ export default function Pricing() {
     try {
       const response = await base44.functions.invoke('createSubscriptionCheckout', {
         planType,
-        successUrl: `${window.location.origin}${createPageUrl('Home')}`,
+        customerEmail: userEmail,
+        successUrl: `${window.location.origin}${createPageUrl('Dashboard')}`,
         cancelUrl: window.location.href
       });
 

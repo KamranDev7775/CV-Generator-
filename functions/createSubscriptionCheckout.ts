@@ -13,9 +13,14 @@ Deno.serve(async (req) => {
 
     const idempotencyKey = `sub_${planType}_${Date.now()}`;
 
+    // Require customer email for subscription tracking
+    if (!customerEmail) {
+      return Response.json({ error: 'Customer email is required' }, { status: 400 });
+    }
+
     let sessionConfig = {
       payment_method_types: ['card'],
-      customer_email: customerEmail || undefined,
+      customer_email: customerEmail,
       success_url: successUrl,
       cancel_url: cancelUrl,
       metadata: {
