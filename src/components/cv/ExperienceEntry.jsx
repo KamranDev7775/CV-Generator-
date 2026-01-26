@@ -4,17 +4,23 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
 
-export default function ExperienceEntry({ experience, index, onChange, onRemove, canRemove, errors = {}, onErrorClear }) {
+export default function ExperienceEntry({ experience, index, onChange, onRemove, canRemove, errors = {}, onErrorClear, onValidateDate }) {
   const handleChange = (field, value) => {
     onChange(index, { ...experience, [field]: value });
     // Clear error when user starts typing
     if (onErrorClear && (field === 'start_date' || field === 'end_date')) {
-      onErrorClear(field);
+      onErrorClear(`exp_${index}_${field}`);
+    }
+  };
+
+  const handleDateBlur = (field, value) => {
+    if (onValidateDate) {
+      onValidateDate('exp', index, field, value);
     }
   };
 
   return (
-    <div className="border-b border-gray-100 pb-8 mb-8 last:border-0 last:pb-0 last:mb-0">
+    <div className="border-b border-gray-100 pb-8 mb-8 last:border-0 last:pb-0 last:mb-0" data-entry-index={index} data-entry-type="experience">
       <div className="flex justify-between items-start mb-6">
         <span className="text-xs uppercase tracking-widest text-gray-400">Experience {index + 1}</span>
         {canRemove && (
@@ -65,22 +71,52 @@ export default function ExperienceEntry({ experience, index, onChange, onRemove,
           <div>
             <label className="block text-sm text-gray-600 mb-2">Start Date</label>
             <Input
+              name={`exp_${index}_start_date`}
               value={experience.start_date || ''}
-              onChange={(e) => handleChange('start_date', e.target.value)}
-              placeholder="Jan 2020"
-              className={`border-gray-200 focus:border-gray-400 focus:ring-0 ${errors.start_date ? 'border-red-300' : ''}`}
+              onChange={(e) => {
+                handleChange('start_date', e.target.value);
+                // Clear error as user types
+                if (errors.start_date && e.target.value.trim()) {
+                  onErrorClear(`exp_${index}_start_date`);
+                }
+              }}
+              onBlur={(e) => handleDateBlur('start_date', e.target.value)}
+              placeholder="Jan 2020, 2020-01, or 01/2020"
+              className={`border-gray-200 focus:border-gray-400 focus:ring-0 transition-colors ${
+                errors.start_date ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''
+              }`}
             />
-            {errors.start_date && <p className="text-xs text-red-500 mt-1">{errors.start_date}</p>}
+            {errors.start_date && (
+              <p className="text-xs text-red-500 mt-1 flex items-center gap-1">
+                <span>⚠️</span>
+                <span>{errors.start_date}</span>
+              </p>
+            )}
           </div>
           <div>
             <label className="block text-sm text-gray-600 mb-2">End Date</label>
             <Input
+              name={`exp_${index}_end_date`}
               value={experience.end_date || ''}
-              onChange={(e) => handleChange('end_date', e.target.value)}
-              placeholder="Present"
-              className={`border-gray-200 focus:border-gray-400 focus:ring-0 ${errors.end_date ? 'border-red-300' : ''}`}
+              onChange={(e) => {
+                handleChange('end_date', e.target.value);
+                // Clear error as user types
+                if (errors.end_date && e.target.value.trim()) {
+                  onErrorClear(`exp_${index}_end_date`);
+                }
+              }}
+              onBlur={(e) => handleDateBlur('end_date', e.target.value)}
+              placeholder="Present, Jan 2020, 2020-01, or 01/2020"
+              className={`border-gray-200 focus:border-gray-400 focus:ring-0 transition-colors ${
+                errors.end_date ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''
+              }`}
             />
-            {errors.end_date && <p className="text-xs text-red-500 mt-1">{errors.end_date}</p>}
+            {errors.end_date && (
+              <p className="text-xs text-red-500 mt-1 flex items-center gap-1">
+                <span>⚠️</span>
+                <span>{errors.end_date}</span>
+              </p>
+            )}
           </div>
         </div>
         

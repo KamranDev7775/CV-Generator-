@@ -45,13 +45,36 @@ const validatePhone = (phone) => {
 const validateDate = (date) => {
   if (!date) return { valid: true }; // Optional field
   const trimmedDate = date.trim();
+  
+  // Accept "Present" or "Current"
   if (trimmedDate.toLowerCase() === 'present' || trimmedDate.toLowerCase() === 'current') {
     return { valid: true };
   }
-  const dateRegex = /^(\d{4}-\d{2}(-\d{2})?|\d{1,2}\/\d{4}|\d{1,2}\/\d{1,2}\/\d{4}|[A-Za-z]{3}\s+\d{4})$/;
-  if (!dateRegex.test(trimmedDate)) {
-    return { valid: false, message: 'Invalid date format (use YYYY-MM, MM/YYYY, or "Jan 2020")' };
+  
+  // Very flexible date validation - accept almost any reasonable date format
+  // Examples: "Oct-2024", "Oct 2024", "2024-10", "10/2024", "10-2024", "2024", "October 2024", etc.
+  // Pattern matches:
+  // - YYYY-MM, YYYY-MM-DD, YYYY
+  // - MM/YYYY, MM/DD/YYYY, DD/MM/YYYY
+  // - MM-YYYY, DD-MM-YYYY
+  // - MMM-YYYY, MMMM-YYYY (Oct-2024, October-2024)
+  // - MMM YYYY, MMMM YYYY (Oct 2024, October 2024)
+  // - MMM DD, YYYY (Oct 15, 2024)
+  // - Any combination with spaces, hyphens, or slashes
+  const dateRegex = /^(\d{4}([-\/]\d{1,2}([-\/]\d{1,2})?)?|\d{1,2}[-\/]\d{1,2}[-\/]\d{4}|\d{1,2}[-\/]\d{4}|\d{4}|[A-Za-z]{3,9}[-\s]\d{4}|[A-Za-z]{3,9}[-\s]\d{1,2}[,\s]?\d{4}|[A-Za-z]{3,9}[-\s]\d{1,2})$/i;
+  
+  // If it doesn't match the regex, still accept it if it looks like a date (has numbers and possibly month names)
+  // This makes validation very permissive - only reject obviously invalid entries
+  const hasNumbers = /\d/.test(trimmedDate);
+  const hasMonthName = /(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec|january|february|march|april|june|july|august|september|october|november|december)/i.test(trimmedDate);
+  const isTooShort = trimmedDate.length < 2;
+  const isTooLong = trimmedDate.length > 50;
+  
+  // Reject only if it's clearly not a date
+  if (isTooShort || isTooLong || (!hasNumbers && !hasMonthName)) {
+    return { valid: false, message: 'Please enter a valid date (e.g., "Oct-2024", "2024-10", "Present")' };
   }
+  
   return { valid: true };
 };
 
@@ -67,6 +90,82 @@ export default function CVFormWithPreview({ formData, setFormData, onSubmit, isG
         delete newErrors[field];
         return newErrors;
       });
+    }
+  };
+
+  // Real-time validation for individual fields
+  const validateField = (field, value) => {
+    let error = null;
+    
+    switch (field) {
+      case 'full_name':
+        if (!value || value.trim() === '') {
+          error = 'Full name is required';
+        }
+        break;
+      case 'email':
+        const emailValidation = validateEmail(value);
+        if (!emailValidation.valid) {
+          error = emailValidation.message;
+        }
+        break;
+      case 'phone':
+        if (value && value.trim() !== '') {
+          const phoneValidation = validatePhone(value);
+          if (!phoneValidation.valid) {
+            error = phoneValidation.message;
+          }
+        }
+        break;
+      case 'linkedin_url':
+        if (value && value.trim() !== '') {
+          const urlValidation = validateURL(value);
+          if (!urlValidation.valid) {
+            error = urlValidation.message;
+          }
+        }
+        break;
+      default:
+        break;
+    }
+    
+    if (error) {
+      setErrors(prev => ({ ...prev, [field]: error }));
+    } else {
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[field];
+        return newErrors;
+      });
+    }
+    
+    return !error;
+  };
+
+  // Validate experience/education date fields
+  const validateDateField = (type, index, field, value) => {
+    const fieldKey = `${type}_${index}_${field}`;
+    if (value && value.trim() !== '') {
+      const dateValidation = validateDate(value);
+      if (!dateValidation.valid) {
+        setErrors(prev => ({ ...prev, [fieldKey]: dateValidation.message }));
+        return false;
+      } else {
+        setErrors(prev => {
+          const newErrors = { ...prev };
+          delete newErrors[fieldKey];
+          return newErrors;
+        });
+        return true;
+      }
+    } else {
+      // Clear error if field is empty (optional field)
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[fieldKey];
+        return newErrors;
+      });
+      return true;
     }
   };
 
@@ -148,20 +247,46 @@ export default function CVFormWithPreview({ formData, setFormData, onSubmit, isG
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    console.log('Form submit triggered', { 
+      isGenerating, 
+      full_name: formData.full_name, 
+      email: formData.email,
+      disabled: isGenerating || !formData.full_name || !formData.email
+    });
+    
     const { isValid, errors: validationErrors } = validateForm();
+    console.log('Validation result', { isValid, errors: validationErrors });
+    
     if (isValid) {
+      console.log('Calling onSubmit');
       onSubmit();
     } else {
-      toast.error('Please fix the validation errors before submitting');
-      // Scroll to first error
+      console.log('Validation failed', validationErrors);
+      const firstErrorKey = Object.keys(validationErrors)[0];
+      const firstError = validationErrors[firstErrorKey];
+      
+      // Show specific error message
+      toast.error(firstError || 'Please fix the validation errors before submitting', {
+        description: `Error in: ${firstErrorKey.replace(/_/g, ' ')}`
+      });
+      
+      // Scroll to first error - try multiple selectors
       setTimeout(() => {
-        const firstErrorKey = Object.keys(validationErrors)[0];
         if (firstErrorKey) {
-          const element = document.querySelector(`[name="${firstErrorKey}"]`) || 
-                         document.getElementById(firstErrorKey);
+          // Try to find the input field by name attribute (we added these to ExperienceEntry and EducationEntry)
+          let element = document.querySelector(`[name="${firstErrorKey}"]`);
+          
           if (element) {
             element.scrollIntoView({ behavior: 'smooth', block: 'center' });
             element.focus();
+            // Highlight the field
+            element.classList.add('border-red-500', 'ring-2', 'ring-red-200');
+            setTimeout(() => {
+              element.classList.remove('border-red-500', 'ring-2', 'ring-red-200');
+            }, 3000);
+          } else {
+            // Fallback: scroll to form section
+            document.getElementById('cv-form')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
           }
         }
       }, 100);
@@ -245,14 +370,24 @@ export default function CVFormWithPreview({ formData, setFormData, onSubmit, isG
                     <Input
                       name="full_name"
                       value={formData.full_name || ''}
-                      onChange={(e) => updateField('full_name', e.target.value)}
+                      onChange={(e) => {
+                        updateField('full_name', e.target.value);
+                        // Clear error as user types
+                        if (errors.full_name && e.target.value.trim()) {
+                          validateField('full_name', e.target.value);
+                        }
+                      }}
+                      onBlur={(e) => validateField('full_name', e.target.value)}
                       required
-                      className={`border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-lg ${
+                      className={`border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-lg transition-colors ${
                         errors.full_name ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''
                       }`}
                     />
                     {errors.full_name && (
-                      <p className="text-xs text-red-500 mt-1">{errors.full_name}</p>
+                      <p className="text-xs text-red-500 mt-1 flex items-center gap-1">
+                        <span>⚠️</span>
+                        <span>{errors.full_name}</span>
+                      </p>
                     )}
                   </div>
                   <div>
@@ -280,14 +415,27 @@ export default function CVFormWithPreview({ formData, setFormData, onSubmit, isG
                         name="email"
                         type="email"
                         value={formData.email || ''}
-                        onChange={(e) => updateField('email', e.target.value)}
+                        onChange={(e) => {
+                          updateField('email', e.target.value);
+                          // Real-time validation - clear error as user types valid email
+                          if (errors.email && e.target.value.trim()) {
+                            const emailValidation = validateEmail(e.target.value);
+                            if (emailValidation.valid) {
+                              validateField('email', e.target.value);
+                            }
+                          }
+                        }}
+                        onBlur={(e) => validateField('email', e.target.value)}
                         required
-                        className={`border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-lg ${
+                        className={`border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-lg transition-colors ${
                           errors.email ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''
                         }`}
                       />
                       {errors.email && (
-                        <p className="text-xs text-red-500 mt-1">{errors.email}</p>
+                        <p className="text-xs text-red-500 mt-1 flex items-center gap-1">
+                          <span>⚠️</span>
+                          <span>{errors.email}</span>
+                        </p>
                       )}
                     </div>
                   </div>
@@ -297,14 +445,38 @@ export default function CVFormWithPreview({ formData, setFormData, onSubmit, isG
                       <Input
                         name="phone"
                         value={formData.phone || ''}
-                        onChange={(e) => updateField('phone', e.target.value)}
+                        onChange={(e) => {
+                          updateField('phone', e.target.value);
+                          // Clear error as user types
+                          if (errors.phone && e.target.value.trim()) {
+                            const phoneValidation = validatePhone(e.target.value);
+                            if (phoneValidation.valid) {
+                              validateField('phone', e.target.value);
+                            }
+                          }
+                        }}
+                        onBlur={(e) => {
+                          if (e.target.value.trim()) {
+                            validateField('phone', e.target.value);
+                          } else {
+                            // Clear error if field is empty (optional)
+                            setErrors(prev => {
+                              const newErrors = { ...prev };
+                              delete newErrors.phone;
+                              return newErrors;
+                            });
+                          }
+                        }}
                         placeholder="+49 123 456 7890"
-                        className={`border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-lg ${
+                        className={`border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-lg transition-colors ${
                           errors.phone ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''
                         }`}
                       />
                       {errors.phone && (
-                        <p className="text-xs text-red-500 mt-1">{errors.phone}</p>
+                        <p className="text-xs text-red-500 mt-1 flex items-center gap-1">
+                          <span>⚠️</span>
+                          <span>{errors.phone}</span>
+                        </p>
                       )}
                     </div>
                     <div>
@@ -312,14 +484,38 @@ export default function CVFormWithPreview({ formData, setFormData, onSubmit, isG
                       <Input
                         name="linkedin_url"
                         value={formData.linkedin_url || ''}
-                        onChange={(e) => updateField('linkedin_url', e.target.value)}
+                        onChange={(e) => {
+                          updateField('linkedin_url', e.target.value);
+                          // Clear error as user types
+                          if (errors.linkedin_url && e.target.value.trim()) {
+                            const urlValidation = validateURL(e.target.value);
+                            if (urlValidation.valid) {
+                              validateField('linkedin_url', e.target.value);
+                            }
+                          }
+                        }}
+                        onBlur={(e) => {
+                          if (e.target.value.trim()) {
+                            validateField('linkedin_url', e.target.value);
+                          } else {
+                            // Clear error if field is empty (optional)
+                            setErrors(prev => {
+                              const newErrors = { ...prev };
+                              delete newErrors.linkedin_url;
+                              return newErrors;
+                            });
+                          }
+                        }}
                         placeholder="linkedin.com/in/yourname"
-                        className={`border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-lg ${
+                        className={`border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-lg transition-colors ${
                           errors.linkedin_url ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''
                         }`}
                       />
                       {errors.linkedin_url && (
-                        <p className="text-xs text-red-500 mt-1">{errors.linkedin_url}</p>
+                        <p className="text-xs text-red-500 mt-1 flex items-center gap-1">
+                          <span>⚠️</span>
+                          <span>{errors.linkedin_url}</span>
+                        </p>
                       )}
                     </div>
                   </div>
@@ -390,8 +586,12 @@ export default function CVFormWithPreview({ formData, setFormData, onSubmit, isG
                       onChange={updateExperience}
                       onRemove={removeExperience}
                       canRemove={(formData.experiences || []).length > 1}
-                      errors={errors}
+                      errors={{
+                        start_date: errors[`exp_${index}_start_date`],
+                        end_date: errors[`exp_${index}_end_date`]
+                      }}
                       onErrorClear={onErrorClear}
+                      onValidateDate={validateDateField}
                     />
                   ))}
                 </div>
@@ -417,8 +617,12 @@ export default function CVFormWithPreview({ formData, setFormData, onSubmit, isG
                       onChange={updateEducation}
                       onRemove={removeEducation}
                       canRemove={(formData.education || []).length > 1}
-                      errors={errors}
+                      errors={{
+                        start_date: errors[`edu_${index}_start_date`],
+                        end_date: errors[`edu_${index}_end_date`]
+                      }}
                       onErrorClear={onErrorClear}
+                      onValidateDate={validateDateField}
                     />
                   ))}
                 </div>
@@ -533,11 +737,33 @@ export default function CVFormWithPreview({ formData, setFormData, onSubmit, isG
               </div>
 
               {/* Submit */}
-              <div className="pt-4 sticky bottom-0 bg-white pb-4">
+              <div className="pt-4 sticky bottom-0 bg-white pb-4 z-10">
                 <Button 
                   type="submit"
-                  disabled={isGenerating || !formData.full_name || !formData.email}
-                  className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700 py-6 text-lg font-semibold rounded-xl shadow-lg disabled:opacity-50"
+                  disabled={isGenerating || !formData?.full_name?.trim() || !formData?.email?.trim()}
+                  onClick={(e) => {
+                    const isDisabled = isGenerating || !formData?.full_name?.trim() || !formData?.email?.trim();
+                    console.log('Button clicked', { 
+                      isGenerating, 
+                      full_name: formData?.full_name, 
+                      email: formData?.email,
+                      full_name_trimmed: formData?.full_name?.trim(),
+                      email_trimmed: formData?.email?.trim(),
+                      disabled: isDisabled
+                    });
+                    if (isDisabled) {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      if (!formData?.full_name?.trim()) {
+                        toast.error('Please enter your full name');
+                      } else if (!formData?.email?.trim()) {
+                        toast.error('Please enter your email address');
+                      }
+                      return false;
+                    }
+                  }}
+                  className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700 py-6 text-lg font-semibold rounded-xl shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                  style={{ pointerEvents: (isGenerating || !formData?.full_name?.trim() || !formData?.email?.trim()) ? 'none' : 'auto' }}
                 >
                   {isGenerating ? (
                     <>
@@ -548,6 +774,15 @@ export default function CVFormWithPreview({ formData, setFormData, onSubmit, isG
                     'Generate CV'
                   )}
                 </Button>
+                {(!formData?.full_name?.trim() || !formData?.email?.trim()) && (
+                  <p className="text-xs text-red-500 mt-2 text-center">
+                    {!formData?.full_name?.trim() && !formData?.email?.trim() 
+                      ? 'Please enter your name and email to continue'
+                      : !formData?.full_name?.trim() 
+                        ? 'Please enter your full name'
+                        : 'Please enter your email address'}
+                  </p>
+                )}
               </div>
             </form>
           </div>
