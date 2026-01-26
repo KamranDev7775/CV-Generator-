@@ -2,8 +2,8 @@ import Stripe from 'npm:stripe';
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
 
 Deno.serve(async (req) => {
-  // Get secrets inside handler to ensure fresh values
-  const stripe = new Stripe(Deno.env.get('STRIPE_TEST_SECRET_KEY'));
+  // Get secrets inside handler to ensure fresh values (use live key if available)
+  const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') || Deno.env.get('STRIPE_TEST_SECRET_KEY'));
   const webhookSecret = Deno.env.get('STRIPE_WEBHOOK_SECRET');
   
   try {
@@ -74,6 +74,28 @@ Deno.serve(async (req) => {
           console.log('Created subscription record');
         } catch (subError) {
           console.error('Error creating subscription:', subError);
+        }
+      }
+
+      // Handle one-time trial payment (not a subscription but needs tracking)
+      if (session.mode === 'payment' && planType === 'trial') {
+        try {
+          // Calculate 14 days access from now
+          const accessEnd = new Date();
+          accessEnd.setDate(accessEnd.getDate() + 14);
+          
+          await base44.asServiceRole.entities.Subscription.create({
+            user_email: session.customer_email || session.customer_details?.email,
+            stripe_customer_id: session.customer,
+            stripe_subscription_id: session.payment_intent || session.id,
+            plan_type: 'trial',
+            status: 'active',
+            current_period_start: new Date().toISOString(),
+            current_period_end: accessEnd.toISOString()
+          });
+          console.log('Created trial access record');
+        } catch (trialError) {
+          console.error('Error creating trial record:', trialError);
         }
       }
     }

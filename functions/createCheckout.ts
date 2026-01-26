@@ -1,7 +1,7 @@
 import Stripe from 'npm:stripe';
-import { v4 as uuidv4 } from 'npm:uuid';
 
-const stripe = new Stripe(Deno.env.get('STRIPE_TEST_SECRET_KEY'));
+// Use live key if available, fallback to test key
+const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') || Deno.env.get('STRIPE_TEST_SECRET_KEY'));
 
 Deno.serve(async (req) => {
   try {
