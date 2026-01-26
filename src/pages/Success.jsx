@@ -12,7 +12,6 @@ export default function Success() {
   const [isLoading, setIsLoading] = useState(true);
   const [copied, setCopied] = useState(false);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
-  const [accessDenied, setAccessDenied] = useState(false);
   const cvRef = useRef(null);
 
   useEffect(() => {
@@ -25,30 +24,11 @@ export default function Success() {
       const urlParams = new URLSearchParams(window.location.search);
       const submissionId = urlParams.get('submission_id');
 
-      if (!submissionId) {
-        setAccessDenied(true);
-        setIsLoading(false);
-        return;
-      }
-
-      // Check if payment was completed via Stripe webhook
-      const submissions = await base44.entities.CVSubmission.filter({ id: submissionId });
-      
-      if (!submissions || submissions.length === 0) {
-        console.error('Submission not found');
-        setAccessDenied(true);
-        setIsLoading(false);
-        return;
-      }
-
-      const submission = submissions[0];
-      
-      // Verify payment was completed by webhook
-      if (submission.payment_status !== 'completed') {
-        console.error('Payment not completed yet');
-        setAccessDenied(true);
-        setIsLoading(false);
-        return;
+      if (submissionId) {
+        // Update payment status
+        await base44.entities.CVSubmission.update(submissionId, {
+          payment_status: 'completed'
+        });
       }
 
       // Load from localStorage
@@ -58,7 +38,11 @@ export default function Success() {
       }
     } catch (error) {
       console.error('Error loading CV data:', error);
-      setAccessDenied(true);
+      // Try localStorage as fallback
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        setCvData(JSON.parse(saved));
+      }
     } finally {
       setIsLoading(false);
     }
@@ -317,12 +301,12 @@ export default function Success() {
     );
   }
 
-  if (accessDenied || !cvData) {
+  if (!cvData) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center px-6">
         <div className="text-center">
-          <h1 className="text-2xl font-light text-black mb-4">Access Denied</h1>
-          <p className="text-gray-500 mb-8">This page is only accessible after successful payment.</p>
+          <h1 className="text-2xl font-light text-black mb-4">No CV data found</h1>
+          <p className="text-gray-500 mb-8">Please generate a CV first.</p>
           <a href="/" className="text-black underline hover:no-underline">
             Go back to start
           </a>
