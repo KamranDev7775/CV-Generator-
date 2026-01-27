@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '../../utils';
 import { ArrowRight, CheckCircle2, Upload, Star } from 'lucide-react';
 
 export default function LandingSection({ onStart, onImport }) {
+  const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
 
@@ -12,7 +14,14 @@ export default function LandingSection({ onStart, onImport }) {
     if (isLoading) return;
     setIsLoading(true);
     try {
-      await onStart();
+      // Navigate to template selection page (CVBuilder)
+      navigate(createPageUrl('CVBuilder'));
+    } catch (error) {
+      console.error('Navigation error:', error);
+      // Fallback to old behavior if navigation fails
+      if (onStart) {
+        await onStart();
+      }
     } finally {
       setIsLoading(false);
     }

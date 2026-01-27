@@ -77,14 +77,14 @@ function ClassicTemplate({ data, style, showWatermark }) {
         {summary && (
           <section className="mb-8">
             <h2 className={`text-sm uppercase tracking-widest ${style.sectionTitleColor} mb-3 font-sans font-semibold`}>Professional Summary</h2>
-            <p className={`${style.bodyTextColor} leading-relaxed whitespace-pre-line`}>{summary}</p>
+            <p className={`${style.bodyTextColor} text-sm leading-relaxed whitespace-pre-line`}>{summary}</p>
           </section>
         )}
 
         {skills && (
           <section className="mb-8">
             <h2 className={`text-sm uppercase tracking-widest ${style.sectionTitleColor} mb-3 font-sans font-semibold`}>Skills</h2>
-            <p className={style.bodyTextColor}>{skills}</p>
+            <p className={`${style.bodyTextColor} text-sm`}>{skills}</p>
           </section>
         )}
 
@@ -105,7 +105,7 @@ function ClassicTemplate({ data, style, showWatermark }) {
                     )}
                   </div>
                   {exp.achievements && (
-                    <ul className={`list-disc list-outside ml-5 space-y-1 ${style.accentColor}`}>
+                    <ul className={`list-disc list-outside ml-5 space-y-1 ${style.bodyTextColor} text-sm`}>
                       {exp.achievements.split('\n').filter(a => a.trim()).map((a, i) => <li key={i}>{a.trim()}</li>)}
                     </ul>
                   )}
@@ -138,7 +138,7 @@ function ClassicTemplate({ data, style, showWatermark }) {
         {languages && (
           <section>
             <h2 className={`text-sm uppercase tracking-widest ${style.sectionTitleColor} mb-3 font-sans font-semibold`}>Languages</h2>
-            <p className={style.bodyTextColor}>{languages}</p>
+            <p className={`${style.bodyTextColor} text-sm`}>{languages}</p>
           </section>
         )}
       </div>
@@ -176,21 +176,21 @@ function ModernTemplate({ data, style, showWatermark }) {
 
         {summary && (
           <section className="mb-10">
-            <h2 className={`text-[10px] uppercase tracking-[0.25em] ${style.sectionTitleColor} mb-4 font-semibold text-center`}>Profile</h2>
+            <h2 className={`text-xs uppercase tracking-wider ${style.sectionTitleColor} mb-4 font-semibold text-center`}>Professional Summary</h2>
             <p className={`${style.bodyTextColor} leading-relaxed whitespace-pre-line text-center max-w-2xl mx-auto text-sm`}>{summary}</p>
           </section>
         )}
 
         {skills && (
           <section className="mb-10">
-            <h2 className={`text-[10px] uppercase tracking-[0.25em] ${style.sectionTitleColor} mb-4 font-semibold text-center`}>Expertise</h2>
+            <h2 className={`text-xs uppercase tracking-wider ${style.sectionTitleColor} mb-4 font-semibold text-center`}>Skills</h2>
             <p className={`${style.bodyTextColor} text-center text-sm`}>{skills}</p>
           </section>
         )}
 
         {experiences.length > 0 && experiences.some(e => e.job_title || e.company) && (
           <section className="mb-10">
-            <h2 className={`text-[10px] uppercase tracking-[0.25em] ${style.sectionTitleColor} mb-6 font-semibold text-center`}>Experience</h2>
+            <h2 className={`text-xs uppercase tracking-wider ${style.sectionTitleColor} mb-6 font-semibold text-center`}>Professional Experience</h2>
             <div className="space-y-8">
               {experiences.filter(e => e.job_title || e.company).map((exp, idx) => (
                 <div key={idx}>
@@ -220,7 +220,7 @@ function ModernTemplate({ data, style, showWatermark }) {
 
         {education.length > 0 && education.some(e => e.degree || e.university) && (
           <section className="mb-10">
-            <h2 className={`text-[10px] uppercase tracking-[0.25em] ${style.sectionTitleColor} mb-6 font-semibold text-center`}>Education</h2>
+            <h2 className={`text-xs uppercase tracking-wider ${style.sectionTitleColor} mb-6 font-semibold text-center`}>Education</h2>
             <div className="space-y-4">
               {education.filter(e => e.degree || e.university).map((edu, idx) => (
                 <div key={idx} className="text-center">
@@ -237,7 +237,7 @@ function ModernTemplate({ data, style, showWatermark }) {
 
         {languages && (
           <section>
-            <h2 className={`text-[10px] uppercase tracking-[0.25em] ${style.sectionTitleColor} mb-4 font-semibold text-center`}>Languages</h2>
+            <h2 className={`text-xs uppercase tracking-wider ${style.sectionTitleColor} mb-4 font-semibold text-center`}>Languages</h2>
             <p className={`${style.bodyTextColor} text-center text-sm`}>{languages}</p>
           </section>
         )}
@@ -268,21 +268,21 @@ function MinimalTemplate({ data, style, showWatermark }) {
 
         {summary && (
           <section className="mb-10">
-            <h2 className={`text-xs ${style.sectionTitleColor} mb-2 font-medium`}>Summary</h2>
+            <h2 className={`text-xs uppercase tracking-wider ${style.sectionTitleColor} mb-3 font-semibold`}>Professional Summary</h2>
             <p className={`${style.bodyTextColor} text-sm leading-relaxed whitespace-pre-line`}>{summary}</p>
           </section>
         )}
 
         {skills && (
           <section className="mb-10">
-            <h2 className={`text-xs ${style.sectionTitleColor} mb-2 font-medium`}>Skills</h2>
+            <h2 className={`text-xs uppercase tracking-wider ${style.sectionTitleColor} mb-3 font-semibold`}>Skills</h2>
             <p className={`${style.bodyTextColor} text-sm`}>{skills}</p>
           </section>
         )}
 
         {experiences.length > 0 && experiences.some(e => e.job_title || e.company) && (
           <section className="mb-10">
-            <h2 className={`text-xs ${style.sectionTitleColor} mb-4 font-medium`}>Experience</h2>
+            <h2 className={`text-xs uppercase tracking-wider ${style.sectionTitleColor} mb-4 font-semibold`}>Professional Experience</h2>
             <div className="space-y-6">
               {experiences.filter(e => e.job_title || e.company).map((exp, idx) => (
                 <div key={idx}>
@@ -308,7 +308,7 @@ function MinimalTemplate({ data, style, showWatermark }) {
 
         {education.length > 0 && education.some(e => e.degree || e.university) && (
           <section className="mb-10">
-            <h2 className={`text-xs ${style.sectionTitleColor} mb-4 font-medium`}>Education</h2>
+            <h2 className={`text-xs uppercase tracking-wider ${style.sectionTitleColor} mb-4 font-semibold`}>Education</h2>
             <div className="space-y-3">
               {education.filter(e => e.degree || e.university).map((edu, idx) => (
                 <div key={idx} className="flex justify-between items-baseline">
@@ -327,7 +327,7 @@ function MinimalTemplate({ data, style, showWatermark }) {
 
         {languages && (
           <section>
-            <h2 className={`text-xs ${style.sectionTitleColor} mb-2 font-medium`}>Languages</h2>
+            <h2 className={`text-xs uppercase tracking-wider ${style.sectionTitleColor} mb-3 font-semibold`}>Languages</h2>
             <p className={`${style.bodyTextColor} text-sm`}>{languages}</p>
           </section>
         )}
@@ -370,27 +370,27 @@ function ExecutiveTemplate({ data, style, showWatermark }) {
         {/* Executive Summary - Prominent */}
         {summary && (
           <section className="mb-10">
-            <h2 className={`text-lg font-bold ${style.sectionTitleColor} mb-4 uppercase tracking-wide border-b ${style.headerBorder} pb-2`}>
-              Executive Summary
+            <h2 className={`text-base font-bold ${style.sectionTitleColor} mb-4 uppercase tracking-wide border-b ${style.headerBorder} pb-2`}>
+              Professional Summary
             </h2>
-            <p className={`${style.bodyTextColor} leading-relaxed whitespace-pre-line text-base`}>{summary}</p>
+            <p className={`${style.bodyTextColor} leading-relaxed whitespace-pre-line text-sm`}>{summary}</p>
           </section>
         )}
 
         {/* Key Competencies */}
         {skills && (
           <section className="mb-10">
-            <h2 className={`text-lg font-bold ${style.sectionTitleColor} mb-4 uppercase tracking-wide border-b ${style.headerBorder} pb-2`}>
-              Key Competencies
+            <h2 className={`text-base font-bold ${style.sectionTitleColor} mb-4 uppercase tracking-wide border-b ${style.headerBorder} pb-2`}>
+              Skills
             </h2>
-            <p className={`${style.bodyTextColor} text-base`}>{skills}</p>
+            <p className={`${style.bodyTextColor} text-sm`}>{skills}</p>
           </section>
         )}
 
         {/* Professional Experience */}
         {experiences.length > 0 && experiences.some(e => e.job_title || e.company) && (
           <section className="mb-10">
-            <h2 className={`text-lg font-bold ${style.sectionTitleColor} mb-6 uppercase tracking-wide border-b ${style.headerBorder} pb-2`}>
+            <h2 className={`text-base font-bold ${style.sectionTitleColor} mb-6 uppercase tracking-wide border-b ${style.headerBorder} pb-2`}>
               Professional Experience
             </h2>
             <div className="space-y-8">
@@ -398,9 +398,9 @@ function ExecutiveTemplate({ data, style, showWatermark }) {
                 <div key={idx}>
                   <div className="flex flex-wrap justify-between items-start mb-3">
                     <div>
-                      <div className={`font-bold ${style.nameColor} text-lg`}>{exp.job_title}</div>
-                      <div className={`${style.accentColor} text-base font-medium`}>{exp.company}</div>
-                      {exp.location && <div className={`${style.subtleTextColor} text-sm`}>{exp.location}</div>}
+                    <div className={`font-bold ${style.nameColor} text-base`}>{exp.job_title}</div>
+                    <div className={`${style.accentColor} text-sm font-medium`}>{exp.company}</div>
+                    {exp.location && <div className={`${style.subtleTextColor} text-xs`}>{exp.location}</div>}
                     </div>
                     {(exp.start_date || exp.end_date) && (
                       <div className={`${style.subtleTextColor} text-sm font-medium bg-gray-100 px-3 py-1`}>
@@ -409,7 +409,7 @@ function ExecutiveTemplate({ data, style, showWatermark }) {
                     )}
                   </div>
                   {exp.achievements && (
-                    <ul className={`list-disc list-outside ml-5 space-y-2 ${style.bodyTextColor}`}>
+                    <ul className={`list-disc list-outside ml-5 space-y-1 ${style.bodyTextColor} text-sm`}>
                       {exp.achievements.split('\n').filter(a => a.trim()).map((a, i) => <li key={i}>{a.trim()}</li>)}
                     </ul>
                   )}
@@ -422,7 +422,7 @@ function ExecutiveTemplate({ data, style, showWatermark }) {
         {/* Education */}
         {education.length > 0 && education.some(e => e.degree || e.university) && (
           <section className="mb-10">
-            <h2 className={`text-lg font-bold ${style.sectionTitleColor} mb-6 uppercase tracking-wide border-b ${style.headerBorder} pb-2`}>
+            <h2 className={`text-base font-bold ${style.sectionTitleColor} mb-6 uppercase tracking-wide border-b ${style.headerBorder} pb-2`}>
               Education
             </h2>
             <div className="space-y-4">
@@ -444,10 +444,10 @@ function ExecutiveTemplate({ data, style, showWatermark }) {
 
         {languages && (
           <section>
-            <h2 className={`text-lg font-bold ${style.sectionTitleColor} mb-4 uppercase tracking-wide border-b ${style.headerBorder} pb-2`}>
+            <h2 className={`text-base font-bold ${style.sectionTitleColor} mb-4 uppercase tracking-wide border-b ${style.headerBorder} pb-2`}>
               Languages
             </h2>
-            <p className={`${style.bodyTextColor} text-base`}>{languages}</p>
+            <p className={`${style.bodyTextColor} text-sm`}>{languages}</p>
           </section>
         )}
       </div>
@@ -524,7 +524,7 @@ function CompactTemplate({ data, style, showWatermark }) {
           <div className="md:col-span-2 space-y-4">
             {summary && (
               <section>
-                <h2 className={`text-xs font-bold ${style.sectionTitleColor} uppercase mb-2`}>Profile</h2>
+                <h2 className={`text-xs font-bold ${style.sectionTitleColor} uppercase mb-2`}>Professional Summary</h2>
                 <p className={`${style.bodyTextColor} text-xs leading-relaxed whitespace-pre-line`}>{summary}</p>
               </section>
             )}
@@ -564,6 +564,480 @@ function CompactTemplate({ data, style, showWatermark }) {
   );
 }
 
+// Template: Sidebar (Two-column layout with sidebar - no photo required)
+function SidebarTemplate({ data, style, showWatermark }) {
+  const { 
+    full_name, target_position, email, phone, linkedin_url, location,
+    summary, skills, experiences = [], education = [], languages
+  } = data;
+
+  const contactParts = [email, phone, linkedin_url, location].filter(Boolean);
+
+  return (
+    <div className="relative bg-white font-sans" id="cv-document">
+      {showWatermark && <Watermark />}
+      
+      <div className={showWatermark ? 'select-none' : ''}>
+        <div className="flex">
+          {/* Left Sidebar */}
+          <div className="w-1/3 bg-gray-100 p-6">
+            {/* Header in sidebar */}
+            <header className="mb-6 pb-6 border-b border-gray-300">
+              <h1 className={`text-2xl font-bold ${style.nameColor} mb-2`}>
+                {full_name || 'Your Name'}
+              </h1>
+              {target_position && (
+                <p className={`text-sm ${style.positionColor}`}>{target_position}</p>
+              )}
+            </header>
+            
+            {/* Contact Info */}
+            {contactParts.length > 0 && (
+              <div className="mb-6">
+                <h3 className={`text-xs font-bold ${style.sectionTitleColor} uppercase mb-3`}>Contact</h3>
+                <div className={`text-xs ${style.contactColor} space-y-2`}>
+                  {contactParts.map((part, i) => (
+                    <div key={i}>{part}</div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Skills */}
+            {skills && (
+              <div className="mb-6">
+                <h3 className={`text-xs font-bold ${style.sectionTitleColor} uppercase mb-3`}>Skills</h3>
+                <p className={`${style.bodyTextColor} text-xs leading-relaxed`}>{skills}</p>
+              </div>
+            )}
+
+            {/* Languages */}
+            {languages && (
+              <div className="mb-6">
+                <h3 className={`text-xs font-bold ${style.sectionTitleColor} uppercase mb-3`}>Languages</h3>
+                <p className={`${style.bodyTextColor} text-xs`}>{languages}</p>
+              </div>
+            )}
+          </div>
+
+          {/* Right Content */}
+          <div className="flex-1 p-8">
+            {/* Summary */}
+            {summary && (
+              <section className="mb-8">
+                <h2 className={`text-sm uppercase tracking-widest ${style.sectionTitleColor} mb-3 font-semibold`}>Professional Summary</h2>
+                <p className={`${style.bodyTextColor} leading-relaxed whitespace-pre-line text-sm`}>{summary}</p>
+              </section>
+            )}
+
+            {/* Experience */}
+            {experiences.length > 0 && experiences.some(e => e.job_title || e.company) && (
+              <section className="mb-8">
+                <h2 className={`text-sm uppercase tracking-widest ${style.sectionTitleColor} mb-4 font-semibold`}>Professional Experience</h2>
+                <div className="space-y-6">
+                  {experiences.filter(e => e.job_title || e.company).map((exp, idx) => (
+                    <div key={idx}>
+                      <div className="flex justify-between items-baseline mb-2">
+                        <div>
+                          <span className={`font-semibold ${style.nameColor}`}>{exp.job_title}</span>
+                          {exp.company && <span className={style.accentColor}>, {exp.company}</span>}
+                          {exp.location && <span className={style.subtleTextColor}>, {exp.location}</span>}
+                        </div>
+                        {(exp.start_date || exp.end_date) && (
+                          <span className={`text-sm ${style.subtleTextColor}`}>{exp.start_date} — {exp.end_date || 'Present'}</span>
+                        )}
+                      </div>
+                      {exp.achievements && (
+                        <ul className={`list-disc list-outside ml-5 space-y-1 ${style.bodyTextColor} text-sm`}>
+                          {exp.achievements.split('\n').filter(a => a.trim()).map((a, i) => <li key={i}>{a.trim()}</li>)}
+                        </ul>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* Education */}
+            {education.length > 0 && education.some(e => e.degree || e.university) && (
+              <section>
+                <h2 className={`text-sm uppercase tracking-widest ${style.sectionTitleColor} mb-4 font-semibold`}>Education</h2>
+                <div className="space-y-4">
+                  {education.filter(e => e.degree || e.university).map((edu, idx) => (
+                    <div key={idx} className="flex justify-between items-baseline">
+                      <div>
+                        <span className={`font-semibold ${style.nameColor}`}>{edu.degree}</span>
+                        {edu.university && <span className={style.accentColor}>, {edu.university}</span>}
+                        {edu.location && <span className={style.subtleTextColor}>, {edu.location}</span>}
+                      </div>
+                      {(edu.start_date || edu.end_date) && (
+                        <span className={`text-sm ${style.subtleTextColor}`}>{edu.start_date} — {edu.end_date}</span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* 
+// Template: Mercury (Sidebar layout with photo - RESERVED FOR FUTURE PHOTO SUPPORT)
+// This template will be enabled when photo upload functionality is implemented
+function MercuryTemplate({ data, style, showWatermark }) {
+  const { 
+    full_name, target_position, email, phone, linkedin_url, location,
+    summary, skills, experiences = [], education = [], languages
+  } = data;
+
+  const contactParts = [email, phone, linkedin_url, location].filter(Boolean);
+
+  return (
+    <div className="relative bg-white font-sans" id="cv-document">
+      {showWatermark && <Watermark />}
+      
+      <div className={showWatermark ? 'select-none' : ''}>
+        <div className="flex">
+          <div className="w-1/3 bg-gray-100 p-6">
+            {data.photo_url && (
+              <div className="w-24 h-24 rounded-full bg-gray-300 mx-auto mb-6 overflow-hidden">
+                <img src={data.photo_url} alt={full_name || 'Profile'} className="w-full h-full object-cover" />
+              </div>
+            )}
+            
+            {contactParts.length > 0 && (
+              <div className="mb-6">
+                <h3 className={`text-xs font-bold ${style.sectionTitleColor} uppercase mb-3`}>Contact</h3>
+                <div className={`text-xs ${style.contactColor} space-y-2`}>
+                  {contactParts.map((part, i) => (
+                    <div key={i}>{part}</div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {skills && (
+              <div className="mb-6">
+                <h3 className={`text-xs font-bold ${style.sectionTitleColor} uppercase mb-3`}>Skills</h3>
+                <p className={`${style.bodyTextColor} text-xs leading-relaxed`}>{skills}</p>
+              </div>
+            )}
+
+            {languages && (
+              <div className="mb-6">
+                <h3 className={`text-xs font-bold ${style.sectionTitleColor} uppercase mb-3`}>Languages</h3>
+                <p className={`${style.bodyTextColor} text-xs`}>{languages}</p>
+              </div>
+            )}
+          </div>
+
+          <div className="flex-1 p-8">
+            <header className="mb-8">
+              <h1 className={`text-3xl font-bold ${style.nameColor} mb-2`}>
+                {full_name || 'Your Name'}
+              </h1>
+              {target_position && (
+                <p className={`text-lg ${style.positionColor}`}>{target_position}</p>
+              )}
+            </header>
+
+            {summary && (
+              <section className="mb-8">
+                <h2 className={`text-sm uppercase tracking-widest ${style.sectionTitleColor} mb-3 font-semibold`}>Profile</h2>
+                <p className={`${style.bodyTextColor} leading-relaxed whitespace-pre-line text-sm`}>{summary}</p>
+              </section>
+            )}
+
+            {experiences.length > 0 && experiences.some(e => e.job_title || e.company) && (
+              <section className="mb-8">
+                <h2 className={`text-sm uppercase tracking-widest ${style.sectionTitleColor} mb-4 font-semibold`}>Professional Experience</h2>
+                <div className="space-y-6">
+                  {experiences.filter(e => e.job_title || e.company).map((exp, idx) => (
+                    <div key={idx}>
+                      <div className="flex justify-between items-baseline mb-2">
+                        <div>
+                          <span className={`font-semibold ${style.nameColor}`}>{exp.job_title}</span>
+                          {exp.company && <span className={style.accentColor}>, {exp.company}</span>}
+                          {exp.location && <span className={style.subtleTextColor}>, {exp.location}</span>}
+                        </div>
+                        {(exp.start_date || exp.end_date) && (
+                          <span className={`text-sm ${style.subtleTextColor}`}>{exp.start_date} — {exp.end_date || 'Present'}</span>
+                        )}
+                      </div>
+                      {exp.achievements && (
+                        <ul className={`list-disc list-outside ml-5 space-y-1 ${style.bodyTextColor} text-sm`}>
+                          {exp.achievements.split('\n').filter(a => a.trim()).map((a, i) => <li key={i}>{a.trim()}</li>)}
+                        </ul>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {education.length > 0 && education.some(e => e.degree || e.university) && (
+              <section>
+                <h2 className={`text-sm uppercase tracking-widest ${style.sectionTitleColor} mb-4 font-semibold`}>Education</h2>
+                <div className="space-y-4">
+                  {education.filter(e => e.degree || e.university).map((edu, idx) => (
+                    <div key={idx} className="flex justify-between items-baseline">
+                      <div>
+                        <span className={`font-semibold ${style.nameColor}`}>{edu.degree}</span>
+                        {edu.university && <span className={style.accentColor}>, {edu.university}</span>}
+                        {edu.location && <span className={style.subtleTextColor}>, {edu.location}</span>}
+                      </div>
+                      {(edu.start_date || edu.end_date) && (
+                        <span className={`text-sm ${style.subtleTextColor}`}>{edu.start_date} — {edu.end_date}</span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+*/
+
+// Template: Finance (Single column, minimalist - like Finance)
+function FinanceTemplate({ data, style, showWatermark }) {
+  const { 
+    full_name, target_position, email, phone, linkedin_url, location,
+    summary, skills, experiences = [], education = [], languages
+  } = data;
+
+  const contactParts = [email, phone, linkedin_url, location].filter(Boolean);
+
+  return (
+    <div className="relative bg-white p-8 md:p-12 font-sans" id="cv-document">
+      {showWatermark && <Watermark />}
+      
+      <div className={showWatermark ? 'select-none' : ''}>
+        {/* Header */}
+        <header className="mb-8">
+          <h1 className={`text-2xl font-bold ${style.nameColor} mb-2`}>
+            {full_name || 'Your Name'}
+          </h1>
+          {contactParts.length > 0 && (
+            <div className={`text-sm ${style.contactColor} mb-4`}>
+              {contactParts.join(' | ')}
+            </div>
+          )}
+        </header>
+
+        {/* Summary */}
+        {summary && (
+          <section className="mb-8">
+            <h2 className={`text-xs font-bold ${style.sectionTitleColor} uppercase mb-3 tracking-wider`}>Professional Summary</h2>
+            <p className={`${style.bodyTextColor} leading-relaxed whitespace-pre-line text-sm`}>{summary}</p>
+          </section>
+        )}
+
+        {/* Education */}
+        {education.length > 0 && education.some(e => e.degree || e.university) && (
+          <section className="mb-8">
+            <h2 className={`text-xs font-bold ${style.sectionTitleColor} uppercase mb-4 tracking-wider`}>Education</h2>
+            <div className="space-y-4">
+              {education.filter(e => e.degree || e.university).map((edu, idx) => (
+                <div key={idx}>
+                  <div className="flex justify-between items-baseline mb-1">
+                    <div>
+                      <span className={`font-semibold ${style.nameColor}`}>{edu.degree}</span>
+                      {edu.university && <span className={style.accentColor}>, {edu.university}</span>}
+                      {edu.location && <span className={style.subtleTextColor}>, {edu.location}</span>}
+                    </div>
+                    {(edu.start_date || edu.end_date) && (
+                      <span className={`text-sm ${style.subtleTextColor}`}>{edu.start_date} — {edu.end_date}</span>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* Experience */}
+        {experiences.length > 0 && experiences.some(e => e.job_title || e.company) && (
+          <section className="mb-8">
+            <h2 className={`text-xs font-bold ${style.sectionTitleColor} uppercase mb-4 tracking-wider`}>Work Experience</h2>
+            <div className="space-y-6">
+              {experiences.filter(e => e.job_title || e.company).map((exp, idx) => (
+                <div key={idx}>
+                  <div className="flex justify-between items-baseline mb-2">
+                    <div>
+                      <span className={`font-semibold ${style.nameColor}`}>{exp.job_title}</span>
+                      {exp.company && <span className={style.accentColor}>, {exp.company}</span>}
+                      {exp.location && <span className={style.subtleTextColor}>, {exp.location}</span>}
+                    </div>
+                    {(exp.start_date || exp.end_date) && (
+                      <span className={`text-sm ${style.subtleTextColor}`}>{exp.start_date} — {exp.end_date || 'Present'}</span>
+                    )}
+                  </div>
+                  {exp.achievements && (
+                    <ul className={`list-disc list-outside ml-5 space-y-1 ${style.bodyTextColor} text-sm`}>
+                      {exp.achievements.split('\n').filter(a => a.trim()).map((a, i) => <li key={i}>{a.trim()}</li>)}
+                    </ul>
+                  )}
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* Skills */}
+        {skills && (
+          <section className="mb-8">
+            <h2 className={`text-xs font-bold ${style.sectionTitleColor} uppercase mb-3 tracking-wider`}>Technical Expertise</h2>
+            <p className={`${style.bodyTextColor} text-sm`}>{skills}</p>
+          </section>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// Template: Steady Form (Two-column with dates on left - like Steady Form)
+function SteadyFormTemplate({ data, style, showWatermark }) {
+  const { 
+    full_name, target_position, email, phone, linkedin_url, location,
+    summary, skills, experiences = [], education = [], languages
+  } = data;
+
+  const contactParts = [email, phone, linkedin_url, location].filter(Boolean);
+
+  return (
+    <div className="relative bg-white p-8 md:p-12 font-sans" id="cv-document">
+      {showWatermark && <Watermark />}
+      
+      <div className={showWatermark ? 'select-none' : ''}>
+        {/* Header */}
+        <header className="mb-10">
+          <h1 className={`text-3xl font-bold ${style.nameColor} mb-2`}>
+            {full_name || 'Your Name'}
+          </h1>
+          {target_position && (
+            <p className={`text-lg ${style.positionColor} mb-4`}>{target_position}</p>
+          )}
+          {contactParts.length > 0 && (
+            <div className={`text-sm ${style.contactColor}`}>
+              {contactParts.join(' | ')}
+            </div>
+          )}
+        </header>
+
+        {/* Profile */}
+        {summary && (
+          <section className="mb-8">
+            <div className="flex gap-6">
+              <div className="w-24 flex-shrink-0"></div>
+              <div className="flex-1">
+                <h2 className={`text-sm uppercase tracking-widest ${style.sectionTitleColor} mb-3 font-semibold`}>Professional Summary</h2>
+                <p className={`${style.bodyTextColor} leading-relaxed whitespace-pre-line text-sm`}>{summary}</p>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* Experience */}
+        {experiences.length > 0 && experiences.some(e => e.job_title || e.company) && (
+          <section className="mb-8">
+            <h2 className={`text-sm uppercase tracking-widest ${style.sectionTitleColor} mb-4 font-semibold`}>Experience</h2>
+            <div className="space-y-6">
+              {experiences.filter(e => e.job_title || e.company).map((exp, idx) => (
+                <div key={idx} className="flex gap-6">
+                  {/* Dates Column */}
+                  <div className="w-24 flex-shrink-0">
+                    {(exp.start_date || exp.end_date) && (
+                      <div className={`text-sm ${style.subtleTextColor}`}>
+                        {exp.start_date} —<br />
+                        {exp.end_date || 'Present'}
+                      </div>
+                    )}
+                  </div>
+                  {/* Content Column */}
+                  <div className="flex-1">
+                    <div className="mb-2">
+                      <span className={`font-semibold ${style.nameColor}`}>{exp.job_title}</span>
+                      {exp.company && <span className={style.accentColor}>, {exp.company}</span>}
+                      {exp.location && <span className={style.subtleTextColor}>, {exp.location}</span>}
+                    </div>
+                    {exp.achievements && (
+                      <ul className={`list-disc list-outside ml-5 space-y-1 ${style.bodyTextColor} text-sm`}>
+                        {exp.achievements.split('\n').filter(a => a.trim()).map((a, i) => <li key={i}>{a.trim()}</li>)}
+                      </ul>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* Education */}
+        {education.length > 0 && education.some(e => e.degree || e.university) && (
+          <section className="mb-8">
+            <h2 className={`text-sm uppercase tracking-widest ${style.sectionTitleColor} mb-4 font-semibold`}>Education</h2>
+            <div className="space-y-4">
+              {education.filter(e => e.degree || e.university).map((edu, idx) => (
+                <div key={idx} className="flex gap-6">
+                  {/* Dates Column */}
+                  <div className="w-24 flex-shrink-0">
+                    {(edu.start_date || edu.end_date) && (
+                      <div className={`text-sm ${style.subtleTextColor}`}>
+                        {edu.start_date} —<br />
+                        {edu.end_date}
+                      </div>
+                    )}
+                  </div>
+                  {/* Content Column */}
+                  <div className="flex-1">
+                    <span className={`font-semibold ${style.nameColor}`}>{edu.degree}</span>
+                    {edu.university && <span className={style.accentColor}>, {edu.university}</span>}
+                    {edu.location && <span className={style.subtleTextColor}>, {edu.location}</span>}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* Skills */}
+        {skills && (
+          <section className="mb-8">
+            <div className="flex gap-6">
+              <div className="w-24 flex-shrink-0"></div>
+              <div className="flex-1">
+                <h2 className={`text-sm uppercase tracking-widest ${style.sectionTitleColor} mb-3 font-semibold`}>Skills</h2>
+                <p className={`${style.bodyTextColor} text-sm`}>{skills}</p>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* Languages */}
+        {languages && (
+          <section>
+            <div className="flex gap-6">
+              <div className="w-24 flex-shrink-0"></div>
+              <div className="flex-1">
+                <h2 className={`text-sm uppercase tracking-widest ${style.sectionTitleColor} mb-3 font-semibold`}>Languages</h2>
+                <p className={`${style.bodyTextColor} text-sm`}>{languages}</p>
+              </div>
+            </div>
+          </section>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // Main CVDocument component
 export default function CVDocument({ data, showWatermark = false }) {
   const templateName = data.template || 'classic';
@@ -576,7 +1050,11 @@ export default function CVDocument({ data, showWatermark = false }) {
     modern: ModernTemplate,
     minimal: MinimalTemplate,
     executive: ExecutiveTemplate,
-    compact: CompactTemplate
+    compact: CompactTemplate,
+    sidebar: SidebarTemplate,
+    // mercury: MercuryTemplate, // Reserved for future photo support
+    finance: FinanceTemplate,
+    steadyForm: SteadyFormTemplate
   };
   
   const SelectedTemplate = templates[templateName] || ClassicTemplate;

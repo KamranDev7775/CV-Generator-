@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -8,8 +8,11 @@ import ExperienceEntry from './ExperienceEntry';
 import EducationEntry from './EducationEntry';
 import CVDocument from './CVDocument';
 import LanguageSelector from './LanguageSelector';
+import ProgressBar from './ProgressBar';
+import TemplateSwitcher from './TemplateSwitcher';
 import { Loader2, Eye } from "lucide-react";
 import { toast } from "sonner";
+import { mergeDataForPreview, hasUserData } from '@/utils/sampleData';
 
 // Validation functions
 const validateEmail = (email) => {
@@ -78,8 +81,22 @@ const validateDate = (date) => {
   return { valid: true };
 };
 
-export default function CVFormWithPreview({ formData, setFormData, onSubmit, isGenerating, generateCoverLetter, setGenerateCoverLetter, user, remainingAIRequests }) {
+export default function CVFormWithPreview({ formData, setFormData, onSubmit, isGenerating, generateCoverLetter, setGenerateCoverLetter, user, remainingAIRequests, selectedTemplate = 'classic', onImport = null }) {
   const [errors, setErrors] = useState({});
+
+  // Determine preview data: use sample data if form is empty, otherwise use form data
+  const previewData = useMemo(() => {
+    const hasData = hasUserData(formData, selectedTemplate);
+    if (hasData) {
+      return formData;
+    }
+    return mergeDataForPreview(formData || {}, selectedTemplate);
+  }, [formData, selectedTemplate]);
+
+  // Check if currently showing sample data
+  const isShowingSampleData = useMemo(() => {
+    return !hasUserData(formData, selectedTemplate);
+  }, [formData, selectedTemplate]);
 
   const updateField = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -343,6 +360,9 @@ export default function CVFormWithPreview({ formData, setFormData, onSubmit, isG
 
   return (
     <section className="bg-gradient-to-b from-white to-gray-50" id="cv-form">
+      {/* Progress Bar */}
+      <ProgressBar formData={formData} />
+      
       <div className="max-w-7xl mx-auto px-6 md:px-12 py-12">
         {/* Header */}
         <div className="text-center mb-12">
@@ -651,34 +671,20 @@ export default function CVFormWithPreview({ formData, setFormData, onSubmit, isG
                 />
               </div>
 
-              {/* Template Selection */}
+              {/* Template Selection - Switcher */}
               <div>
-                <h3 className="text-sm font-semibold uppercase tracking-wider text-blue-600 mb-2">CV Template</h3>
-                <p className="text-xs text-gray-500 mb-4">Select from 5 professional templates</p>
-                <div className="grid grid-cols-3 md:grid-cols-5 gap-2 md:gap-3">
-                  {[
-                    { id: 'classic', name: 'Classic', desc: 'Traditional' },
-                    { id: 'modern', name: 'Modern', desc: 'Centered' },
-                    { id: 'minimal', name: 'Minimal', desc: 'Clean' },
-                    { id: 'executive', name: 'Executive', desc: 'Senior' },
-                    { id: 'compact', name: 'Compact', desc: 'Dense' }
-                  ].map((template) => (
-                    <button
-                      key={template.id}
-                      type="button"
-                      onClick={() => updateField('template', template.id)}
-                      className={`p-3 border-2 rounded-lg text-center transition-all ${
-                        (formData.template || 'classic') === template.id
-                          ? 'border-blue-600 bg-blue-50'
-                          : 'border-gray-200 hover:border-gray-300'
-                      }`}
-                    >
-                      <div className="font-medium text-gray-900 text-xs md:text-sm">{template.name}</div>
-                      <div className="text-[10px] md:text-xs text-gray-500 mt-0.5">{template.desc}</div>
-                    </button>
-                  ))}
-                </div>
-                <p className="text-xs text-gray-400 mt-2">5 professional ATS-friendly templates</p>
+                <h3 className="text-sm font-semibold uppercase tracking-wider text-blue-600 mb-4">CV Template</h3>
+                <TemplateSwitcher
+                  selectedTemplate={formData.template || selectedTemplate}
+                  onTemplateChange={(newTemplate) => {
+                    updateField('template', newTemplate);
+                    // Update preview with new template's sample data if form is empty
+                    if (isShowingSampleData) {
+                      // Preview will automatically update via useMemo
+                    }
+                  }}
+                />
+                <p className="text-xs text-gray-400 mt-2">You can switch templates anytime before payment</p>
               </div>
 
               {/* Style Selection */}
@@ -705,7 +711,7 @@ export default function CVFormWithPreview({ formData, setFormData, onSubmit, isG
                     </button>
                   ))}
                 </div>
-                <p className="text-xs text-gray-400 mt-3 text-center">All 15 combinations (5 templates × 3 styles) are ATS-friendly</p>
+                <p className="text-xs text-gray-400 mt-3 text-center">All combinations of templates and styles are ATS-friendly</p>
               </div>
 
               {/* Cover Letter Option - Prominent */}
@@ -789,15 +795,26 @@ export default function CVFormWithPreview({ formData, setFormData, onSubmit, isG
 
           {/* Live Preview - Right Side */}
           <div className="bg-white rounded-2xl shadow-lg p-8 lg:h-[calc(100vh-12rem)] lg:overflow-y-auto lg:sticky lg:top-24">
-            <div className="flex items-center gap-2 mb-6">
-              <Eye className="h-5 w-5 text-blue-600" />
-              <h3 className="text-lg font-semibold text-gray-900">Live Preview</h3>
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-2">
+                <Eye className="h-5 w-5 text-blue-600" />
+                <h3 className="text-lg font-semibold text-gray-900">Live Preview</h3>
+              </div>
+              {isShowingSampleData && (
+                <span className="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded-full font-medium">
+                  Sample Data
+                </span>
+              )}
             </div>
-            <div className="border border-gray-200 rounded-lg p-6 bg-gray-50">
-              <CVDocument data={formData} showWatermark={true} />
+            <div className="border border-gray-200 rounded-lg p-2 md:p-6 bg-gray-50 overflow-x-auto">
+              <div className="min-w-[600px] md:min-w-0">
+                <CVDocument data={previewData} showWatermark={true} />
+              </div>
             </div>
             <p className="text-xs text-gray-500 text-center mt-4">
-              Preview updates as you type • Final version available after payment
+              {isShowingSampleData 
+                ? 'Preview shows sample data • Start typing to see your CV'
+                : 'Preview updates as you type • Final version available after payment'}
             </p>
           </div>
         </div>

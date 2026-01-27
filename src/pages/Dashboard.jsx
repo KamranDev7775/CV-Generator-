@@ -79,8 +79,8 @@ export default function Dashboard() {
     // Store in secure localStorage
     setSecureStorage('form_data', formData);
     
-    // Navigate to Home with edit mode flag
-    navigate(createPageUrl('Home') + '?edit=true');
+    // Navigate to CVBuilder form step with template
+    navigate(`${createPageUrl('CVBuilder')}?step=form&template=${formData.template || 'classic'}`);
   };
 
   if (loading) {

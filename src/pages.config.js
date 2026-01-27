@@ -5,6 +5,7 @@ import Pricing from './pages/Pricing';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import Success from './pages/Success';
 import TermsConditions from './pages/TermsConditions';
+import CVBuilder from './pages/CVBuilder';
 import __Layout from './Layout.jsx';
 
 
@@ -16,6 +17,7 @@ export const PAGES = {
     "PrivacyPolicy": PrivacyPolicy,
     "Success": Success,
     "TermsConditions": TermsConditions,
+    "CVBuilder": CVBuilder,
 }
 
 export const pagesConfig = {
