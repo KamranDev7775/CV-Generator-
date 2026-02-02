@@ -1,9 +1,10 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { base44 } from '@/api/base44Client';
 import ExperienceEntry from './ExperienceEntry';
 import EducationEntry from './EducationEntry';
 import CVDocument from './CVDocument';
@@ -13,6 +14,28 @@ import TemplateSwitcher from './TemplateSwitcher';
 import { Loader2, Eye } from "lucide-react";
 import { toast } from "sonner";
 import { mergeDataForPreview, hasUserData } from '@/utils/sampleData';
+
+/**
+ * @typedef {Object} FormData
+ * @property {string} [full_name]
+ * @property {string} [email]
+ * @property {string} [phone]
+ * @property {string} [linkedin_url]
+ * @property {string} [location]
+ * @property {string} [target_position]
+ * @property {string} [summary]
+ * @property {string} [skills]
+ * @property {boolean} [auto_generate_summary]
+ * @property {Array} [experiences]
+ * @property {Array} [education]
+ * @property {Array} [languagesList]
+ * @property {string} [languages]
+ * @property {string} [template]
+ */
+
+/**
+ * @typedef {Object.<string, string>} ValidationErrors
+ */
 
 // Validation functions
 const validateEmail = (email) => {
@@ -26,12 +49,32 @@ const validateEmail = (email) => {
 
 const validateURL = (url) => {
   if (!url) return { valid: true }; // Optional field
+  return { valid: true };
+};
+// Accepts any valid LinkedIn profile URL (with or without protocol, with www, with country, etc.)
+const validateLinkedInURL = (url) => {
+  if (!url) return { valid: true }; // Optional field
   try {
     const urlToTest = url.startsWith('http') ? url : `https://${url}`;
-    new URL(urlToTest);
-    return { valid: true };
+    const parsed = new URL(urlToTest);
+    // Accept linkedin.com or country subdomains (e.g., de.linkedin.com)
+    const host = parsed.hostname.replace(/^www\./, '');
+    if (
+      host.endsWith('linkedin.com') &&
+      /^\/in\//.test(parsed.pathname)
+    ) {
+      return { valid: true };
+    }
+    // Accept also /pub/ and /profile/ for legacy LinkedIn URLs
+    if (
+      host.endsWith('linkedin.com') &&
+      (/^\/(in|pub|profile)\//.test(parsed.pathname))
+    ) {
+      return { valid: true };
+    }
+    return { valid: false, message: 'Please enter a valid LinkedIn profile URL (e.g., linkedin.com/in/yourname)' };
   } catch {
-    return { valid: false, message: 'Please enter a valid URL (e.g., linkedin.com/in/yourname)' };
+    return { valid: false, message: 'Please enter a valid LinkedIn profile URL (e.g., linkedin.com/in/yourname)' };
   }
 };
 
@@ -81,16 +124,41 @@ const validateDate = (date) => {
   return { valid: true };
 };
 
-export default function CVFormWithPreview({ formData, setFormData, onSubmit, isGenerating, generateCoverLetter, setGenerateCoverLetter, user, remainingAIRequests, selectedTemplate = 'classic', onImport = null }) {
+/**
+ * @param {Object} props
+ * @param {FormData} props.formData
+ * @param {Function} props.setFormData
+ * @param {Function} props.onSubmit
+ * @param {boolean} props.isGenerating
+ * @param {Object} [props.user]
+ * @param {number} [props.remainingAIRequests]
+ * @param {string} [props.selectedTemplate]
+ * @param {Function} [props.onImport]
+ * @returns {React.ReactElement}
+ */
+export default function CVFormWithPreview({ formData, setFormData, onSubmit, isGenerating, user, remainingAIRequests, selectedTemplate = 'classic', onImport = null }) {
+  /** @type {[ValidationErrors, Function]} */
   const [errors, setErrors] = useState({});
+  const fileInputRef = useRef(null);
 
   // Determine preview data: use sample data if form is empty, otherwise use form data
+  // Always ensure the correct template is set
   const previewData = useMemo(() => {
     const hasData = hasUserData(formData, selectedTemplate);
+    const currentTemplate = formData.template || selectedTemplate;
+    
     if (hasData) {
-      return formData;
+      return {
+        ...formData,
+        template: currentTemplate
+      };
     }
-    return mergeDataForPreview(formData || {}, selectedTemplate);
+    
+    const merged = mergeDataForPreview(formData || {}, currentTemplate);
+    return {
+      ...merged,
+      template: currentTemplate
+    };
   }, [formData, selectedTemplate]);
 
   // Check if currently showing sample data
@@ -108,6 +176,23 @@ export default function CVFormWithPreview({ formData, setFormData, onSubmit, isG
         return newErrors;
       });
     }
+  };
+
+  const handleUploadClick = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+      fileInputRef.current.click();
+    }
+  };
+
+  const handleFileChange = async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    if (!onImport) {
+      toast.error('Upload is currently unavailable. Please fill the form manually.');
+      return;
+    }
+    await onImport(file);
   };
 
   // Real-time validation for individual fields
@@ -136,7 +221,7 @@ export default function CVFormWithPreview({ formData, setFormData, onSubmit, isG
         break;
       case 'linkedin_url':
         if (value && value.trim() !== '') {
-          const urlValidation = validateURL(value);
+          const urlValidation = validateLinkedInURL(value);
           if (!urlValidation.valid) {
             error = urlValidation.message;
           }
@@ -220,7 +305,7 @@ export default function CVFormWithPreview({ formData, setFormData, onSubmit, isG
     
     // Validate LinkedIn URL
     if (formData.linkedin_url) {
-      const urlValidation = validateURL(formData.linkedin_url);
+      const urlValidation = validateLinkedInURL(formData.linkedin_url);
       if (!urlValidation.valid) {
         newErrors.linkedin_url = urlValidation.message;
       }
@@ -291,11 +376,13 @@ export default function CVFormWithPreview({ formData, setFormData, onSubmit, isG
       setTimeout(() => {
         if (firstErrorKey) {
           // Try to find the input field by name attribute (we added these to ExperienceEntry and EducationEntry)
-          let element = document.querySelector(`[name="${firstErrorKey}"]`);
+          const element = document.querySelector(`[name="${firstErrorKey}"]`);
           
-          if (element) {
+          if (element && element instanceof HTMLElement) {
             element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            element.focus();
+            if ('focus' in element && typeof element.focus === 'function') {
+              element.focus();
+            }
             // Highlight the field
             element.classList.add('border-red-500', 'ring-2', 'ring-red-200');
             setTimeout(() => {
@@ -363,7 +450,7 @@ export default function CVFormWithPreview({ formData, setFormData, onSubmit, isG
       {/* Progress Bar */}
       <ProgressBar formData={formData} />
       
-      <div className="max-w-7xl mx-auto px-6 md:px-12 py-12">
+      <div className="w-full px-4 md:px-6 lg:px-8 py-6">
         {/* Header */}
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold text-black mb-3">
@@ -539,6 +626,51 @@ export default function CVFormWithPreview({ formData, setFormData, onSubmit, isG
                       )}
                     </div>
                   </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Profile Photo</label>
+                    <div className="flex items-center gap-4">
+                      <div className="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden border-2 border-gray-200">
+                        {formData.photo ? (
+                          <img src={formData.photo} alt="Profile" className="w-full h-full object-cover" />
+                        ) : (
+                          <span className="text-2xl text-gray-400">👤</span>
+                        )}
+                      </div>
+                      <div className="flex-1">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={async (e) => {
+                            const file = e.target.files[0];
+                            if (file) {
+                              try {
+                                toast.loading('Uploading photo...');
+                                const { file_url } = await base44.integrations.Core.UploadFile({ file });
+                                updateField('photo', file_url);
+                                toast.success('Photo uploaded!');
+                              } catch (error) {
+                                console.error('Photo upload error:', error);
+                                toast.error('Failed to upload photo. Please try again.');
+                              }
+                            }
+                          }}
+                          className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                        />
+                        <p className="text-xs text-gray-400 mt-1">Used in Professional, Modern Sidebar, and Executive Dark templates</p>
+                      </div>
+                      {formData.photo && (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => updateField('photo', null)}
+                          className="text-red-500 hover:text-red-700"
+                        >
+                          Remove
+                        </Button>
+                      )}
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -577,19 +709,6 @@ export default function CVFormWithPreview({ formData, setFormData, onSubmit, isG
                     </div>
                   </div>
                 </div>
-              </div>
-
-              {/* Skills */}
-              <div>
-                <h3 className="text-sm font-semibold uppercase tracking-wider text-blue-600 mb-4">Skills</h3>
-                <Textarea
-                  value={formData.skills || ''}
-                  onChange={(e) => updateField('skills', e.target.value)}
-                  placeholder="IT Audit, SOX, SAP, SQL, Excel, Power BI"
-                  rows={2}
-                  className="border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-lg resize-none"
-                />
-                <p className="text-xs text-gray-500 mt-2">Comma-separated list</p>
               </div>
 
               {/* Professional Experience */}
@@ -655,7 +774,18 @@ export default function CVFormWithPreview({ formData, setFormData, onSubmit, isG
                   + Add another education
                 </Button>
               </div>
-
+              {/* Skills */}
+              <div>
+                <h3 className="text-sm font-semibold uppercase tracking-wider text-blue-600 mb-4">Skills</h3>
+                <Textarea
+                  value={formData.skills || ''}
+                  onChange={(e) => updateField('skills', e.target.value)}
+                  placeholder="IT Audit, SOX, SAP, SQL, Excel, Power BI"
+                  rows={2}
+                  className="border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-lg resize-none"
+                />
+                <p className="text-xs text-gray-500 mt-2">Comma-separated list</p>
+              </div>
               {/* Languages */}
               <div>
                 <h3 className="text-sm font-semibold uppercase tracking-wider text-blue-600 mb-4">Languages</h3>
@@ -685,61 +815,6 @@ export default function CVFormWithPreview({ formData, setFormData, onSubmit, isG
                   }}
                 />
                 <p className="text-xs text-gray-400 mt-2">You can switch templates anytime before payment</p>
-              </div>
-
-              {/* Style Selection */}
-              <div>
-                <h3 className="text-sm font-semibold uppercase tracking-wider text-blue-600 mb-4">CV Style</h3>
-                <div className="grid grid-cols-3 gap-3">
-                  {[
-                    { id: 'professional', name: 'Professional', desc: 'Serif, Classic' },
-                    { id: 'elegant', name: 'Elegant', desc: 'Sans-serif, Slate' },
-                    { id: 'bold', name: 'Bold', desc: 'Sans-serif, Strong' }
-                  ].map((style) => (
-                    <button
-                      key={style.id}
-                      type="button"
-                      onClick={() => updateField('style', style.id)}
-                      className={`p-4 border-2 rounded-lg text-center transition-all ${
-                        (formData.style || 'professional') === style.id
-                          ? 'border-purple-600 bg-purple-50'
-                          : 'border-gray-200 hover:border-gray-300'
-                      }`}
-                    >
-                      <div className="font-medium text-gray-900 text-sm">{style.name}</div>
-                      <div className="text-xs text-gray-500 mt-1">{style.desc}</div>
-                    </button>
-                  ))}
-                </div>
-                <p className="text-xs text-gray-400 mt-3 text-center">All combinations of templates and styles are ATS-friendly</p>
-              </div>
-
-              {/* Cover Letter Option - Prominent */}
-              <div className="bg-gradient-to-r from-purple-50 via-blue-50 to-purple-50 p-5 rounded-xl border-2 border-purple-300 shadow-md">
-                <div className="flex items-start space-x-3">
-                  <Checkbox
-                    id="cover-letter-preview"
-                    checked={generateCoverLetter || false}
-                    onCheckedChange={setGenerateCoverLetter}
-                    className="mt-1 border-purple-400 data-[state=checked]:bg-purple-600 data-[state=checked]:border-purple-600"
-                  />
-                  <div className="flex-1">
-                    <label htmlFor="cover-letter-preview" className="text-base font-bold text-gray-900 cursor-pointer block flex items-center gap-2">
-                      <span className="text-xl">✉️</span>
-                      <span>Generate a matching cover letter</span>
-                    </label>
-                    <p className="text-sm text-gray-700 mt-2 leading-relaxed">
-                      AI will create a professional cover letter tailored to your experience and target position. You can edit it before finalizing.
-                    </p>
-                    {!user && remainingAIRequests !== null && (
-                      <p className="text-xs text-amber-600 mt-2 font-medium">
-                        {remainingAIRequests > 0 
-                          ? `⚠️ ${remainingAIRequests} AI request(s) remaining this hour. Log in for unlimited access.`
-                          : '⚠️ Rate limit reached. Please log in for unlimited AI generation.'}
-                      </p>
-                    )}
-                  </div>
-                </div>
               </div>
 
               {/* Submit */}
@@ -794,24 +869,20 @@ export default function CVFormWithPreview({ formData, setFormData, onSubmit, isG
           </div>
 
           {/* Live Preview - Right Side */}
-          <div className="bg-white rounded-2xl shadow-lg p-8 lg:h-[calc(100vh-12rem)] lg:overflow-y-auto lg:sticky lg:top-24">
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-2">
-                <Eye className="h-5 w-5 text-blue-600" />
-                <h3 className="text-lg font-semibold text-gray-900">Live Preview</h3>
-              </div>
-              {isShowingSampleData && (
-                <span className="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded-full font-medium">
-                  Sample Data
-                </span>
-              )}
+          <div className="space-y-4">
+            <div className="flex items-center gap-2">
+              <Eye className="h-5 w-5 text-blue-600" />
+              <h3 className="text-lg font-semibold text-gray-900">Live Preview</h3>
             </div>
-            <div className="border border-gray-200 rounded-lg p-2 md:p-6 bg-gray-50 overflow-x-auto">
-              <div className="min-w-[600px] md:min-w-0">
-                <CVDocument data={previewData} showWatermark={true} />
-              </div>
+            {isShowingSampleData && (
+              <span className="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded-full font-medium inline-block">
+                Sample Data
+              </span>
+            )}
+            <div className="sticky top-4 border border-gray-200 rounded-lg bg-white shadow-lg overflow-auto" style={{height: 'calc(100vh - 8rem)'}}>
+              <CVDocument data={previewData} showWatermark={true} preview={true} />
             </div>
-            <p className="text-xs text-gray-500 text-center mt-4">
+            <p className="text-xs text-gray-500 text-center">
               {isShowingSampleData 
                 ? 'Preview shows sample data • Start typing to see your CV'
                 : 'Preview updates as you type • Final version available after payment'}

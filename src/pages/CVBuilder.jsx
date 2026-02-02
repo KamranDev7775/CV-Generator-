@@ -4,7 +4,7 @@ import { base44 } from '@/api/base44Client';
 import { createPageUrl } from '../utils';
 import { setSecureStorage, getSecureStorage, removeSecureStorage } from '../utils/storage';
 import { toast } from "sonner";
-import { getAllTemplates, getTemplatesByCategory, TEMPLATE_CATEGORIES, getAllCategories, getTemplateById, templateExists } from '@/config/templates';
+import { getAllTemplates, getTemplatesByCategory, getAllCategories, templateExists } from '@/config/templates';
 import { canMakeAIRequest, recordAIRequest, getRemainingRequests } from '../utils/rateLimiter';
 import TemplateCard from '@/components/cv/TemplateCard';
 import CVFormWithPreview from '@/components/cv/CVFormWithPreview';
@@ -20,9 +20,8 @@ export default function CVBuilder() {
   const navigate = useNavigate();
   const location = useLocation();
   
-  // Get step from URL params
   const urlParams = new URLSearchParams(location.search);
-  const step = urlParams.get('step') || 'templates'; // templates, form, preview
+  const step = urlParams.get('step') || 'templates';
   
   const updateStep = (newStep, template = null) => {
     const params = new URLSearchParams();
@@ -54,65 +53,80 @@ export default function CVBuilder() {
     seniority_level: 'Mid',
     job_description: '',
     template: 'classic',
-    style: 'professional'
+    style: 'professional',
+    photo: null
   });
   const [generatedCV, setGeneratedCV] = useState(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
-  const [generateCoverLetter, setGenerateCoverLetter] = useState(false);
   const [importError, setImportError] = useState(null);
   const [csrfToken, setCsrfToken] = useState('');
   const [remainingAIRequests, setRemainingAIRequests] = useState(null);
   const [authCheckAttempts, setAuthCheckAttempts] = useState(0);
   const lastAuthCheckRef = useRef(0);
-  const pendingImportRef = useRef(null);
 
-  // Load user and saved form data on mount
   useEffect(() => {
+    console.log('[CV Builder] Mount effect running');
     loadUser();
     
-    // Check for pending CV import - store in ref to process after handleImportCV is defined
-    const pendingImport = sessionStorage.getItem('pending_cv_import');
-    if (pendingImport && urlParams.get('import') === 'true') {
+    // Check for imported CV data from Home.jsx
+    const importParam = urlParams.get('import');
+    const importDataStr = sessionStorage.getItem('cv_import_data');
+    
+    console.log('[CV Builder] Import check:', {
+      importParam: importParam,
+      hasImportData: !!importDataStr
+    });
+    
+    if (importParam === 'success' && importDataStr) {
+      console.log('[CV Builder] Processing imported CV data');
       try {
-        const fileData = JSON.parse(pendingImport);
-        // Convert base64 back to File object
-        const byteCharacters = atob(fileData.data.split(',')[1]);
-        const byteNumbers = new Array(byteCharacters.length);
-        for (let i = 0; i < byteCharacters.length; i++) {
-          byteNumbers[i] = byteCharacters.charCodeAt(i);
-        }
-        const byteArray = new Uint8Array(byteNumbers);
-        const file = new File([byteArray], fileData.name, { type: fileData.type });
+        const importData = JSON.parse(importDataStr);
         
-        // Store in ref to process after handleImportCV is defined
-        pendingImportRef.current = file;
-        sessionStorage.removeItem('pending_cv_import');
+        setFormData(prev => ({
+          ...prev,
+          ...importData,
+          template: prev.template || 'classic'
+        }));
+        
+        setSecureStorage(STORAGE_KEY, {
+          ...formData,
+          ...importData
+        });
+        
+        console.log('[CV Builder] Import data merged into form');
+        sessionStorage.removeItem('cv_import_data');
       } catch (error) {
-        console.error('Error processing pending import:', error);
-        sessionStorage.removeItem('pending_cv_import');
+        console.error('[CV Builder] Error processing import data:', error);
       }
     }
     
-    // Load template from URL or storage
     const templateParam = urlParams.get('template');
     const savedTemplate = getSecureStorage(STORAGE_KEY_TEMPLATE);
     const templateId = templateParam || savedTemplate || 'classic';
     const validTemplate = templateExists(templateId) ? templateId : 'classic';
+    
+    console.log('[CV Builder] Template selection:', {
+      templateParam,
+      savedTemplate,
+      selected: validTemplate
+    });
     
     setSelectedTemplateId(validTemplate);
     
     const saved = getSecureStorage(STORAGE_KEY);
     if (saved) {
       try {
-        setFormData({
+        console.log('[CV Builder] Loading saved form data from storage');
+        setFormData(prev => ({
           ...saved,
           template: validTemplate
-        });
+        }));
       } catch (e) {
-        console.log('Could not parse saved data');
+        console.log('[CV Builder] Could not parse saved data');
       }
     } else {
+      console.log('[CV Builder] No saved form data found');
       setFormData(prev => ({
         ...prev,
         template: validTemplate
@@ -124,9 +138,9 @@ export default function CVBuilder() {
     }
     
     setRemainingAIRequests(getRemainingRequests());
+    console.log('[CV Builder] Mount effect completed');
   }, []);
 
-  // Generate CSRF token on mount
   useEffect(() => {
     const generateCsrfToken = () => {
       if (crypto.randomUUID) {
@@ -168,7 +182,6 @@ export default function CVBuilder() {
     }
   };
 
-  // Get filtered templates
   const filteredTemplates = useMemo(() => {
     if (selectedCategory === 'All Templates') {
       return getAllTemplates();
@@ -176,7 +189,6 @@ export default function CVBuilder() {
     return getTemplatesByCategory(selectedCategory);
   }, [selectedCategory]);
 
-  // Get available categories
   const categories = useMemo(() => {
     return ['All Templates', ...getAllCategories()];
   }, []);
@@ -184,8 +196,6 @@ export default function CVBuilder() {
   const handleTemplateSelect = (templateId) => {
     setSelectedTemplateId(templateId);
     setSecureStorage(STORAGE_KEY_TEMPLATE, templateId);
-    
-    // Navigate to form step
     updateStep('form', templateId);
   };
 
@@ -193,19 +203,16 @@ export default function CVBuilder() {
     navigate(createPageUrl('Home'));
   };
 
-  // Sanitize string input - remove dangerous characters and trim
   const sanitizeString = (str) => {
     if (!str || typeof str !== 'string') return '';
-    // Remove null bytes, control characters, and excessive whitespace
     return str
       .replace(/\0/g, '')
       .replace(/[\x00-\x1F\x7F]/g, '')
       .replace(/\s+/g, ' ')
       .trim()
-      .substring(0, 10000); // Max length limit
+      .substring(0, 10000);
   };
 
-  // Sanitize array of objects
   const sanitizeArray = (arr, maxItems = 10) => {
     if (!Array.isArray(arr)) return [];
     return arr.slice(0, maxItems).map(item => {
@@ -222,12 +229,17 @@ export default function CVBuilder() {
     });
   };
 
-  // Import CV functionality with validation and sanitization
   const handleImportCV = async (file) => {
+    console.log('[CV Builder] handleImportCV called', {
+      fileName: file?.name,
+      fileType: file?.type,
+      fileSize: file?.size,
+      timestamp: new Date().toISOString()
+    });
+    
     setImportError(null);
     
     try {
-      // Validation: File type
       const allowedTypes = [
         'application/pdf',
         'application/msword',
@@ -235,32 +247,40 @@ export default function CVBuilder() {
         'text/plain'
       ];
       
+      console.log('[CV Builder] Validating file type:', file.type);
       if (!allowedTypes.includes(file.type) && !file.name.match(/\.(pdf|doc|docx|txt)$/i)) {
+        console.error('[CV Builder] Invalid file type:', file.type);
         setImportError('Invalid file type. Please upload a PDF, Word document, or text file.');
         toast.error('Invalid file type. Please upload a PDF, Word document, or text file.');
         return;
       }
       
-      // Validation: File size (max 10MB)
       const maxSize = 10 * 1024 * 1024;
+      console.log('[CV Builder] Validating file size:', file.size, 'max:', maxSize);
       if (file.size > maxSize) {
+        console.error('[CV Builder] File too large:', file.size);
         setImportError('File is too large. Please upload a file smaller than 10MB.');
         toast.error('File is too large. Please upload a file smaller than 10MB.');
         return;
       }
       
-      // Validation: Empty file
       if (file.size === 0) {
+        console.error('[CV Builder] File is empty');
         setImportError('File is empty. Please upload a valid file.');
         toast.error('File is empty. Please upload a valid file.');
         return;
       }
       
-      // Show loading toast
+      console.log('[CV Builder] File validation passed, showing loading toast');
       toast.loading('Uploading and processing your CV...');
       
+      // Upload the file to base44
+      console.log('[CV Builder] Calling UploadFile API');
       const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      console.log('[CV Builder] UploadFile success, file_url:', file_url);
       
+      // Extract data from the uploaded CV
+      console.log('[CV Builder] Calling ExtractDataFromUploadedFile API');
       const result = await base44.integrations.Core.ExtractDataFromUploadedFile({
         file_url,
         json_schema: {
@@ -306,116 +326,68 @@ export default function CVBuilder() {
         }
       });
 
-      if (result && typeof result === 'object' && 'status' in result && result.status === 'error') {
+      console.log('[CV Builder] ExtractDataFromUploadedFile result:', result);
+
+      if (result.status === 'error') {
+        console.error('[CV Builder] API returned error status');
         setImportError('Could not read this file. Please try another one.');
         toast.error('Could not read this file. Please try another one.');
         return;
       }
 
-      const extractedDataRaw = (result && typeof result === 'object' && 'output' in result) ? result.output : (result || {});
-      const extractedData = extractedDataRaw && typeof extractedDataRaw === 'object' ? extractedDataRaw : {};
+      // Merge extracted data with default form structure
+      const extractedData = result.output || {};
+      console.log('[CV Builder] Extracted data:', extractedData);
       
-      // Sanitize all extracted data with proper type checking
-      const sanitizedData = {
-        full_name: sanitizeString(extractedData && 'full_name' in extractedData ? String(extractedData.full_name) : ''),
-        target_position: sanitizeString(extractedData && 'target_position' in extractedData ? String(extractedData.target_position) : ''),
-        location: sanitizeString(extractedData && 'location' in extractedData ? String(extractedData.location) : ''),
-        email: sanitizeString(extractedData && 'email' in extractedData ? String(extractedData.email) : '').toLowerCase(), // Normalize email
-        phone: sanitizeString(extractedData && 'phone' in extractedData ? String(extractedData.phone) : ''),
-        linkedin_url: sanitizeString(extractedData && 'linkedin_url' in extractedData ? String(extractedData.linkedin_url) : ''),
-        summary: sanitizeString(extractedData && 'summary' in extractedData ? String(extractedData.summary) : ''),
-        skills: sanitizeString(extractedData && 'skills' in extractedData ? String(extractedData.skills) : ''),
-        experiences: sanitizeArray(extractedData && 'experiences' in extractedData && Array.isArray(extractedData.experiences) ? extractedData.experiences : [], 10),
-        education: sanitizeArray(extractedData && 'education' in extractedData && Array.isArray(extractedData.education) ? extractedData.education : [], 10),
-        languages: sanitizeString(extractedData && 'languages' in extractedData ? String(extractedData.languages) : '')
-      };
-      
-      // Ensure experiences and education arrays have proper structure
-      const sanitizedExperiences = sanitizedData.experiences.length > 0
-        ? sanitizedData.experiences.map(exp => {
-            const expObj = exp && typeof exp === 'object' ? exp : {};
-            return {
-              job_title: sanitizeString('job_title' in expObj ? String(expObj.job_title) : ''),
-              company: sanitizeString('company' in expObj ? String(expObj.company) : ''),
-              location: sanitizeString('location' in expObj ? String(expObj.location) : ''),
-              start_date: sanitizeString('start_date' in expObj ? String(expObj.start_date) : ''),
-              end_date: sanitizeString('end_date' in expObj ? String(expObj.end_date) : ''),
-              achievements: sanitizeString('achievements' in expObj ? String(expObj.achievements) : '')
-            };
-          })
-        : [{ job_title: '', company: '', location: '', start_date: '', end_date: '', achievements: '' }];
-      
-      const sanitizedEducation = sanitizedData.education.length > 0
-        ? sanitizedData.education.map(edu => {
-            const eduObj = edu && typeof edu === 'object' ? edu : {};
-            return {
-              degree: sanitizeString('degree' in eduObj ? String(eduObj.degree) : ''),
-              university: sanitizeString('university' in eduObj ? String(eduObj.university) : ''),
-              location: sanitizeString('location' in eduObj ? String(eduObj.location) : ''),
-              start_date: sanitizeString('start_date' in eduObj ? String(eduObj.start_date) : ''),
-              end_date: sanitizeString('end_date' in eduObj ? String(eduObj.end_date) : '')
-            };
-          })
-        : [{ degree: '', university: '', location: '', start_date: '', end_date: '' }];
-
       const newFormData = {
         ...formData,
-        full_name: sanitizedData.full_name,
-        target_position: sanitizedData.target_position,
-        location: sanitizedData.location,
-        email: sanitizedData.email,
-        phone: sanitizedData.phone,
-        linkedin_url: sanitizedData.linkedin_url,
-        summary: sanitizedData.summary,
+        full_name: extractedData.full_name || '',
+        target_position: extractedData.target_position || '',
+        location: extractedData.location || '',
+        email: extractedData.email || '',
+        phone: extractedData.phone || '',
+        linkedin_url: extractedData.linkedin_url || '',
+        summary: extractedData.summary || '',
         auto_generate_summary: false,
-        skills: sanitizedData.skills,
-        experiences: sanitizedExperiences,
-        education: sanitizedEducation,
-        languages: sanitizedData.languages,
+        skills: extractedData.skills || '',
+        experiences: (extractedData.experiences && extractedData.experiences.length > 0) 
+          ? extractedData.experiences 
+          : [{ job_title: '', company: '', location: '', start_date: '', end_date: '', achievements: '' }],
+        education: (extractedData.education && extractedData.education.length > 0) 
+          ? extractedData.education 
+          : [{ degree: '', university: '', location: '', start_date: '', end_date: '' }],
+        languages: extractedData.languages || '',
         languagesList: [],
         target_country: formData.target_country || 'Germany',
         seniority_level: formData.seniority_level || 'Mid',
         job_description: '',
-        template: formData.template || 'classic',
-        style: formData.style || 'professional'
+        template: formData.template || 'classic'
       };
 
+      console.log('[CV Builder] Setting form data');
       setFormData(newFormData);
       setSecureStorage(STORAGE_KEY, newFormData);
       updateStep('form', newFormData.template);
       
+      console.log('[CV Builder] Import completed successfully');
       toast.success('CV imported successfully! Review and edit your information.');
       
     } catch (error) {
-      console.error('Import error:', error);
+      console.error('[CV Builder] Import error:', error);
       const errorMessage = error.message || 'Could not read this file. Please try another one.';
       setImportError(errorMessage);
       toast.error(errorMessage);
     }
   };
 
-  // Process pending import after handleImportCV is defined
-  useEffect(() => {
-    if (pendingImportRef.current) {
-      const file = pendingImportRef.current;
-      pendingImportRef.current = null;
-      handleImportCV(file).catch(err => {
-        console.error('Error processing pending import:', err);
-        toast.error('Error processing imported file. Please try again.');
-      });
-    }
-  }, []);
-
-  // Generate CV function (moved from Home.jsx)
   const generateCV = async () => {
     if (isGenerating) return;
     setIsGenerating(true);
     
     try {
       let summary = formData.summary;
-      let coverLetter = null;
       
-      const needsAI = formData.auto_generate_summary || generateCoverLetter;
+      const needsAI = formData.auto_generate_summary;
       if (!user && needsAI) {
         const rateLimitCheck = canMakeAIRequest();
         if (!rateLimitCheck.allowed) {
@@ -493,74 +465,7 @@ Generate a professional summary that will make recruiters want to interview this
         }
       }
 
-      if (generateCoverLetter) {
-        try {
-          const experienceText = formData.experiences
-            .filter(e => e.job_title || e.company)
-            .map(e => `${e.job_title} at ${e.company} (${e.start_date} - ${e.end_date || 'Present'}): ${e.achievements || 'No details provided'}`)
-            .join('\n\n');
-          
-          const prompt = `You are an expert cover letter writer for top consulting firms, tech companies, and Fortune 500 applications.
-
-Write a professional cover letter (3-4 paragraphs, ~300-400 words) for this candidate.
-
-CANDIDATE INFORMATION:
-Name: ${formData.full_name}
-Target Position: ${formData.target_position || 'Professional role'}
-Target Country: ${formData.target_country}
-Email: ${formData.email}
-Phone: ${formData.phone}
-Location: ${formData.location}
-
-PROFESSIONAL SUMMARY:
-${formData.summary || 'Experienced professional'}
-
-CORE SKILLS:
-${formData.skills || 'General business skills'}
-
-PROFESSIONAL EXPERIENCE:
-${experienceText || 'Entry-level professional'}
-
-${formData.job_description ? `TARGET JOB DESCRIPTION:\n${formData.job_description}` : ''}
-
-REQUIREMENTS:
-- Write in first person ("I", "my", "me")
-- Start with a strong opening that captures attention
-- Connect candidate's experience to the target role
-- Highlight 2-3 key achievements or strengths
-- Show enthusiasm and cultural fit
-- End with a strong call to action
-- Professional but personable tone
-- Tailored to the target position and company type
-- ATS-friendly language
-
-Generate a compelling cover letter that will make recruiters want to interview this candidate.`;
-          
-          const result = await base44.integrations.Core.InvokeLLM({
-            prompt,
-            response_json_schema: {
-              type: "object",
-              properties: {
-                cover_letter: { type: "string" }
-              }
-            }
-          });
-          
-          coverLetter = (result && typeof result === 'object' && 'cover_letter' in result && typeof result.cover_letter === 'string')
-            ? result.cover_letter
-            : null;
-          
-          if (!user) {
-            recordAIRequest();
-            setRemainingAIRequests(getRemainingRequests());
-          }
-        } catch (aiError) {
-          console.error('AI cover letter generation failed:', aiError);
-          toast.error('AI cover letter generation failed. You can write your own cover letter.');
-        }
-      }
-
-      const cvData = { ...formData, summary, generated_cv: summary, cover_letter: coverLetter };
+      const cvData = { ...formData, summary, generated_cv: summary };
       
       if (user) {
         try {
@@ -634,11 +539,9 @@ Generate a compelling cover letter that will make recruiters want to interview t
     }
   };
 
-  // Render based on step
   if (step === 'templates') {
     return (
       <div className="min-h-screen bg-white">
-        {/* Header */}
         <div className="border-b border-gray-100 bg-white sticky top-0 z-10">
           <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-24 py-6">
             <div className="flex items-center justify-between">
@@ -662,7 +565,6 @@ Generate a compelling cover letter that will make recruiters want to interview t
           </div>
         </div>
 
-        {/* Filter Buttons */}
         <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-24 py-6">
           {importError && (
             <div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
@@ -686,7 +588,6 @@ Generate a compelling cover letter that will make recruiters want to interview t
             ))}
           </div>
 
-          {/* Template Grid */}
           {filteredTemplates.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
               {filteredTemplates.map((template) => (
@@ -704,13 +605,12 @@ Generate a compelling cover letter that will make recruiters want to interview t
             </div>
           )}
 
-          {/* Info Section */}
           <div className="bg-gray-50 rounded-lg p-6 mb-8">
             <h3 className="text-lg font-semibold text-black mb-2">
               All templates are ATS-friendly
             </h3>
             <p className="text-sm text-gray-600">
-              Every template is optimized for Applicant Tracking Systems (ATS) to ensure your CV gets past automated screening. You can preview your CV with sample data before filling in your information.
+              Every template is optimized for Applicant Tracking Systems (ATS) to ensure your CV gets past automated screening.
             </p>
           </div>
         </div>
@@ -726,8 +626,6 @@ Generate a compelling cover letter that will make recruiters want to interview t
           setFormData={setFormData}
           onSubmit={generateCV}
           isGenerating={isGenerating}
-          generateCoverLetter={generateCoverLetter}
-          setGenerateCoverLetter={setGenerateCoverLetter}
           user={user}
           remainingAIRequests={remainingAIRequests}
           selectedTemplate={formData.template || 'classic'}
@@ -744,7 +642,7 @@ Generate a compelling cover letter that will make recruiters want to interview t
           cvData={generatedCV || formData}
           onCvDataChange={setGeneratedCV}
           onPayment={handlePayment}
-          onSubscribe={() => {}} // Not used in CV flow
+          onSubscribe={() => {}}
           isProcessingPayment={isProcessingPayment}
         />
       </div>

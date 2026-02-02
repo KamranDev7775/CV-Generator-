@@ -1,0 +1,102 @@
+{
+  "templates": [
+    {
+      "id": "classic",
+      "name": "Professional",
+      "category": "Classic",
+      "description": "Professional layout with photo area and clear sections. Ideal for experienced professionals with detailed work history.",
+      "layout": "photo-single-column",
+      "features": ["Photo area", "Detailed sections", "Professional", "ATS-friendly"],
+      "idealFor": ["Finance", "Engineering", "Management", "Consulting"],
+      "styles": {
+        "photoArea": true,
+        "headerBorder": "border-b-2 border-gray-800 pb-4",
+        "sectionHeaderStyle": "text-base font-bold border-b border-gray-800 pb-2 mb-4",
+        "fontFamily": "font-sans",
+        "padding": "p-8",
+        "previewPadding": "p-3",
+        "backgroundColor": "bg-white",
+        "textColor": "text-gray-900"
+      }
+    },
+    {
+      "id": "modern",
+      "name": "Traditional",
+      "category": "Traditional",
+      "description": "Centered formal layout with skills table and references. Classic professional design for conservative industries.",
+      "layout": "centered-traditional",
+      "features": ["Centered", "Skills table", "References", "Formal"],
+      "idealFor": ["Accounting", "Law", "Academia", "Corporate"],
+      "styles": {
+        "centered": true,
+        "headerCentered": true,
+        "skillsTable": true,
+        "references": true,
+        "sectionHeaderStyle": "text-xs uppercase font-bold tracking-wider mb-4",
+        "padding": "p-10",
+        "previewPadding": "p-3",
+        "backgroundColor": "bg-white"
+      }
+    },
+    {
+      "id": "minimal",
+      "name": "Minimal",
+      "category": "Minimal",
+      "description": "Clean centered layout with bold section headers. Minimal design focusing on content clarity and readability.",
+      "layout": "minimal-centered",
+      "features": ["Centered", "Clean", "Bold headers", "Minimal"],
+      "idealFor": ["Research", "Science", "Healthcare", "Technical"],
+      "styles": {
+        "centered": true,
+        "boldSectionHeaders": true,
+        "sectionHeaderStyle": "text-sm font-bold uppercase tracking-wider border-b-2 border-gray-900 pb-2 mb-4",
+        "padding": "p-10",
+        "previewPadding": "p-3",
+        "backgroundColor": "bg-white",
+        "fontFamily": "font-sans"
+      }
+    },
+    {
+      "id": "executive",
+      "name": "Modern Sidebar",
+      "category": "Modern",
+      "description": "Two-column layout with gray sidebar and photo. Modern professional design with clear visual hierarchy.",
+      "layout": "sidebar-modern",
+      "features": ["Photo", "Sidebar", "Two-column", "Modern"],
+      "idealFor": ["Marketing", "Design", "Creative", "Tech"],
+      "styles": {
+        "photoArea": true,
+        "photoRounded": true,
+        "sidebarColor": "bg-gray-100",
+        "sidebarWidth": "w-1/3",
+        "sidebarPadding": "p-6",
+        "contentWidth": "w-2/3",
+        "sectionHeaderStyle": "text-sm font-bold mb-4",
+        "padding": "p-0",
+        "previewPadding": "p-0"
+      }
+    },
+    {
+      "id": "creative",
+      "name": "Executive Dark",
+      "category": "Executive",
+      "description": "Dark sidebar with timeline design and professional photo. Modern executive template with visual impact.",
+      "layout": "dark-sidebar-timeline",
+      "features": ["Dark theme", "Timeline", "Photo", "Icons"],
+      "idealFor": ["Executive", "Management", "Leadership", "Corporate"],
+      "styles": {
+        "photoArea": true,
+        "photoCircle": true,
+        "darkHeader": true,
+        "headerColor": "bg-slate-700",
+        "sidebarColor": "bg-gray-200",
+        "sidebarWidth": "w-1/3",
+        "timeline": true,
+        "icons": true,
+        "sectionHeaderStyle": "text-sm font-bold uppercase mb-4",
+        "padding": "p-0",
+        "previewPadding": "p-0"
+      }
+    }
+  ]
+}

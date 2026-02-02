@@ -148,22 +148,22 @@ export default function Pricing() {
 
           {/* Pricing Cards */}
           <div className="grid md:grid-cols-2 gap-8 mb-12">
-            {/* Trial Plan */}
-            <div className="relative border border-gray-200 p-8 md:p-10 bg-white">
+            {/* One-Time Purchase */}
+            <div className="relative border-2 border-black p-8 md:p-10 bg-white hover:shadow-2xl transition-shadow">
               <div className="absolute top-0 right-0 bg-black text-white text-xs px-3 py-1 font-medium">
                 Most popular
               </div>
               
-              <h2 className="text-2xl font-light text-black mb-2">One-Time Purchase</h2>
+              <h2 className="text-2xl font-semibold text-black mb-2">One-Time Purchase</h2>
               <div className="mb-6">
-                <span className="text-5xl font-light text-black">€1.99</span>
-                <span className="text-gray-500 ml-2">one-time</span>
+                <span className="text-5xl font-bold text-black">€1.99</span>
+                <span className="text-gray-600 ml-2 text-lg">one-time</span>
               </div>
               
               <Button
                 onClick={() => handleSubscribe('trial')}
                 disabled={loadingPlan !== null || (subscription?.status === 'active')}
-                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700 py-7 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all mb-8 disabled:opacity-50"
+                className="w-full bg-black text-white hover:bg-gray-900 py-7 text-lg font-semibold rounded-lg mb-8 disabled:opacity-50"
               >
                 {loadingPlan === 'trial' ? (
                   <>
@@ -171,52 +171,62 @@ export default function Pricing() {
                     Processing...
                   </>
                 ) : subscription?.status === 'active' ? (
-                  'Already Subscribed'
+                  'Already Purchased'
                 ) : (
                   'Get your CV for €1.99'
                 )}
               </Button>
 
               <div className="grid grid-cols-2 gap-3 mb-8">
-                <div className="bg-blue-50 p-4 rounded-lg text-center">
-                  <div className="text-2xl font-bold text-blue-600 mb-1">14</div>
-                  <div className="text-xs text-gray-600">Days Access</div>
+                <div className="bg-gray-100 p-4 rounded-lg text-center">
+                  <div className="text-2xl font-bold text-black mb-1">5</div>
+                  <div className="text-xs text-gray-700 font-medium">Days Access</div>
                 </div>
-                <div className="bg-purple-50 p-4 rounded-lg text-center">
-                  <div className="text-2xl font-bold text-purple-600 mb-1">∞</div>
-                  <div className="text-xs text-gray-600">Edits & Downloads</div>
+                <div className="bg-gray-100 p-4 rounded-lg text-center">
+                  <div className="text-2xl font-bold text-black mb-1">∞</div>
+                  <div className="text-xs text-gray-700 font-medium">Edits & Downloads</div>
                 </div>
               </div>
 
-              <div className="space-y-4">
+              <div className="space-y-3 mb-6">
                 {features.map((feature, idx) => (
-                  <div key={idx} className="flex items-start gap-3 group">
-                    <div className="flex-shrink-0 w-6 h-6 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center mt-0.5">
-                      <Check className="h-4 w-4 text-white" />
-                    </div>
-                    <span className="text-sm text-gray-700 leading-relaxed group-hover:text-black transition-colors">{feature}</span>
+                  <div key={idx} className="flex items-start gap-3">
+                    <Check className="h-5 w-5 text-black flex-shrink-0 mt-0.5" />
+                    <span className="text-sm text-gray-700">{feature}</span>
                   </div>
                 ))}
               </div>
+
+              <div className="border-t border-gray-200 pt-4 space-y-2">
+                <div className="flex items-start gap-2">
+                  <Check className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
+                  <span className="text-sm font-medium text-green-700">30-day money-back guarantee</span>
+                </div>
+                <p className="text-xs text-gray-600 ml-7">
+                  Not satisfied? Get your money back, no questions asked.
+                </p>
+                <p className="text-xs text-gray-500 ml-0 mt-3">
+                  ℹ️ No auto-renewal. One-time payment, permanent ownership.
+                </p>
+              </div>
             </div>
 
-            {/* Monthly Plan */}
-            <div className="border border-gray-200 p-8 md:p-10 bg-white">
-              <h2 className="text-2xl font-light text-black mb-2">Monthly Access</h2>
+            {/* Quarterly Plan */}
+            <div className="border-2 border-gray-300 p-8 md:p-10 bg-white hover:shadow-lg transition-shadow">
+              <h2 className="text-2xl font-semibold text-black mb-2">Billed Quarterly</h2>
               <div className="mb-6">
-                <span className="text-4xl font-light text-black">€6.99</span>
-                <span className="text-gray-500 ml-2">/ month</span>
+                <span className="text-5xl font-bold text-black">€24.95</span>
+                <span className="text-gray-600 ml-2 text-lg">/ quarter</span>
               </div>
               
-              <p className="text-sm text-gray-600 mb-6 leading-relaxed">
-                Recurring subscription. Cancel anytime.
+              <p className="text-sm text-gray-700 mb-6 leading-relaxed font-medium">
+                Ongoing access with quarterly billing
               </p>
 
               <Button
                 onClick={() => handleSubscribe('monthly')}
                 disabled={loadingPlan !== null || (subscription?.status === 'active' && subscription?.plan_type === 'monthly')}
-                variant="outline"
-                className="w-full border-gray-200 text-black hover:bg-gray-50 py-6 text-base font-normal rounded-none mb-8 disabled:opacity-50"
+                className="w-full border-2 border-black bg-white text-black hover:bg-black hover:text-white py-7 text-lg font-semibold rounded-lg mb-8 disabled:opacity-50 transition-colors"
               >
                 {loadingPlan === 'monthly' ? (
                   <>
@@ -226,17 +236,30 @@ export default function Pricing() {
                 ) : subscription?.status === 'active' && subscription?.plan_type === 'monthly' ? (
                   'Currently Subscribed'
                 ) : (
-                  'Subscribe for €6.99/month'
+                  'Subscribe for €24.95/quarter'
                 )}
               </Button>
 
-              <div className="space-y-3">
+              <div className="space-y-3 mb-6">
                 {features.map((feature, idx) => (
                   <div key={idx} className="flex items-start gap-3">
                     <Check className="h-5 w-5 text-black flex-shrink-0 mt-0.5" />
-                    <span className="text-sm text-gray-700 leading-relaxed">{feature}</span>
+                    <span className="text-sm text-gray-700">{feature}</span>
                   </div>
                 ))}
+              </div>
+
+              <div className="border-t border-gray-200 pt-4 space-y-2">
+                <div className="flex items-start gap-2">
+                  <Check className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
+                  <span className="text-sm font-medium text-green-700">30-day money-back guarantee</span>
+                </div>
+                <p className="text-xs text-gray-600 ml-7">
+                  Not satisfied? Get a full refund within 30 days.
+                </p>
+                <p className="text-xs text-gray-500 ml-0 mt-3">
+                  ℹ️ Auto-renews every 3 months for €24.95 EUR unless cancelled
+                </p>
               </div>
             </div>
           </div>

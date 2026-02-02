@@ -37,12 +37,37 @@ export default function TermsConditions() {
 
             <section>
               <h2 className="text-xl font-medium text-black mb-3">3. Payment Terms</h2>
-              <p>
-                <strong>One-Time Payment:</strong> €1.99 for complete CV download (PDF + copyable text). This is a one-time payment with no recurring charges, no subscriptions, and no auto-renewal.
-              </p>
-              <p>
-                All payments are processed securely through Stripe. Refunds are provided on a case-by-case basis.
-              </p>
+              
+              <div className="space-y-4">
+                <div>
+                  <h3 className="font-semibold text-gray-800 mb-2">One-Time Purchase</h3>
+                  <ul className="list-disc list-inside text-sm space-y-2 text-gray-700">
+                    <li><strong>Price:</strong> €1.99</li>
+                    <li><strong>Duration:</strong> 5 days of access to your CV</li>
+                    <li><strong>Features:</strong> Complete CV download (PDF + copyable text)</li>
+                    <li><strong>Renewals:</strong> NO auto-renewal. One-time payment only.</li>
+                    <li><strong>Refunds:</strong> 30-day money-back guarantee. Full refund if not satisfied.</li>
+                  </ul>
+                </div>
+
+                <div>
+                  <h3 className="font-semibold text-gray-800 mb-2">Quarterly Subscription</h3>
+                  <ul className="list-disc list-inside text-sm space-y-2 text-gray-700">
+                    <li><strong>Price:</strong> €24.95 per quarter (every 3 months)</li>
+                    <li><strong>Duration:</strong> Ongoing access to CV builder and downloads</li>
+                    <li><strong>Features:</strong> Unlimited edits, regenerations, and downloads</li>
+                    <li><strong>Auto-renewal:</strong> Your subscription will automatically renew every 3 months for €24.95 EUR unless you cancel it.</li>
+                    <li><strong>Cancellation:</strong> You can cancel anytime. Access ends at the end of your current billing period.</li>
+                    <li><strong>Refunds:</strong> 30-day money-back guarantee. Full refund if not satisfied within 30 days of purchase.</li>
+                  </ul>
+                </div>
+
+                <div className="bg-gray-50 p-4 rounded border border-gray-200 mt-4">
+                  <p className="text-sm text-gray-700">
+                    <strong>Payment Processing:</strong> All payments are processed securely through Stripe. Your payment information is never stored on our servers.
+                  </p>
+                </div>
+              </div>
             </section>
 
             <section>

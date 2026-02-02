@@ -6,6 +6,7 @@ import CVDocument from '@/components/cv/CVDocument';
 import { Check, Copy, Download, Loader2, Edit2, Save } from "lucide-react";
 import { toast } from "sonner";
 import { removeSecureStorage, getSecureStorage } from '../utils/storage';
+import { useIsMounted } from '@/hooks/useIsMounted';
 
 // HTML escaping function to prevent XSS
 const escapeHtml = (text) => {
@@ -25,9 +26,18 @@ export default function Success() {
   const [editedCoverLetter, setEditedCoverLetter] = useState('');
   const [isSavingCoverLetter, setIsSavingCoverLetter] = useState(false);
   const cvRef = useRef(null);
+  const isMountedRef = useIsMounted();
+  const copyTimeoutRef = useRef(null);
 
   useEffect(() => {
     loadCVData();
+    
+    // Cleanup timeout on unmount
+    return () => {
+      if (copyTimeoutRef.current) {
+        clearTimeout(copyTimeoutRef.current);
+      }
+    };
   }, []);
 
   const loadCVData = async () => {
@@ -54,14 +64,14 @@ export default function Success() {
       let attempts = 0;
       const maxAttempts = 10;
       
-      while (attempts < maxAttempts) {
+      while (attempts < maxAttempts && isMountedRef.current) {
         // Verify ownership: filter by both ID and created_by
         const submissions = await base44.entities.CVSubmission.filter({ 
           id: submissionId,
           created_by: currentUser.email 
         });
         
-        if (submissions?.length > 0) {
+        if (submissions?.length > 0 && isMountedRef.current) {
           const submission = submissions[0];
           
           if (submission.payment_status === 'completed') {
@@ -93,7 +103,7 @@ export default function Success() {
         }
         
         attempts++;
-        if (attempts < maxAttempts) {
+        if (attempts < maxAttempts && isMountedRef.current) {
           await new Promise(resolve => setTimeout(resolve, 1500)); // Wait 1.5s between checks
         }
       }
@@ -218,7 +228,17 @@ export default function Success() {
     await navigator.clipboard.writeText(text);
     setCopied(true);
     toast.success('CV text copied to clipboard');
-    setTimeout(() => setCopied(false), 2000);
+    
+    // Clear any existing timeout
+    if (copyTimeoutRef.current) {
+      clearTimeout(copyTimeoutRef.current);
+    }
+    
+    copyTimeoutRef.current = setTimeout(() => {
+      if (isMountedRef.current) {
+        setCopied(false);
+      }
+    }, 2000);
   };
 
   const downloadCoverLetterPDF = async () => {

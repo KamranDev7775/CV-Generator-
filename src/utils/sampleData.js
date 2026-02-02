@@ -37,6 +37,28 @@ const SAMPLE_EDUCATION = [
   }
 ];
 
+// Sample references data
+const SAMPLE_REFERENCES = [
+  {
+    name: 'LeAnne Gaines',
+    company: 'Dubone Partnership',
+    email: 'lgaines@dbp.com',
+    phone: '917-988-1212'
+  },
+  {
+    name: 'Jeffrey Ringer',
+    company: 'Huntington Associates',
+    email: 'jringer@huntingpa.com',
+    phone: '267-348-9533'
+  },
+  {
+    name: 'Liam Olsen',
+    company: 'Huntington Associates',
+    email: 'lolsen@huntingpa.com',
+    phone: '913-278-8787'
+  }
+];
+
 // Base sample data structure
 const BASE_SAMPLE_DATA = {
   full_name: 'Sarah Johnson',
@@ -50,6 +72,7 @@ const BASE_SAMPLE_DATA = {
   experiences: SAMPLE_EXPERIENCES,
   education: SAMPLE_EDUCATION,
   languages: 'English (Native), German (C1), French (B2)',
+  references: SAMPLE_REFERENCES,
   target_country: 'Germany',
   seniority_level: 'Senior',
   job_description: '',
@@ -83,40 +106,12 @@ const TEMPLATE_SAMPLE_DATA = {
     target_position: 'Chief Technology Officer',
     summary: 'Technology executive with 15+ years of experience leading engineering teams and driving innovation. Expertise in scaling startups, building high-performance teams, and delivering enterprise-grade solutions. Track record of successful exits and IPO preparation.'
   },
-  compact: {
+  creative: {
     ...BASE_SAMPLE_DATA,
-    template: 'compact',
+    template: 'creative',
     full_name: 'Emma Thompson',
-    target_position: 'Data Scientist',
-    summary: 'Data scientist specializing in machine learning and predictive analytics. Expert in Python, R, and cloud ML platforms. Published researcher with 10+ papers in top-tier conferences.'
-  },
-  sidebar: {
-    ...BASE_SAMPLE_DATA,
-    template: 'sidebar',
-    full_name: 'David Rodriguez',
-    target_position: 'Business Development Manager',
-    summary: 'Results-driven business development professional with expertise in B2B sales and strategic partnerships. Successfully closed deals worth €10M+ and built relationships with Fortune 500 companies. Strong background in SaaS and enterprise software.'
-  },
-  // mercury: {
-  //   ...BASE_SAMPLE_DATA,
-  //   template: 'mercury',
-  //   full_name: 'David Rodriguez',
-  //   target_position: 'Business Development Manager',
-  //   summary: 'Results-driven business development professional with expertise in B2B sales and strategic partnerships. Successfully closed deals worth €10M+ and built relationships with Fortune 500 companies. Strong background in SaaS and enterprise software.'
-  // },
-  finance: {
-    ...BASE_SAMPLE_DATA,
-    template: 'finance',
-    full_name: 'Lisa Wang',
-    target_position: 'Financial Analyst',
-    summary: 'Analytical financial professional with expertise in financial modeling, risk analysis, and strategic planning. Strong background in investment banking and corporate finance. CFA Level II candidate with proven track record in portfolio management.'
-  },
-  steadyForm: {
-    ...BASE_SAMPLE_DATA,
-    template: 'steadyForm',
-    full_name: 'Robert Schmidt',
-    target_position: 'Project Manager',
-    summary: 'Certified project manager (PMP) with 8+ years of experience managing complex IT projects. Expertise in agile methodologies, stakeholder management, and risk mitigation. Successfully delivered 20+ projects on time and within budget.'
+    target_position: 'Creative Director',
+    summary: 'Award-winning creative director with expertise in brand strategy and visual design. Led campaigns generating 500K+ impressions and won 3 international design awards. Strong background in digital marketing and creative leadership.'
   }
 };
 
@@ -157,6 +152,7 @@ export function hasUserData(formData, templateId) {
 /**
  * Merge user data with sample data for preview
  * Shows sample data for empty fields, user data for filled fields
+ * Always shows template structure even with minimal data
  * @param {Object} formData - User's form data
  * @param {string} templateId - Current template ID
  * @returns {Object} Merged data for preview
@@ -168,29 +164,35 @@ export function mergeDataForPreview(formData, templateId) {
     return sampleData;
   }
   
-  // Merge: use user data if exists, otherwise use sample data
+  // Helper to check if a string field has user content
+  const hasContent = (value) => value && value.trim() !== '';
+  
+  // Merge: use user data if exists and has content, otherwise use sample data
+  // This ensures the preview always shows the template structure
   return {
-    full_name: formData.full_name || sampleData.full_name,
-    target_position: formData.target_position || sampleData.target_position,
-    location: formData.location || sampleData.location,
-    email: formData.email || sampleData.email,
-    phone: formData.phone || sampleData.phone,
-    linkedin_url: formData.linkedin_url || sampleData.linkedin_url,
-    summary: formData.summary || sampleData.summary,
-    skills: formData.skills || sampleData.skills,
-    experiences: formData.experiences && formData.experiences.length > 0 && formData.experiences.some(exp => exp.job_title || exp.company)
+    full_name: hasContent(formData.full_name) ? formData.full_name : sampleData.full_name,
+    target_position: hasContent(formData.target_position) ? formData.target_position : sampleData.target_position,
+    location: hasContent(formData.location) ? formData.location : sampleData.location,
+    email: hasContent(formData.email) ? formData.email : sampleData.email,
+    phone: hasContent(formData.phone) ? formData.phone : sampleData.phone,
+    linkedin_url: hasContent(formData.linkedin_url) ? formData.linkedin_url : sampleData.linkedin_url,
+    summary: hasContent(formData.summary) ? formData.summary : sampleData.summary,
+    skills: hasContent(formData.skills) ? formData.skills : sampleData.skills,
+    // For arrays, show sample data if user's array is empty or has no valid entries
+    experiences: formData.experiences && formData.experiences.length > 0 && formData.experiences.some(exp => hasContent(exp.job_title) || hasContent(exp.company))
       ? formData.experiences
       : sampleData.experiences,
-    education: formData.education && formData.education.length > 0 && formData.education.some(edu => edu.degree || edu.university)
+    education: formData.education && formData.education.length > 0 && formData.education.some(edu => hasContent(edu.degree) || hasContent(edu.university))
       ? formData.education
       : sampleData.education,
-    languages: formData.languages || sampleData.languages,
+    languages: hasContent(formData.languages) ? formData.languages : sampleData.languages,
     target_country: formData.target_country || sampleData.target_country,
     seniority_level: formData.seniority_level || sampleData.seniority_level,
-    job_description: formData.job_description || sampleData.job_description,
+    job_description: formData.job_description || '',
     template: formData.template || templateId,
     style: formData.style || sampleData.style,
-    cover_letter: formData.cover_letter || null
+    cover_letter: formData.cover_letter || null,
+    references: formData.references && formData.references.length > 0 ? formData.references : sampleData.references || []
   };
 }
 

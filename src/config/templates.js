@@ -1,96 +1,31 @@
 // Template registry and metadata configuration
-// This file defines all available CV templates, their metadata, and categories
+// This file now serves as a bridge to the JSON-based templateConfig.json
+// All template definitions are stored in JSON format for scalability and flexibility
+
+import templateConfigJSON from './templateConfig.json';
 
 export const TEMPLATE_CATEGORIES = {
-  SIMPLE: 'Simple',
+  CLASSIC: 'Classic',
   MODERN: 'Modern',
-  CREATIVE: 'Creative',
-  PROFESSIONAL: 'Professional'
+  MINIMAL: 'Minimal',
+  EXECUTIVE: 'Executive',
+  CREATIVE: 'Creative'
 };
 
-export const TEMPLATES = {
-  classic: {
-    id: 'classic',
-    name: 'Classic',
-    description: 'Traditional single-column layout with clean typography. Perfect for conservative industries.',
-    category: TEMPLATE_CATEGORIES.SIMPLE,
-    componentName: 'ClassicTemplate',
-    previewImage: null, // Can be added later
-    features: ['Single column', 'Traditional layout', 'ATS-friendly']
-  },
-  modern: {
-    id: 'modern',
-    name: 'Modern',
-    description: 'Centered layout with elegant typography. Great for creative and tech roles.',
-    category: TEMPLATE_CATEGORIES.MODERN,
-    componentName: 'ModernTemplate',
-    previewImage: null,
-    features: ['Centered design', 'Elegant typography', 'Modern aesthetic']
-  },
-  minimal: {
-    id: 'minimal',
-    name: 'Minimal',
-    description: 'Ultra-clean design with maximum white space. Ideal for design and creative fields.',
-    category: TEMPLATE_CATEGORIES.SIMPLE,
-    componentName: 'MinimalTemplate',
-    previewImage: null,
-    features: ['Ultra-clean', 'Maximum white space', 'Minimal design']
-  },
-  executive: {
-    id: 'executive',
-    name: 'Executive',
-    description: 'Strong presence for senior professionals. Bold sections and clear hierarchy.',
-    category: TEMPLATE_CATEGORIES.PROFESSIONAL,
-    componentName: 'ExecutiveTemplate',
-    previewImage: null,
-    features: ['Bold sections', 'Executive presence', 'Senior professional']
-  },
-  compact: {
-    id: 'compact',
-    name: 'Compact',
-    description: 'Dense layout optimized for space. Perfect for experienced professionals.',
-    category: TEMPLATE_CATEGORIES.SIMPLE,
-    componentName: 'CompactTemplate',
-    previewImage: null,
-    features: ['Space-efficient', 'Dense layout', 'Information-rich']
-  },
-  sidebar: {
-    id: 'sidebar',
-    name: 'Sidebar',
-    description: 'Two-column layout with sidebar. Professional and modern design without photo requirement.',
-    category: TEMPLATE_CATEGORIES.MODERN,
-    componentName: 'SidebarTemplate',
-    previewImage: null,
-    features: ['Sidebar layout', 'Two-column design', 'Professional layout']
-  },
-  // mercury: {
-  //   id: 'mercury',
-  //   name: 'Mercury',
-  //   description: 'Two-column layout with sidebar and photo. Professional and modern design.',
-  //   category: TEMPLATE_CATEGORIES.MODERN,
-  //   componentName: 'MercuryTemplate',
-  //   previewImage: null,
-  //   features: ['Sidebar layout', 'Photo support', 'Two-column design']
-  // },
-  finance: {
-    id: 'finance',
-    name: 'Finance',
-    description: 'Single-column minimalist design. Clean and professional for finance and consulting.',
-    category: TEMPLATE_CATEGORIES.PROFESSIONAL,
-    componentName: 'FinanceTemplate',
-    previewImage: null,
-    features: ['Minimalist', 'Professional', 'Finance-focused']
-  },
-  steadyForm: {
-    id: 'steadyForm',
-    name: 'Steady Form',
-    description: 'Two-column layout with dates on left. Chronological and organized presentation.',
-    category: TEMPLATE_CATEGORIES.PROFESSIONAL,
-    componentName: 'SteadyFormTemplate',
-    previewImage: null,
-    features: ['Chronological', 'Date-focused', 'Organized layout']
-  }
-};
+// Build TEMPLATES object from JSON configuration for backwards compatibility
+export const TEMPLATES = {};
+templateConfigJSON.templates.forEach(template => {
+  TEMPLATES[template.id] = {
+    id: template.id,
+    name: template.name,
+    description: template.description,
+    category: template.category,
+    componentName: template.layout,
+    previewImage: template.previewImage || null,
+    features: template.features || [],
+    idealFor: template.idealFor || []
+  };
+});
 
 // Get all templates
 export function getAllTemplates() {
@@ -131,4 +66,3 @@ export function getAvailableCategories() {
   });
   return Array.from(categories);
 }
-

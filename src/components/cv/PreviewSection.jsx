@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import CVDocument from './CVDocument';
@@ -7,6 +7,7 @@ import { base44 } from '@/api/base44Client';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '../../utils';
 import { jsPDF } from 'jspdf';
+import { useIsMounted } from '@/hooks/useIsMounted';
 
 export default function PreviewSection({ cvData, onCvDataChange, onPayment, onSubscribe, isProcessingPayment }) {
   const [hasSubscription, setHasSubscription] = useState(false);
@@ -15,23 +16,36 @@ export default function PreviewSection({ cvData, onCvDataChange, onPayment, onSu
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   const [isEditingCoverLetter, setIsEditingCoverLetter] = useState(false);
   const [editedCoverLetter, setEditedCoverLetter] = useState(cvData?.cover_letter || '');
+  const isMountedRef = useIsMounted();
+  const copyTimeoutRef = useRef(null);
 
   useEffect(() => {
     checkSubscription();
+    
+    // Cleanup timeout on unmount
+    return () => {
+      if (copyTimeoutRef.current) {
+        clearTimeout(copyTimeoutRef.current);
+      }
+    };
   }, []);
 
   const checkSubscription = async () => {
     try {
       const user = await base44.auth.me();
-      if (user) {
+      if (user && isMountedRef.current) {
         const subs = await base44.entities.Subscription.filter({ user_email: user.email });
         const activeSub = subs.find(s => s.status === 'active' || s.status === 'trialing');
-        setHasSubscription(!!activeSub);
+        if (isMountedRef.current) {
+          setHasSubscription(!!activeSub);
+        }
       }
     } catch (e) {
       // Not logged in or error
     } finally {
-      setCheckingSubscription(false);
+      if (isMountedRef.current) {
+        setCheckingSubscription(false);
+      }
     }
   };
 
@@ -70,7 +84,17 @@ export default function PreviewSection({ cvData, onCvDataChange, onPayment, onSu
     const text = generateCVText();
     await navigator.clipboard.writeText(text);
     setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    
+    // Clear any existing timeout
+    if (copyTimeoutRef.current) {
+      clearTimeout(copyTimeoutRef.current);
+    }
+    
+    copyTimeoutRef.current = setTimeout(() => {
+      if (isMountedRef.current) {
+        setCopied(false);
+      }
+    }, 2000);
   };
 
   const downloadPDF = async () => {

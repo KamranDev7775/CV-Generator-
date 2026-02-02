@@ -8,6 +8,7 @@ import CVDocument from '@/components/cv/CVDocument';
 import { Check, Copy, Download, Loader2, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 import { jsPDF } from 'jspdf';
+import { useIsMounted } from '@/hooks/useIsMounted';
 
 export default function PaymentSuccess() {
   const [isLoading, setIsLoading] = useState(true);
@@ -17,9 +18,18 @@ export default function PaymentSuccess() {
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   const [verificationStatus, setVerificationStatus] = useState('verifying'); // verifying, success, pending
   const cvRef = useRef(null);
+  const isMountedRef = useIsMounted();
+  const copyTimeoutRef = useRef(null);
 
   useEffect(() => {
     verifyPayment();
+    
+    // Cleanup timeout on unmount
+    return () => {
+      if (copyTimeoutRef.current) {
+        clearTimeout(copyTimeoutRef.current);
+      }
+    };
   }, []);
 
   const verifyPayment = async () => {
@@ -35,7 +45,7 @@ export default function PaymentSuccess() {
       let attempts = 0;
       const maxAttempts = 10;
       
-      while (attempts < maxAttempts) {
+      while (attempts < maxAttempts && isMountedRef.current) {
         try {
           // Verify user owns the submission
           let currentUser = null;
@@ -51,7 +61,7 @@ export default function PaymentSuccess() {
             created_by: currentUser.email 
           });
           
-          if (submissions?.length > 0 && submissions[0].payment_status === 'completed') {
+          if (submissions?.length > 0 && submissions[0].payment_status === 'completed' && isMountedRef.current) {
             setVerificationStatus('success');
             // Load from database (primary source)
             const submission = submissions[0];
@@ -82,13 +92,15 @@ export default function PaymentSuccess() {
         }
         
         attempts++;
-        if (attempts < maxAttempts) {
+        if (attempts < maxAttempts && isMountedRef.current) {
           await new Promise(resolve => setTimeout(resolve, 1500));
         }
       }
       
       // Still show CV but mark as pending - try to load from database, fallback to encrypted localStorage
-      setVerificationStatus('pending');
+      if (isMountedRef.current) {
+        setVerificationStatus('pending');
+      }
       try {
         // Verify user owns the submission
         let currentUser = null;
@@ -103,7 +115,7 @@ export default function PaymentSuccess() {
             id: submissionId,
             created_by: currentUser.email 
           });
-          if (submissions?.length > 0) {
+          if (submissions?.length > 0 && isMountedRef.current) {
             const submission = submissions[0];
             const cvDataFromDb = {
               full_name: submission.full_name,
@@ -125,7 +137,7 @@ export default function PaymentSuccess() {
         }
         
         // Fallback to encrypted localStorage if database unavailable or user not authenticated
-        if (!cvData) {
+        if (!cvData && isMountedRef.current) {
           // Fallback to encrypted localStorage if database unavailable
           const saved = getSecureStorage('form_data');
           if (saved) {
@@ -135,9 +147,11 @@ export default function PaymentSuccess() {
       } catch (e) {
         console.error('Error loading CV from database:', e);
         // Fallback to encrypted localStorage if database unavailable
-        const saved = getSecureStorage('form_data');
-        if (saved) {
-          setCvData(saved);
+        if (isMountedRef.current) {
+          const saved = getSecureStorage('form_data');
+          if (saved) {
+            setCvData(saved);
+          }
         }
       }
     } else if (type === 'trial' || type === 'monthly') {
@@ -169,14 +183,20 @@ export default function PaymentSuccess() {
             });
           }
         }
-        setVerificationStatus('success');
+        if (isMountedRef.current) {
+          setVerificationStatus('success');
+        }
       } catch (e) {
         console.error('Error creating subscription:', e);
-        setVerificationStatus('success'); // Still show success page
+        if (isMountedRef.current) {
+          setVerificationStatus('success'); // Still show success page
+        }
       }
     }
     
-    setIsLoading(false);
+    if (isMountedRef.current) {
+      setIsLoading(false);
+    }
   };
 
   const generateCVText = () => {
@@ -230,7 +250,17 @@ export default function PaymentSuccess() {
     await navigator.clipboard.writeText(text);
     setCopied(true);
     toast.success('CV text copied to clipboard');
-    setTimeout(() => setCopied(false), 2000);
+    
+    // Clear any existing timeout
+    if (copyTimeoutRef.current) {
+      clearTimeout(copyTimeoutRef.current);
+    }
+    
+    copyTimeoutRef.current = setTimeout(() => {
+      if (isMountedRef.current) {
+        setCopied(false);
+      }
+    }, 2000);
   };
 
   const downloadPDF = async () => {
