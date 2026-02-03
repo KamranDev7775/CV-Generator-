@@ -628,7 +628,7 @@ Generate a professional summary that will make recruiters want to interview this
           isGenerating={isGenerating}
           user={user}
           remainingAIRequests={remainingAIRequests}
-          selectedTemplate={formData.template || 'classic'}
+          selectedTemplate={selectedTemplateId || 'classic'}
           onImport={handleImportCV}
         />
       </div>

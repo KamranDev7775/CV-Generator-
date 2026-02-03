@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { canMakeAIRequest, recordAIRequest, getRemainingRequests } from '@/utils/rateLimiter';
 import { setSecureStorage } from '@/utils/storage';
-import { toast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 
 const SUBMISSION_KEY = 'submission_id';
 
@@ -22,11 +22,7 @@ export const useCVGeneration = (user, formData, setFormData, submissionKey = SUB
       if (!user && needsAI) {
         const rateLimitCheck = canMakeAIRequest();
         if (!rateLimitCheck) {
-          toast({ 
-            title: 'Error', 
-            description: 'Rate limit exceeded. Please log in for unlimited AI generation.', 
-            variant: 'destructive' 
-          });
+          toast.error('Rate limit exceeded. Please log in for unlimited AI generation.');
           setIsGenerating(false);
           setRemainingAIRequests(getRemainingRequests());
           return;
@@ -95,7 +91,7 @@ REQUIREMENTS:
           }
         } catch (aiError) {
           console.error('AI summary generation failed:', aiError);
-          toast({ title: 'Error', description: 'AI summary generation failed. Using your original summary.', variant: 'destructive' });
+          toast.error('AI summary generation failed. Using your original summary.');
         }
       }
 

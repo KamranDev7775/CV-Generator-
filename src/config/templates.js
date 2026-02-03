@@ -21,7 +21,8 @@ templateConfigJSON.templates.forEach(template => {
     description: template.description,
     category: template.category,
     componentName: template.layout,
-    previewImage: template.previewImage || null,
+    previewImage: template.previewImageUrl || template.previewImage || null,
+    previewImageUrl: template.previewImageUrl || template.previewImage || null,
     features: template.features || [],
     idealFor: template.idealFor || []
   };

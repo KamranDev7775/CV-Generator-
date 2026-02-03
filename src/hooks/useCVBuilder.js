@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import { canMakeAIRequest, recordAIRequest, getRemainingRequests } from '@/utils/rateLimiter';
 import { setSecureStorage, getSecureStorage } from '@/utils/storage';
-import { toast } from "@/components/ui/use-toast";
 
 const STORAGE_KEY = 'form_data';
 const SUBMISSION_KEY = 'submission_id';

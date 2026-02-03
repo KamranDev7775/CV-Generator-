@@ -59,6 +59,9 @@ const SAMPLE_REFERENCES = [
   }
 ];
 
+// Simple placeholder photo (1x1 px gray) so previews show a picture even without uploads
+const DEFAULT_SAMPLE_PHOTO = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO7oAT8AAAAASUVORK5CYII=';
+
 // Base sample data structure
 const BASE_SAMPLE_DATA = {
   full_name: 'Sarah Johnson',
@@ -67,6 +70,7 @@ const BASE_SAMPLE_DATA = {
   email: 'sarah.johnson@email.com',
   phone: '+49 30 1234 5678',
   linkedin_url: 'linkedin.com/in/sarah-johnson',
+  photo: DEFAULT_SAMPLE_PHOTO,
   summary: 'Experienced software engineer with 6+ years of expertise in full-stack development, cloud architecture, and team leadership. Proven track record of delivering scalable solutions for high-traffic applications. Passionate about clean code, agile methodologies, and mentoring junior developers.',
   skills: 'JavaScript, TypeScript, React, Node.js, Python, AWS, Docker, Kubernetes, PostgreSQL, MongoDB, Git, CI/CD, Microservices, RESTful APIs',
   experiences: SAMPLE_EXPERIENCES,

@@ -188,7 +188,14 @@ export function getSecureStorage(key) {
     
     if (!decrypted) return null;
     
-    return JSON.parse(decrypted);
+    try {
+      return JSON.parse(decrypted);
+    } catch (parseError) {
+      // Decrypted data is corrupted, remove it
+      console.warn('Corrupted encrypted data, removing:', key);
+      localStorage.removeItem(STORAGE_PREFIX + key);
+      return null;
+    }
   } catch (error) {
     console.error('Error getting secure storage:', error);
     // Try to read unencrypted data (for backward compatibility)

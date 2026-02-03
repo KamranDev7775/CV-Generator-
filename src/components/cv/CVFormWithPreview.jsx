@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useRef } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -68,7 +69,7 @@ const validateLinkedInURL = (url) => {
     // Accept also /pub/ and /profile/ for legacy LinkedIn URLs
     if (
       host.endsWith('linkedin.com') &&
-      (/^\/(in|pub|profile)\//.test(parsed.pathname))
+      (/^\/(in|pub|profile|me)\//.test(parsed.pathname))
     ) {
       return { valid: true };
     }
@@ -134,9 +135,12 @@ const validateDate = (date) => {
  * @param {number} [props.remainingAIRequests]
  * @param {string} [props.selectedTemplate]
  * @param {Function} [props.onImport]
+ * @param {Function} [props.onTemplateChange]
  * @returns {React.ReactElement}
  */
-export default function CVFormWithPreview({ formData, setFormData, onSubmit, isGenerating, user, remainingAIRequests, selectedTemplate = 'classic', onImport = null }) {
+export default function CVFormWithPreview({ formData, setFormData, onSubmit, isGenerating, user, remainingAIRequests, selectedTemplate = 'classic', onImport = null, onTemplateChange }) {
+  const navigate = useNavigate();
+  const location = useLocation();
   /** @type {[ValidationErrors, Function]} */
   const [errors, setErrors] = useState({});
   const fileInputRef = useRef(null);
@@ -805,12 +809,16 @@ export default function CVFormWithPreview({ formData, setFormData, onSubmit, isG
               <div>
                 <h3 className="text-sm font-semibold uppercase tracking-wider text-blue-600 mb-4">CV Template</h3>
                 <TemplateSwitcher
-                  selectedTemplate={formData.template || selectedTemplate}
+                  selectedTemplate={selectedTemplate || formData.template}
                   onTemplateChange={(newTemplate) => {
                     updateField('template', newTemplate);
-                    // Update preview with new template's sample data if form is empty
-                    if (isShowingSampleData) {
-                      // Preview will automatically update via useMemo
+                    // Update URL to reflect template change
+                    const params = new URLSearchParams(location.search);
+                    params.set('template', newTemplate);
+                    navigate(`${location.pathname}?${params.toString()}`, { replace: true });
+                    // Notify parent if callback provided
+                    if (onTemplateChange) {
+                      onTemplateChange(newTemplate);
                     }
                   }}
                 />
