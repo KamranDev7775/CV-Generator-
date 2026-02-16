@@ -32,6 +32,7 @@ import { mergeDataForPreview, hasUserData } from '@/utils/sampleData';
  * @property {Array} [languagesList]
  * @property {string} [languages]
  * @property {string} [template]
+ * @property {string} [photo]
  */
 
 /**
@@ -138,36 +139,24 @@ const validateDate = (date) => {
  * @param {Function} [props.onTemplateChange]
  * @returns {React.ReactElement}
  */
-export default function CVFormWithPreview({ formData, setFormData, onSubmit, isGenerating, user, remainingAIRequests, selectedTemplate = 'classic', onImport = null, onTemplateChange }) {
+export default function CVFormWithPreview({ formData, setFormData, onSubmit, isGenerating, user, remainingAIRequests, selectedTemplate = 'minimal', onImport = null, onTemplateChange }) {
   const navigate = useNavigate();
   const location = useLocation();
   /** @type {[ValidationErrors, Function]} */
   const [errors, setErrors] = useState({});
   const fileInputRef = useRef(null);
 
-  // Determine preview data: use sample data if form is empty, otherwise use form data
-  // Always ensure the correct template is set
+  // Always use merged data for preview - this ensures preview never disappears
+  // and always shows complete CV structure with user data where available
   const previewData = useMemo(() => {
-    const hasData = hasUserData(formData, selectedTemplate);
-    const currentTemplate = formData.template || selectedTemplate;
-    
-    if (hasData) {
-      return {
-        ...formData,
-        template: currentTemplate
-      };
-    }
-    
-    const merged = mergeDataForPreview(formData || {}, currentTemplate);
-    return {
-      ...merged,
-      template: currentTemplate
-    };
+    const currentTemplate = formData.template || selectedTemplate || 'modern';
+    return mergeDataForPreview({ ...formData, template: currentTemplate }, currentTemplate);
   }, [formData, selectedTemplate]);
 
-  // Check if currently showing sample data
+  // Check if currently showing any sample data (mixed with user data)
   const isShowingSampleData = useMemo(() => {
-    return !hasUserData(formData, selectedTemplate);
+    const currentTemplate = formData.template || selectedTemplate || 'modern';
+    return !hasUserData(formData, currentTemplate);
   }, [formData, selectedTemplate]);
 
   const updateField = (field, value) => {
@@ -450,31 +439,36 @@ export default function CVFormWithPreview({ formData, setFormData, onSubmit, isG
   };
 
   return (
-    <section className="bg-gradient-to-b from-white to-gray-50" id="cv-form">
+    <section className="bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 min-h-screen" id="cv-form">
       {/* Progress Bar */}
       <ProgressBar formData={formData} />
       
-      <div className="w-full px-4 md:px-6 lg:px-8 py-6">
+      <div className="w-full px-4 md:px-6 lg:px-8 py-6 sm:py-8">
         {/* Header */}
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-black mb-3">
+        <div className="text-center mb-12 sm:mb-16">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-4">
             Create your professional CV
           </h2>
-          <p className="text-lg text-gray-600">
+          <p className="text-lg sm:text-xl text-gray-700 max-w-2xl mx-auto px-4">
             Fill in your details and see your CV update in real-time
           </p>
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-8">
+        <div className="grid lg:grid-cols-2 gap-6 sm:gap-8">
           {/* Form Section - Left Side */}
-          <div className="bg-white rounded-2xl shadow-lg p-8 lg:h-[calc(100vh-12rem)] lg:overflow-y-auto">
-            <form onSubmit={handleSubmit} className="space-y-10">
+          <div className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl border border-white/20 p-6 sm:p-8 lg:h-[calc(130vh-12rem)] lg:overflow-y-auto hover:shadow-2xl transition-all duration-300">
+            <form onSubmit={handleSubmit} className="space-y-8 sm:space-y-10">
               
               {/* Basic Information */}
               <div>
-                <h3 className="text-sm font-semibold uppercase tracking-wider text-blue-600 mb-4">
-                  Basic Information
-                </h3>
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
+                    <span className="text-white text-sm font-bold">1</span>
+                  </div>
+                  <h3 className="text-lg font-bold text-gray-800">
+                    Basic Information
+                  </h3>
+                </div>
                 <div className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">Full Name *</label>
@@ -660,7 +654,7 @@ export default function CVFormWithPreview({ formData, setFormData, onSubmit, isG
                           }}
                           className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
                         />
-                        <p className="text-xs text-gray-400 mt-1">Used in Professional, Modern Sidebar, and Executive Dark templates</p>
+                        <p className="text-xs text-gray-400 mt-1">Displayed in Professional, Modern Sidebar, and Executive Dark templates</p>
                       </div>
                       {formData.photo && (
                         <Button
@@ -680,9 +674,14 @@ export default function CVFormWithPreview({ formData, setFormData, onSubmit, isG
 
               {/* Professional Summary */}
               <div>
-                <h3 className="text-sm font-semibold uppercase tracking-wider text-blue-600 mb-4">
-                  Professional Summary
-                </h3>
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
+                    <span className="text-white text-sm font-bold">2</span>
+                  </div>
+                  <h3 className="text-lg font-bold text-gray-800">
+                    Professional Summary
+                  </h3>
+                </div>
                 <div className="space-y-3">
                   <Textarea
                     value={formData.summary || ''}
@@ -717,9 +716,14 @@ export default function CVFormWithPreview({ formData, setFormData, onSubmit, isG
 
               {/* Professional Experience */}
               <div>
-                <h3 className="text-sm font-semibold uppercase tracking-wider text-blue-600 mb-4">
-                  Professional Experience
-                </h3>
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
+                    <span className="text-white text-sm font-bold">3</span>
+                  </div>
+                  <h3 className="text-lg font-bold text-gray-800">
+                    Professional Experience
+                  </h3>
+                </div>
                 <div className="space-y-0">
                   {(formData.experiences || []).map((exp, index) => (
                     <ExperienceEntry
@@ -750,7 +754,14 @@ export default function CVFormWithPreview({ formData, setFormData, onSubmit, isG
 
               {/* Education */}
               <div>
-                <h3 className="text-sm font-semibold uppercase tracking-wider text-blue-600 mb-4">Education</h3>
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
+                    <span className="text-white text-sm font-bold">4</span>
+                  </div>
+                  <h3 className="text-lg font-bold text-gray-800">
+                    Education
+                  </h3>
+                </div>
                 <div className="space-y-0">
                   {(formData.education || []).map((edu, index) => (
                     <EducationEntry
@@ -780,7 +791,14 @@ export default function CVFormWithPreview({ formData, setFormData, onSubmit, isG
               </div>
               {/* Skills */}
               <div>
-                <h3 className="text-sm font-semibold uppercase tracking-wider text-blue-600 mb-4">Skills</h3>
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
+                    <span className="text-white text-sm font-bold">5</span>
+                  </div>
+                  <h3 className="text-lg font-bold text-gray-800">
+                    Skills
+                  </h3>
+                </div>
                 <Textarea
                   value={formData.skills || ''}
                   onChange={(e) => updateField('skills', e.target.value)}
@@ -792,7 +810,14 @@ export default function CVFormWithPreview({ formData, setFormData, onSubmit, isG
               </div>
               {/* Languages */}
               <div>
-                <h3 className="text-sm font-semibold uppercase tracking-wider text-blue-600 mb-4">Languages</h3>
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
+                    <span className="text-white text-sm font-bold">6</span>
+                  </div>
+                  <h3 className="text-lg font-bold text-gray-800">
+                    Languages
+                  </h3>
+                </div>
                 <LanguageSelector 
                   languages={formData.languagesList || []}
                   onChange={(langs) => {
@@ -807,15 +832,18 @@ export default function CVFormWithPreview({ formData, setFormData, onSubmit, isG
 
               {/* Template Selection - Switcher */}
               <div>
-                <h3 className="text-sm font-semibold uppercase tracking-wider text-blue-600 mb-4">CV Template</h3>
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
+                    <span className="text-white text-sm font-bold">7</span>
+                  </div>
+                  <h3 className="text-lg font-bold text-gray-800">
+                    CV Template
+                  </h3>
+                </div>
                 <TemplateSwitcher
-                  selectedTemplate={selectedTemplate || formData.template}
+                  selectedTemplate={formData.template || selectedTemplate}
                   onTemplateChange={(newTemplate) => {
                     updateField('template', newTemplate);
-                    // Update URL to reflect template change
-                    const params = new URLSearchParams(location.search);
-                    params.set('template', newTemplate);
-                    navigate(`${location.pathname}?${params.toString()}`, { replace: true });
                     // Notify parent if callback provided
                     if (onTemplateChange) {
                       onTemplateChange(newTemplate);
@@ -826,7 +854,7 @@ export default function CVFormWithPreview({ formData, setFormData, onSubmit, isG
               </div>
 
               {/* Submit */}
-              <div className="pt-4 sticky bottom-0 bg-white pb-4 z-10">
+              <div className="pt-6 sticky bottom-0 bg-gradient-to-t from-white via-white to-transparent pb-6 z-10">
                 <Button 
                   type="submit"
                   disabled={isGenerating || !formData?.full_name?.trim() || !formData?.email?.trim()}
@@ -887,7 +915,7 @@ export default function CVFormWithPreview({ formData, setFormData, onSubmit, isG
                 Sample Data
               </span>
             )}
-            <div className="sticky top-4 border border-gray-200 rounded-lg bg-white shadow-lg overflow-auto" style={{height: 'calc(100vh - 8rem)'}}>
+            <div className="sticky top-4 border border-gray-200 rounded-2xl bg-white shadow-2xl overflow-auto hover:shadow-3xl transition-shadow duration-300" style={{height: 'calc(100vh - 6rem)'}}>
               <CVDocument data={previewData} showWatermark={true} preview={true} />
             </div>
             <p className="text-xs text-gray-500 text-center">

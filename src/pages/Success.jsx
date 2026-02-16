@@ -7,6 +7,8 @@ import { Check, Copy, Download, Loader2, Edit2, Save } from "lucide-react";
 import { toast } from "sonner";
 import { removeSecureStorage, getSecureStorage } from '../utils/storage';
 import { useIsMounted } from '@/hooks/useIsMounted';
+import Navbar from '@/components/navigation/Navbar';
+import Footer from '@/components/navigation/Footer';
 
 // HTML escaping function to prevent XSS
 const escapeHtml = (text) => {
@@ -489,16 +491,22 @@ export default function Success() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+      <div className="min-h-screen flex flex-col" style={{ background: 'linear-gradient(180deg, #F3F1FF 0%, #FFFFFF 83.1%)' }}>
+        <Navbar />
+        <div className="flex-1 flex items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+        </div>
+        <Footer />
       </div>
     );
   }
 
   if (!cvData) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center px-6">
-        <div className="text-center max-w-md">
+      <div className="min-h-screen flex flex-col" style={{ background: 'linear-gradient(180deg, #F3F1FF 0%, #FFFFFF 83.1%)' }}>
+        <Navbar />
+        <div className="flex-1 flex items-center justify-center px-6">
+          <div className="text-center max-w-md">
           <h1 className="text-2xl font-light text-black mb-4">CV Not Found</h1>
           <p className="text-gray-500 mb-2">
             We couldn't load your CV. This may happen if:
@@ -523,14 +531,17 @@ export default function Success() {
               Refresh page
             </button>
           </div>
+          </div>
         </div>
+        <Footer />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-white">
-      <section className="px-6 md:px-12 lg:px-24 py-20">
+    <div className="min-h-screen flex flex-col" style={{ background: 'linear-gradient(180deg, #F3F1FF 0%, #FFFFFF 83.1%)' }}>
+      <Navbar />
+      <section className="flex-1 px-6 md:px-12 lg:px-24 py-12">
         <div className="max-w-3xl mx-auto">
           {/* Success Message */}
           <div className="mb-12 text-center">
@@ -720,6 +731,7 @@ export default function Success() {
           </div>
         </div>
       </section>
+      <Footer />
     </div>
   );
 }

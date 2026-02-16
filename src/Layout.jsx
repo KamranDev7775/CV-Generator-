@@ -31,49 +31,55 @@ export default function Layout({ children, currentPageName }) {
   }, []);
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <main className="flex-grow">
+    <div className="flex flex-col min-h-screen">
+      <main className="flex-1">
         {children}
       </main>
       
-      <footer className="border-t border-gray-100 bg-white">
-        <div className="max-w-6xl mx-auto px-6 py-12">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-6">
-            <div className="text-sm text-gray-400">
-              © {new Date().getFullYear()} ATS CV Generator
+      <footer className="mt-auto">
+        <div className="bg-gradient-to-b from-[#1a002b] to-[#0c0018] border-t border-white/10">
+          <div className="max-w-7xl mx-auto px-10 py-8">
+
+            {/* Top Row */}
+            <div className="flex justify-between items-start text-sm text-white/70">
+
+              {/* Left Links */}
+              <div className="flex flex-col space-y-2">
+                <Link to={createPageUrl('Home')} className="hover:text-white transition">
+                  Home
+                </Link>
+                <Link to={createPageUrl('Dashboard')} className="hover:text-white transition">
+                  Dashboard
+                </Link>
+              </div>
+
+              {/* Center Links */}
+              <div className="flex flex-col space-y-2 text-center">
+                <Link to={createPageUrl('Templates')} className="hover:text-white transition">
+                  Templates
+                </Link>
+                <Link to={createPageUrl('Pricing')} className="hover:text-white transition">
+                  Pricing
+                </Link>
+              </div>
+
+              {/* Right Links */}
+              <div className="flex flex-col space-y-2 text-right">
+                <Link to={createPageUrl('FAQs')} className="hover:text-white transition">
+                  FAQs
+                </Link>
+              </div>
+
+              {/* Copyright */}
+              <div className="absolute right-10 top-6 text-xs text-white/30">
+                © {new Date().getFullYear()} ATS CV Generator. All rights reserved.
+              </div>
+
             </div>
-            <nav className="flex flex-wrap justify-center gap-6 text-sm">
-              <Link 
-                to={createPageUrl('Home')} 
-                className="text-gray-500 hover:text-gray-900 transition-colors hover:underline"
-              >
-                Home
-              </Link>
-              <Link 
-                to={createPageUrl('Pricing')} 
-                className="text-gray-500 hover:text-gray-900 transition-all hover:underline"
-              >
-                Pricing
-              </Link>
-              <Link 
-                to={createPageUrl('Dashboard')} 
-                className="text-gray-500 hover:text-gray-900 transition-colors hover:underline"
-              >
-                Dashboard
-              </Link>
-              <Link 
-                to={createPageUrl('PrivacyPolicy')} 
-                className="text-gray-500 hover:text-gray-900 transition-colors hover:underline"
-              >
-                Privacy Policy
-              </Link>
-              <Link 
-                to={createPageUrl('TermsConditions')} 
-                className="text-gray-500 hover:text-gray-900 transition-colors hover:underline"
-              >
-                Terms & Conditions
-              </Link>
-            </nav>
+
+            {/* Divider */}
+            <div className="mt-6 border-t border-white/10"></div>
+
           </div>
         </div>
       </footer>

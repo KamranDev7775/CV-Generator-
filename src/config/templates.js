@@ -6,10 +6,10 @@ import templateConfigJSON from './templateConfig.json';
 
 export const TEMPLATE_CATEGORIES = {
   CLASSIC: 'Classic',
-  MODERN: 'Modern',
+  MODERN: 'modern',
   MINIMAL: 'Minimal',
-  EXECUTIVE: 'Executive',
-  CREATIVE: 'Creative'
+  EXECUTIVE: 'executive',
+  CREATIVE: 'creative'
 };
 
 // Build TEMPLATES object from JSON configuration for backwards compatibility
@@ -40,7 +40,7 @@ export function getTemplatesByCategory(category) {
 
 // Get template by ID
 export function getTemplateById(templateId) {
-  return TEMPLATES[templateId] || TEMPLATES.classic;
+  return TEMPLATES[templateId] || TEMPLATES.minimal;
 }
 
 // Get template component name

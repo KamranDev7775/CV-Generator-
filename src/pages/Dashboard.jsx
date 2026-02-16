@@ -6,6 +6,8 @@ import { Loader2, FileText, LogOut, Edit, Eye, Download } from "lucide-react";
 import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '../utils';
 import { setSecureStorage } from '../utils/storage';
+import Navbar from '@/components/navigation/Navbar';
+import Footer from '@/components/navigation/Footer';
 
 export default function Dashboard() {
   const [user, setUser] = useState(null);
@@ -92,8 +94,9 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <section className="px-6 md:px-12 lg:px-24 py-20">
+    <div className="min-h-screen flex flex-col" style={{ background: 'linear-gradient(180deg, #F3F1FF 0%, #FFFFFF 83.1%)' }}>
+      <Navbar />
+      <section className="flex-1 px-6 md:px-12 lg:px-24 py-12">
         <div className="max-w-4xl mx-auto">
           <div className="flex justify-between items-center mb-8">
             <h1 className="text-3xl font-light text-black">Dashboard</h1>
@@ -227,6 +230,7 @@ export default function Dashboard() {
           </Card>
         </div>
       </section>
+      <Footer />
     </div>
   );
 }

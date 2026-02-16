@@ -2,18 +2,18 @@
   "templates": [
     {
       "id": "classic",
-      "name": "Professional",
+      "name": "classic",
       "previewImageUrl": "/templates/cv1.png",
       "category": "Classic",
       "description": "Professional layout with photo area and clear sections. Ideal for experienced professionals with detailed work history.",
       "layout": "photo-single-column",
       "dynamicLayout": {
         "layout": "single",
-        "containerClass": "bg-white p-8 font-sans text-sm",
+        "containerClass": "bg-white p-6 font-sans text-sm w-full",
         "sections": [
           { 
             "type": "header", 
-            "config": { "layout": "horizontal", "showPhoto": true, "border": true },
+            "config": { "layout": "horizontal", "showPhoto": false, "border": true, "photoSize": "xl" },
             "className": "mb-6 pb-4 border-b-2 border-gray-800"
           },
           { "type": "summary", "config": { "title": "Professional Summary" } },
@@ -29,7 +29,7 @@
         "headerBorder": "border-b-2 border-gray-800 pb-4",
         "sectionHeaderStyle": "text-base font-bold border-b border-gray-800 pb-2 mb-4",
         "fontFamily": "font-sans",
-        "padding": "p-8",
+        "padding": "p-12",
         "previewPadding": "p-3",
         "backgroundColor": "bg-white",
         "textColor": "text-gray-900"
@@ -37,19 +37,19 @@
     },
     {
       "id": "modern",
-      "name": "Traditional",
+      "name": "modern",
       "previewImageUrl": "/templates/cv2.png",
-      "category": "Traditional",
+      "category": "modern",
       "description": "Centered formal layout with skills table and references. Classic professional design for conservative industries.",
       "layout": "centered-traditional",
       "dynamicLayout": {
         "layout": "single",
-        "containerClass": "bg-white px-12 py-10 font-serif text-[11px] leading-tight",
+        "containerClass": "bg-white px-8 py-6 font-serif text-xs leading-tight w-full",
         "sections": [
           { 
             "type": "header", 
-            "config": { "layout": "centered", "border": false },
-            "className": "text-center mb-6"
+            "config": { "layout": "horizontal", "showPhoto": true, "border": false, "photoSize": "lg" },
+            "className": "mb-6"
           },
           { 
             "type": "summary", 
@@ -81,7 +81,7 @@
         "skillsTable": true,
         "references": true,
         "sectionHeaderStyle": "text-xs uppercase font-bold tracking-wider mb-4",
-        "padding": "px-12 py-10",
+        "padding": "px-16 py-14",
         "previewPadding": "px-3",
         "backgroundColor": "bg-white"
       }
@@ -95,7 +95,7 @@
       "layout": "minimal-centered",
       "dynamicLayout": {
         "layout": "single",
-        "containerClass": "bg-white p-10 font-sans text-sm",
+        "containerClass": "bg-white p-6 font-sans text-sm w-full",
         "sections": [
           { 
             "type": "header", 
@@ -138,7 +138,7 @@
         "centered": true,
         "boldSectionHeaders": true,
         "sectionHeaderStyle": "text-sm font-bold uppercase tracking-wider border-b-2 border-gray-900 pb-2 mb-4",
-        "padding": "p-10",
+        "padding": "p-14",
         "previewPadding": "p-3",
         "backgroundColor": "bg-white",
         "fontFamily": "font-sans"
@@ -146,36 +146,30 @@
     },
     {
       "id": "executive",
-      "name": "Modern Sidebar",
+      "name": "executive",
       "previewImageUrl": "/templates/cv4.png",
-      "category": "Modern",
+      "category": "executive",
       "description": "Two-column layout with gray sidebar and photo. Modern professional design with clear visual hierarchy.",
       "layout": "sidebar-modern",
       "dynamicLayout": {
         "layout": "two-column",
-        "containerClass": "bg-white text-sm",
+        "containerClass": "bg-white text-sm w-full",
         "sidebar": {
           "sections": [
-            { "type": "photo", "config": { "circular": false, "size": "large", "showName": false, "showTitle": false } },
-            { 
-              "type": "header", 
-              "config": { "layout": "vertical", "border": false },
-              "className": "mt-6 mb-2"
-            },
+            { "type": "photo", "config": { "circular": false, "size": "xl", "showName": true, "showTitle": true } },
             { 
               "type": "contact", 
-              "config": { "layout": "list", "showLabels": true },
+              "config": { "layout": "list", "showLabels": false },
               "className": "mb-6"
             },
-            { "type": "education", "config": { "title": "Education", "maxItems": 2 } },
-            { "type": "skills", "config": { "title": "Experience", "layout": "list" } }
+            { "type": "education", "config": { "title": "EDUCATION", "maxItems": 2 } },
+            { "type": "skills", "config": { "title": "SKILLS", "layout": "list" } }
           ]
         },
         "content": {
           "sections": [
-            { "type": "summary" },
-            { "type": "experience", "config": { "title": "Experience", "layout": "timeline" } },
-            { "type": "education", "config": { "title": "Education" } }
+            { "type": "summary", "config": { "title": "PROFILE" } },
+            { "type": "experience", "config": { "title": "EXPERIENCE", "layout": "timeline" } }
           ]
         },
         "sidebarClass": "w-1/3 bg-gray-100 p-6",
@@ -197,43 +191,39 @@
     },
     {
       "id": "creative",
-      "name": "Executive Dark",
+      "name": "creative",
       "previewImageUrl": "/templates/cv5.png",
-      "category": "Executive",
+      "category": "creative",
       "description": "Dark sidebar with timeline design and professional photo. Modern executive template with visual impact.",
       "layout": "dark-sidebar-timeline",
       "dynamicLayout": {
-        "layout": "two-column",
-        "containerClass": "bg-white text-sm",
+        "layout": "two-column-with-header",
+        "containerClass": "bg-white text-sm w-full h-full",
+        "header": {
+          "type": "header",
+          "config": { "layout": "dark", "showPhoto": true, "border": false, "photoSize": "xl" },
+          "className": "bg-slate-700 text-white p-6 mb-0"
+        },
         "sidebar": {
           "sections": [
             { 
-              "type": "photo", 
-              "config": { "circular": true, "size": "large", "showName": false, "showTitle": false }
-            },
-            { 
-              "type": "header", 
-              "config": { "layout": "vertical", "border": false },
-              "className": "mt-4 mb-2"
-            },
-            { 
               "type": "contact", 
               "config": { "layout": "list", "showLabels": false },
-              "className": "mb-6"
+              "className": "mb-6 text-sm"
             },
-            { "type": "skills", "config": { "title": "SKILLS", "layout": "list" } },
-            { "type": "languages", "config": { "title": "LANGUAGES" } }
+            { "type": "skills", "config": { "title": "SKILLS", "layout": "list" }, "className": "mb-6" },
+            { "type": "languages", "config": { "title": "LANGUAGES" }, "className": "mb-6" }
           ]
         },
         "content": {
           "sections": [
-            { "type": "summary", "config": { "title": "PROFILE" } },
-            { "type": "experience", "config": { "title": "WORK EXPERIENCE", "layout": "timeline" } },
-            { "type": "education", "config": { "title": "EDUCATION" } }
+            { "type": "summary", "config": { "title": "PROFILE" }, "className": "mb-6" },
+            { "type": "experience", "config": { "title": "WORK EXPERIENCE", "layout": "timeline" }, "className": "mb-6" },
+            { "type": "education", "config": { "title": "EDUCATION" }, "className": "mb-6" }
           ]
         },
-        "sidebarClass": "w-1/3 bg-slate-700 text-white p-6",
-        "contentClass": "w-2/3 p-8"
+        "sidebarClass": "w-1/3 bg-gray-200 p-6 h-full",
+        "contentClass": "w-2/3 p-6 h-full"
       },
       "features": ["Dark theme", "Timeline", "Photo", "Icons"],
       "idealFor": ["Executive", "Management", "Leadership", "Corporate"],

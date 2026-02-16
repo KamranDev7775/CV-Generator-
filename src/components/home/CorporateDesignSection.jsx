@@ -16,68 +16,68 @@ export default function CorporateDesignSection({ onStart }) {
   };
 
   return (
-    <section className="py-24 bg-gradient-to-b from-gray-50 to-white">
-      <div className="max-w-7xl mx-auto px-6 md:px-12">
-        <div className="grid lg:grid-cols-2 gap-16 items-center">
+    <section className="py-16 sm:py-20 md:py-24 bg-gradient-to-b from-gray-50 to-white">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-12">
+        <div className="grid lg:grid-cols-2 gap-10 sm:gap-12 md:gap-16 items-center">
           {/* Left Content */}
-          <div className="space-y-10">
-            <div className="space-y-4">
-              <h2 className="text-5xl md:text-6xl font-bold text-black leading-tight tracking-tight">
+          <div className="space-y-6 sm:space-y-8 md:space-y-10">
+            <div className="space-y-3 sm:space-y-4">
+              <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-black leading-tight tracking-tight">
                 Designed for{' '}
                 <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
                   Professional Roles
                 </span>
               </h2>
-              <p className="text-xl text-gray-600 leading-relaxed">
+              <p className="text-base sm:text-lg md:text-xl text-gray-600 leading-relaxed">
                 A clean, recruiter-friendly CV that helps you stand out in seconds
               </p>
             </div>
 
             {/* Features */}
-            <div className="space-y-5">
-              <div className="group flex items-start gap-5 p-5 rounded-2xl hover:bg-white transition-all duration-300 hover:shadow-lg cursor-default">
-                <div className="flex-shrink-0 w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-lg shadow-blue-500/30">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <div className="space-y-3 sm:space-y-4 md:space-y-5">
+              <div className="group flex items-start gap-3 sm:gap-4 md:gap-5 p-3 sm:p-4 md:p-5 rounded-xl sm:rounded-2xl hover:bg-white transition-all duration-300 hover:shadow-lg cursor-default">
+                <div className="flex-shrink-0 w-10 h-10 sm:w-11 sm:h-11 md:w-12 md:h-12 rounded-xl sm:rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-lg shadow-blue-500/30">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="sm:w-6 sm:h-6">
                     <polyline points="20 6 9 17 4 12"/>
                   </svg>
                 </div>
-                <div className="flex-1 pt-1">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-1 group-hover:text-blue-600 transition-colors">
+                <div className="flex-1 pt-0.5 sm:pt-1">
+                  <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-1 group-hover:text-blue-600 transition-colors">
                     Single-Column Format
                   </h3>
-                  <p className="text-gray-600 leading-relaxed">
+                  <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
                     Easy to read. Works well with screening tools.
                   </p>
                 </div>
               </div>
 
-              <div className="group flex items-start gap-5 p-5 rounded-2xl hover:bg-white transition-all duration-300 hover:shadow-lg cursor-default">
-                <div className="flex-shrink-0 w-12 h-12 rounded-2xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center shadow-lg shadow-purple-500/30">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <div className="group flex items-start gap-3 sm:gap-4 md:gap-5 p-3 sm:p-4 md:p-5 rounded-xl sm:rounded-2xl hover:bg-white transition-all duration-300 hover:shadow-lg cursor-default">
+                <div className="flex-shrink-0 w-10 h-10 sm:w-11 sm:h-11 md:w-12 md:h-12 rounded-xl sm:rounded-2xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center shadow-lg shadow-purple-500/30">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="sm:w-6 sm:h-6">
                     <polyline points="20 6 9 17 4 12"/>
                   </svg>
                 </div>
-                <div className="flex-1 pt-1">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-1 group-hover:text-purple-600 transition-colors">
+                <div className="flex-1 pt-0.5 sm:pt-1">
+                  <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-1 group-hover:text-purple-600 transition-colors">
                     Professional Design
                   </h3>
-                  <p className="text-gray-600 leading-relaxed">
+                  <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
                     Clean layout and fonts — suitable for any role.
                   </p>
                 </div>
               </div>
 
-              <div className="group flex items-start gap-5 p-5 rounded-2xl hover:bg-white transition-all duration-300 hover:shadow-lg cursor-default">
-                <div className="flex-shrink-0 w-12 h-12 rounded-2xl bg-gradient-to-br from-pink-500 to-pink-600 flex items-center justify-center shadow-lg shadow-pink-500/30">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <div className="group flex items-start gap-3 sm:gap-4 md:gap-5 p-3 sm:p-4 md:p-5 rounded-xl sm:rounded-2xl hover:bg-white transition-all duration-300 hover:shadow-lg cursor-default">
+                <div className="flex-shrink-0 w-10 h-10 sm:w-11 sm:h-11 md:w-12 md:h-12 rounded-xl sm:rounded-2xl bg-gradient-to-br from-pink-500 to-pink-600 flex items-center justify-center shadow-lg shadow-pink-500/30">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="sm:w-6 sm:h-6">
                     <polyline points="20 6 9 17 4 12"/>
                   </svg>
                 </div>
-                <div className="flex-1 pt-1">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-1 group-hover:text-pink-600 transition-colors">
+                <div className="flex-1 pt-0.5 sm:pt-1">
+                  <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-1 group-hover:text-pink-600 transition-colors">
                     Globally Recognized Format
                   </h3>
-                  <p className="text-gray-600 leading-relaxed">
+                  <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
                     Follows international best practices and passes ATS screening systems used by top companies worldwide.
                   </p>
                 </div>
@@ -89,19 +89,20 @@ export default function CorporateDesignSection({ onStart }) {
               <Button 
                 onClick={handleStart}
                 disabled={isLoading}
-                className="bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700 px-10 py-7 text-lg font-semibold rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 group disabled:opacity-70 disabled:cursor-not-allowed"
+                style={{ background: 'linear-gradient(90deg, #2563EB 0%, #9333EA 100%)' }}
+                className="text-white px-6 sm:px-8 md:px-10 py-5 sm:py-6 md:py-7 text-base sm:text-lg font-semibold rounded-xl sm:rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 group disabled:opacity-70 disabled:cursor-not-allowed hover:opacity-90 w-full sm:w-auto"
               >
                 {isLoading ? 'Loading...' : 'Get your CV now'}
-                {!isLoading && <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />}
+                {!isLoading && <ArrowRight className="ml-2 w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform" />}
               </Button>
-              <p className="text-sm text-gray-500 mt-4">
+              <p className="text-xs sm:text-sm text-gray-500 mt-3 sm:mt-4">
                 No credit card required • Ready in 2 minutes
               </p>
             </div>
           </div>
 
           {/* Right Visual */}
-          <div className="relative lg:block hidden">
+          <div className="relative hidden lg:block">
             <div className="relative">
               {/* Decorative gradient orbs */}
               <div className="absolute -top-10 -right-10 w-72 h-72 bg-gradient-to-br from-blue-400/20 to-purple-400/20 rounded-full blur-3xl" />

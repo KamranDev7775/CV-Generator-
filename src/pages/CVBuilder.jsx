@@ -11,6 +11,7 @@ import CVFormWithPreview from '@/components/cv/CVFormWithPreview';
 import PreviewSection from '@/components/cv/PreviewSection';
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from 'lucide-react';
+import Navbar from '@/components/navigation/Navbar';
 
 const STORAGE_KEY = 'form_data';
 const SUBMISSION_KEY = 'submission_id';
@@ -52,8 +53,8 @@ export default function CVBuilder() {
     target_country: 'Germany',
     seniority_level: 'Mid',
     job_description: '',
-    template: 'classic',
-    style: 'professional',
+    template: 'minimal',
+    style: 'minimal',
     photo: null
   });
   const [generatedCV, setGeneratedCV] = useState(null);
@@ -86,7 +87,7 @@ export default function CVBuilder() {
         setFormData(prev => ({
           ...prev,
           ...importData,
-          template: prev.template || 'classic'
+          template: prev.template || 'minimal'
         }));
         
         setSecureStorage(STORAGE_KEY, {
@@ -103,8 +104,8 @@ export default function CVBuilder() {
     
     const templateParam = urlParams.get('template');
     const savedTemplate = getSecureStorage(STORAGE_KEY_TEMPLATE);
-    const templateId = templateParam || savedTemplate || 'classic';
-    const validTemplate = templateExists(templateId) ? templateId : 'classic';
+    const templateId = templateParam || savedTemplate || 'minimal';
+    const validTemplate = templateExists(templateId) ? templateId : 'minimal';
     
     console.log('[CV Builder] Template selection:', {
       templateParam,
@@ -133,7 +134,7 @@ export default function CVBuilder() {
       }));
     }
     
-    if (validTemplate !== 'classic') {
+    if (validTemplate !== 'minimal') {
       setSecureStorage(STORAGE_KEY_TEMPLATE, validTemplate);
     }
     
@@ -196,6 +197,8 @@ export default function CVBuilder() {
   const handleTemplateSelect = (templateId) => {
     setSelectedTemplateId(templateId);
     setSecureStorage(STORAGE_KEY_TEMPLATE, templateId);
+    // Update formData.template immediately
+    setFormData(prev => ({ ...prev, template: templateId }));
     updateStep('form', templateId);
   };
 
@@ -328,7 +331,7 @@ export default function CVBuilder() {
 
       console.log('[CV Builder] ExtractDataFromUploadedFile result:', result);
 
-      if (result.status === 'error') {
+      if (result && typeof result === 'object' && 'status' in result && result.status === 'error') {
         console.error('[CV Builder] API returned error status');
         setImportError('Could not read this file. Please try another one.');
         toast.error('Could not read this file. Please try another one.');
@@ -336,27 +339,27 @@ export default function CVBuilder() {
       }
 
       // Merge extracted data with default form structure
-      const extractedData = result.output || {};
+      const extractedData = (result && typeof result === 'object' && 'output' in result) ? result.output : {};
       console.log('[CV Builder] Extracted data:', extractedData);
       
       const newFormData = {
         ...formData,
-        full_name: extractedData.full_name || '',
-        target_position: extractedData.target_position || '',
-        location: extractedData.location || '',
-        email: extractedData.email || '',
-        phone: extractedData.phone || '',
-        linkedin_url: extractedData.linkedin_url || '',
-        summary: extractedData.summary || '',
+        full_name: (extractedData && typeof extractedData === 'object' && 'full_name' in extractedData && typeof extractedData.full_name === 'string') ? extractedData.full_name : '',
+        target_position: (extractedData && typeof extractedData === 'object' && 'target_position' in extractedData && typeof extractedData.target_position === 'string') ? extractedData.target_position : '',
+        location: (extractedData && typeof extractedData === 'object' && 'location' in extractedData && typeof extractedData.location === 'string') ? extractedData.location : '',
+        email: (extractedData && typeof extractedData === 'object' && 'email' in extractedData && typeof extractedData.email === 'string') ? extractedData.email : '',
+        phone: (extractedData && typeof extractedData === 'object' && 'phone' in extractedData && typeof extractedData.phone === 'string') ? extractedData.phone : '',
+        linkedin_url: (extractedData && typeof extractedData === 'object' && 'linkedin_url' in extractedData && typeof extractedData.linkedin_url === 'string') ? extractedData.linkedin_url : '',
+        summary: (extractedData && typeof extractedData === 'object' && 'summary' in extractedData && typeof extractedData.summary === 'string') ? extractedData.summary : '',
         auto_generate_summary: false,
-        skills: extractedData.skills || '',
-        experiences: (extractedData.experiences && extractedData.experiences.length > 0) 
+        skills: (extractedData && typeof extractedData === 'object' && 'skills' in extractedData && typeof extractedData.skills === 'string') ? extractedData.skills : '',
+        experiences: (extractedData && typeof extractedData === 'object' && 'experiences' in extractedData && Array.isArray(extractedData.experiences) && extractedData.experiences.length > 0) 
           ? extractedData.experiences 
           : [{ job_title: '', company: '', location: '', start_date: '', end_date: '', achievements: '' }],
-        education: (extractedData.education && extractedData.education.length > 0) 
+        education: (extractedData && typeof extractedData === 'object' && 'education' in extractedData && Array.isArray(extractedData.education) && extractedData.education.length > 0) 
           ? extractedData.education 
           : [{ degree: '', university: '', location: '', start_date: '', end_date: '' }],
-        languages: extractedData.languages || '',
+        languages: (extractedData && typeof extractedData === 'object' && 'languages' in extractedData && typeof extractedData.languages === 'string') ? extractedData.languages : '',
         languagesList: [],
         target_country: formData.target_country || 'Germany',
         seniority_level: formData.seniority_level || 'Mid',
@@ -541,77 +544,221 @@ Generate a professional summary that will make recruiters want to interview this
 
   if (step === 'templates') {
     return (
-      <div className="min-h-screen bg-white">
-        <div className="border-b border-gray-100 bg-white sticky top-0 z-10">
-          <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-24 py-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <Button
-                  variant="ghost"
-                  onClick={handleBackToHome}
-                  className="text-gray-600 hover:text-gray-900 mb-2"
-                >
-                  <ArrowLeft className="h-4 w-4 mr-2" />
-                  Back to Home
-                </Button>
-                <h1 className="text-3xl md:text-4xl font-light text-black">
-                  Choose Your CV Template
+      <div className="min-h-screen flex flex-col" style={{ background: 'linear-gradient(180deg, #F3F1FF 0%, #FFFFFF 83.1%)' }}>
+        <Navbar />
+        
+        <div className="relative pt-12 pb-16 sm:pt-16 sm:pb-20">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="text-center">
+                <div className="inline-flex items-center px-4 py-2 rounded-full bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-800 text-sm font-medium mb-6">
+                  <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                  Professional Templates
+                </div>
+                
+                <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold bg-gradient-to-r from-gray-900 via-blue-800 to-indigo-800 bg-clip-text text-transparent mb-6 leading-tight">
+                  Choose Your Perfect
+                  <br className="hidden sm:block" />
+                  <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">CV Template</span>
                 </h1>
-                <p className="text-gray-500 mt-2">
-                  Select a design you like. You can customize or switch it later.
+                
+                <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto mb-8 leading-relaxed">
+                  Select from our professionally designed templates. Each one is ATS-optimized and crafted to make you stand out to recruiters and hiring managers.
                 </p>
-              </div>
+                
+                <div className="flex flex-wrap justify-center gap-6 text-sm text-gray-500">
+                  <div className="flex items-center">
+                    <svg className="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                    ATS-Optimized
+                  </div>
+                  <div className="flex items-center">
+                    <svg className="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                    Professional Design
+                  </div>
+                  <div className="flex items-center">
+                    <svg className="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                    Instant Download
+                  </div>
+                </div>
             </div>
           </div>
         </div>
 
-        <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-24 py-6">
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
           {importError && (
-            <div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
-              {importError}
+            <div className="mb-8 bg-red-50/80 backdrop-blur-sm border border-red-200 text-red-700 px-6 py-4 rounded-2xl shadow-lg">
+              <div className="flex items-center">
+                <div className="flex-shrink-0">
+                  <svg className="w-5 h-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <div className="ml-3">
+                  <p className="text-sm font-medium">{importError}</p>
+                </div>
+              </div>
             </div>
           )}
           
-          <div className="flex flex-wrap gap-3 mb-8">
-            {categories.map((category) => (
-              <button
-                key={category}
-                onClick={() => setSelectedCategory(category)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                  selectedCategory === category
-                    ? 'bg-black text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
-              >
-                {category}
-              </button>
-            ))}
-          </div>
-
-          {filteredTemplates.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-              {filteredTemplates.map((template) => (
-                <TemplateCard
-                  key={template.id}
-                  template={template}
-                  onSelect={handleTemplateSelect}
-                  isSelected={selectedTemplateId === template.id}
-                />
+          {/* Category Filter */}
+          <div className="mb-16">
+            <div className="text-center mb-8">
+              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">Browse by Category</h2>
+              <p className="text-gray-600 max-w-2xl mx-auto">Find the perfect template that matches your industry and career level</p>
+            </div>
+            
+            <div className="flex flex-wrap justify-center gap-3 sm:gap-4">
+              {categories.map((category, index) => (
+                <button
+                  key={category}
+                  onClick={() => setSelectedCategory(category)}
+                  className={`group relative px-4 sm:px-6 py-2.5 sm:py-3 rounded-full font-medium transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 ${
+                    selectedCategory === category
+                      ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-xl shadow-blue-500/25'
+                      : 'bg-white/80 backdrop-blur-sm text-gray-700 hover:bg-white hover:shadow-lg border border-gray-200/50 hover:border-blue-200'
+                  }`}
+                  style={{ animationDelay: `${index * 50}ms` }}
+                >
+                  <span className="relative z-10 text-sm sm:text-base">{category}</span>
+                  {selectedCategory === category && (
+                    <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full animate-pulse opacity-20" />
+                  )}
+                  <div className="absolute inset-0 rounded-full bg-gradient-to-r from-blue-600/0 to-indigo-600/0 group-hover:from-blue-600/5 group-hover:to-indigo-600/5 transition-all duration-300" />
+                </button>
               ))}
             </div>
+          </div>
+
+          {/* Templates Grid */}
+          {filteredTemplates.length > 0 ? (
+            <div className="space-y-12">
+              <div className="text-center">
+                <div className="inline-flex items-center px-4 py-2 rounded-full bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 text-sm font-medium mb-4">
+                  <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
+                  </svg>
+                  {filteredTemplates.length} template{filteredTemplates.length !== 1 ? 's' : ''} available
+                </div>
+                
+                <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-3">
+                  {selectedCategory === 'All Templates' ? 'All Templates' : `${selectedCategory} Templates`}
+                </h2>
+                <p className="text-gray-600 max-w-2xl mx-auto">
+                  Each template is carefully crafted to help you land your dream job
+                </p>
+              </div>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 lg:gap-10">
+                {filteredTemplates.map((template, index) => (
+                  <div 
+                    key={template.id}
+                    className="group transform transition-all duration-500 hover:scale-105"
+                    style={{ 
+                      animation: 'fadeInUp 0.6s ease-out forwards',
+                      animationDelay: `${index * 100}ms`,
+                      opacity: 0
+                    }}
+                  >
+                    <div className="relative">
+                      <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl blur opacity-0 group-hover:opacity-25 transition duration-500" />
+                      <div className="relative">
+                        <TemplateCard
+                          template={template}
+                          onSelect={handleTemplateSelect}
+                          onPreview={() => {}}
+                          isSelected={selectedTemplateId === template.id}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           ) : (
-            <div className="text-center py-12">
-              <p className="text-gray-500">No templates found in this category.</p>
+            <div className="text-center py-20">
+              <div className="relative">
+                <div className="w-32 h-32 mx-auto mb-8 bg-gradient-to-br from-gray-100 to-gray-200 rounded-3xl flex items-center justify-center shadow-lg">
+                  <svg className="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                </div>
+                <h3 className="text-2xl font-bold text-gray-900 mb-3">No templates found</h3>
+                <p className="text-gray-500 max-w-md mx-auto">No templates available in the {selectedCategory} category. Try selecting a different category.</p>
+              </div>
             </div>
           )}
 
-          <div className="bg-gray-50 rounded-lg p-6 mb-8">
-            <h3 className="text-lg font-semibold text-black mb-2">
-              All templates are ATS-friendly
-            </h3>
-            <p className="text-sm text-gray-600">
-              Every template is optimized for Applicant Tracking Systems (ATS) to ensure your CV gets past automated screening.
-            </p>
+          {/* Features Section */}
+          <div className="mt-20">
+            <div className="relative">
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-purple-600/10 rounded-3xl blur-3xl" />
+              <div className="relative bg-white/70 backdrop-blur-xl rounded-3xl p-8 sm:p-12 border border-white/30 shadow-2xl">
+                <div className="text-center mb-12">
+                  <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">Why Choose Our Templates?</h3>
+                  <p className="text-gray-600 max-w-2xl mx-auto">Every template is designed with your success in mind</p>
+                </div>
+                
+                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                  <div className="text-center group">
+                    <div className="relative">
+                      <div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-blue-500 to-blue-600 rounded-3xl flex items-center justify-center group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 shadow-lg">
+                        <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                      </div>
+                      <div className="absolute -top-2 -right-2 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                        </svg>
+                      </div>
+                    </div>
+                    <h4 className="text-xl font-bold text-gray-900 mb-3">ATS-Optimized</h4>
+                    <p className="text-gray-600 leading-relaxed">Every template passes through Applicant Tracking Systems with ease, ensuring your CV reaches human recruiters</p>
+                  </div>
+                  
+                  <div className="text-center group">
+                    <div className="relative">
+                      <div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-green-500 to-green-600 rounded-3xl flex items-center justify-center group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 shadow-lg">
+                        <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                      </div>
+                      <div className="absolute -top-2 -right-2 w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.293l-3-3a1 1 0 00-1.414 1.414L10.586 9.5 9.293 10.793a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414z" clipRule="evenodd" />
+                        </svg>
+                      </div>
+                    </div>
+                    <h4 className="text-xl font-bold text-gray-900 mb-3">Instant Preview</h4>
+                    <p className="text-gray-600 leading-relaxed">See exactly how your CV will look in real-time as you fill in your information</p>
+                  </div>
+                  
+                  <div className="text-center group sm:col-span-2 lg:col-span-1">
+                    <div className="relative">
+                      <div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-purple-500 to-purple-600 rounded-3xl flex items-center justify-center group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 shadow-lg">
+                        <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zM21 5a2 2 0 00-2-2h-4a2 2 0 00-2 2v12a4 4 0 004 4h4a2 2 0 002-2V5z" />
+                        </svg>
+                      </div>
+                      <div className="absolute -top-2 -right-2 w-6 h-6 bg-purple-500 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" />
+                        </svg>
+                      </div>
+                    </div>
+                    <h4 className="text-xl font-bold text-gray-900 mb-3">Professional Design</h4>
+                    <p className="text-gray-600 leading-relaxed">Crafted by design experts and tested with hiring managers for maximum impact</p>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -620,7 +767,14 @@ Generate a professional summary that will make recruiters want to interview this
 
   if (step === 'form') {
     return (
-      <div className="min-h-screen bg-white">
+      <div className="min-h-screen flex flex-col" style={{ background: 'linear-gradient(180deg, #F3F1FF 0%, #FFFFFF 83.1%)' }}>
+        <Navbar />
+        {/* Animated Background */}
+        <div className="fixed inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-blue-400/10 to-purple-600/10 rounded-full blur-3xl animate-pulse" />
+          <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-tr from-indigo-400/10 to-pink-600/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }} />
+        </div>
+        
         <CVFormWithPreview 
           formData={formData}
           setFormData={setFormData}
@@ -637,7 +791,14 @@ Generate a professional summary that will make recruiters want to interview this
 
   if (step === 'preview') {
     return (
-      <div className="min-h-screen bg-white">
+      <div className="min-h-screen flex flex-col" style={{ background: 'linear-gradient(180deg, #F3F1FF 0%, #FFFFFF 83.1%)' }}>
+        <Navbar />
+        {/* Animated Background */}
+        <div className="fixed inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-green-400/10 to-blue-600/10 rounded-full blur-3xl animate-pulse" />
+          <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-tr from-purple-400/10 to-indigo-600/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }} />
+        </div>
+        
         <PreviewSection
           cvData={generatedCV || formData}
           onCvDataChange={setGeneratedCV}

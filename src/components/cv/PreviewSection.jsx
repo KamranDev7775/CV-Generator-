@@ -252,24 +252,132 @@ export default function PreviewSection({ cvData, onCvDataChange, onPayment, onSu
   if (hasSubscription) {
     return (
       <section className="px-6 md:px-12 lg:px-24 py-20" id="preview">
-        <div className="max-w-3xl mx-auto">
-          <h2 className="text-2xl md:text-3xl font-light text-black mb-4">
-            Your CV is ready
-          </h2>
-          <p className="text-gray-500 mb-12">
-            You have an active subscription. Download or copy your CV below.
-          </p>
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent mb-6">
+               Your CV is Ready!
+            </h2>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
+              You have an active subscription. Download or copy your CV below.
+            </p>
+          </div>
 
           {/* CV Preview - No watermark for subscribers */}
-          <div className="border border-gray-200 shadow-sm mb-8">
-            <CVDocument data={cvData} showWatermark={false} />
+          <div className="bg-white rounded-2xl shadow-2xl p-4 mb-12">
+            <div className="cv-preview-container border-2 border-gray-200 rounded-xl" style={{ width: '100%', minHeight: '1123px', height: 'auto' }}>
+              <CVDocument data={cvData} showWatermark={false} />
+            </div>
           </div>
 
           {/* Cover Letter Preview (if generated) - Editable for subscribers */}
           {cvData?.cover_letter && (
             <div className="mb-12">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-medium text-black">Cover Letter</h3>
+              <div className="bg-white rounded-2xl shadow-xl p-8">
+                <div className="flex justify-between items-center mb-6">
+                  <h3 className="text-2xl font-bold text-gray-900 flex items-center">
+                    📄 Cover Letter
+                  </h3>
+                  {!isEditingCoverLetter ? (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setEditedCoverLetter(cvData.cover_letter);
+                        setIsEditingCoverLetter(true);
+                      }}
+                      className="border-blue-200 text-blue-600 hover:bg-blue-50 rounded-lg px-4 py-2 font-medium"
+                    >
+                      <Edit2 className="h-4 w-4 mr-2" />
+                      Edit
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        if (onCvDataChange) {
+                          onCvDataChange({ ...cvData, cover_letter: editedCoverLetter });
+                        }
+                        setIsEditingCoverLetter(false);
+                      }}
+                      className="border-green-200 text-green-600 hover:bg-green-50 rounded-lg px-4 py-2 font-medium"
+                    >
+                      <Save className="h-4 w-4 mr-2" />
+                      Save
+                    </Button>
+                  )}
+                </div>
+                {isEditingCoverLetter ? (
+                  <Textarea
+                    value={editedCoverLetter}
+                    onChange={(e) => setEditedCoverLetter(e.target.value)}
+                    className="min-h-[300px] border-2 border-gray-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-100 rounded-xl text-base p-4"
+                    placeholder="Edit your cover letter..."
+                  />
+                ) : (
+                  <div className="bg-gradient-to-br from-gray-50 to-gray-100 p-8 border-2 border-gray-200 rounded-xl">
+                    <div className="whitespace-pre-line text-gray-800 leading-relaxed text-base">
+                      {cvData.cover_letter}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Action buttons */}
+          <div className="bg-white rounded-2xl shadow-xl p-8">
+            <h3 className="text-2xl font-semibold text-gray-900 mb-6 text-center">Download Your CV</h3>
+            <div className="flex flex-col sm:flex-row gap-6">
+              <Button 
+                onClick={downloadPDF}
+                disabled={isGeneratingPDF}
+                className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800 py-6 text-lg font-medium rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105"
+              >
+                {isGeneratingPDF ? <><Loader2 className="mr-3 h-5 w-5 animate-spin" />Generating PDF...</> : <><Download className="mr-3 h-5 w-5" />Download PDF</>}
+              </Button>
+              <Button 
+                onClick={copyText}
+                variant="outline"
+                className="flex-1 border-2 border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400 py-6 text-lg font-medium rounded-xl shadow-md hover:shadow-lg transition-all duration-200"
+              >
+                {copied ? <><Check className="mr-3 h-5 w-5 text-green-600" />Copied!</> : <><Copy className="mr-3 h-5 w-5" />Copy Text</>}
+              </Button>
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  // User does not have subscription - show payment options
+  return (
+    <section className="px-6 md:px-12 lg:px-24 py-20" id="preview">
+      <div className="max-w-4xl mx-auto">
+        <div className="text-center mb-12">
+          <h2 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent mb-6">
+             Your CV is Ready!
+          </h2>
+          <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
+            Review your generated CV below. Choose a plan to unlock PDF download and text copy.
+          </p>
+        </div>
+
+        {/* CV Preview */}
+        <div className="bg-white rounded-2xl shadow-2xl p-8 mb-12">
+          <div className="cv-preview-container border-2 border-gray-200 rounded-xl overflow-hidden">
+            <CVDocument data={cvData} showWatermark={true} />
+          </div>
+        </div>
+
+        {/* Cover Letter Preview (if generated) */}
+        {cvData?.cover_letter && (
+          <div className="mb-12">
+            <div className="bg-white rounded-2xl shadow-xl p-8">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-2xl font-bold text-gray-900 flex items-center">
+                  📄 Cover Letter
+                </h3>
                 {!isEditingCoverLetter ? (
                   <Button
                     variant="outline"
@@ -278,9 +386,9 @@ export default function PreviewSection({ cvData, onCvDataChange, onPayment, onSu
                       setEditedCoverLetter(cvData.cover_letter);
                       setIsEditingCoverLetter(true);
                     }}
-                    className="border-gray-200 text-gray-600 hover:bg-gray-50 rounded-none"
+                    className="border-blue-200 text-blue-600 hover:bg-blue-50 rounded-lg px-4 py-2 font-medium"
                   >
-                    <Edit2 className="h-4 w-4 mr-1" />
+                    <Edit2 className="h-4 w-4 mr-2" />
                     Edit
                   </Button>
                 ) : (
@@ -293,9 +401,9 @@ export default function PreviewSection({ cvData, onCvDataChange, onPayment, onSu
                       }
                       setIsEditingCoverLetter(false);
                     }}
-                    className="border-green-200 text-green-600 hover:bg-green-50 rounded-none"
+                    className="border-green-200 text-green-600 hover:bg-green-50 rounded-lg px-4 py-2 font-medium"
                   >
-                    <Save className="h-4 w-4 mr-1" />
+                    <Save className="h-4 w-4 mr-2" />
                     Save
                   </Button>
                 )}
@@ -304,153 +412,71 @@ export default function PreviewSection({ cvData, onCvDataChange, onPayment, onSu
                 <Textarea
                   value={editedCoverLetter}
                   onChange={(e) => setEditedCoverLetter(e.target.value)}
-                  className="min-h-[300px] border-gray-200 focus:ring-0 rounded-none text-sm"
+                  className="min-h-[300px] border-2 border-gray-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-100 rounded-xl text-base p-4"
                   placeholder="Edit your cover letter..."
                 />
               ) : (
-                <div className="border border-gray-200 bg-gray-50 p-6">
-                  <div className="whitespace-pre-line text-gray-800 leading-relaxed text-sm">
+                <div className="bg-gradient-to-br from-gray-50 to-gray-100 p-8 border-2 border-gray-200 rounded-xl relative">
+                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                    <div className="transform -rotate-45 text-gray-300 text-2xl font-bold opacity-50">
+                      🔒 Unlock for €1.99
+                    </div>
+                  </div>
+                  <div className="whitespace-pre-line text-gray-800 leading-relaxed text-base blur-sm select-none">
                     {cvData.cover_letter}
                   </div>
                 </div>
               )}
+              <p className="text-sm text-gray-600 mt-4 flex items-center">
+                {isEditingCoverLetter ? '💡 Make your edits and click Save' : '🔓 Full cover letter available after payment'}
+              </p>
             </div>
-          )}
-
-          {/* Action buttons */}
-          <div className="flex flex-col sm:flex-row gap-4">
-            <Button 
-              onClick={downloadPDF}
-              disabled={isGeneratingPDF}
-              className="flex-1 bg-black text-white hover:bg-gray-900 py-6 text-base font-normal rounded-none"
-            >
-              {isGeneratingPDF ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Generating...</> : 'Download PDF'}
-            </Button>
-            <Button 
-              onClick={copyText}
-              variant="outline"
-              className="flex-1 border-gray-200 text-gray-700 hover:bg-gray-50 py-6 text-base font-normal rounded-none"
-            >
-              {copied ? 'Copied!' : 'Copy CV Text'}
-            </Button>
-          </div>
-        </div>
-      </section>
-    );
-  }
-
-  // User does not have subscription - show payment options
-  return (
-    <section className="px-6 md:px-12 lg:px-24 py-20" id="preview">
-      <div className="max-w-3xl mx-auto">
-        <h2 className="text-2xl md:text-3xl font-light text-black mb-4">
-          Your CV is ready
-        </h2>
-        <p className="text-gray-500 mb-12">
-          Review your generated CV below. Choose a plan to unlock PDF download and text copy.
-        </p>
-
-        {/* CV Preview */}
-        <div className="border border-gray-200 shadow-sm mb-8">
-          <CVDocument data={cvData} showWatermark={true} />
-        </div>
-
-        {/* Cover Letter Preview (if generated) */}
-        {cvData?.cover_letter && (
-          <div className="mb-12">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-medium text-black">Cover Letter</h3>
-              {!isEditingCoverLetter ? (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    setEditedCoverLetter(cvData.cover_letter);
-                    setIsEditingCoverLetter(true);
-                  }}
-                  className="border-gray-200 text-gray-600 hover:bg-gray-50 rounded-none"
-                >
-                  <Edit2 className="h-4 w-4 mr-1" />
-                  Edit
-                </Button>
-              ) : (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    if (onCvDataChange) {
-                      onCvDataChange({ ...cvData, cover_letter: editedCoverLetter });
-                    }
-                    setIsEditingCoverLetter(false);
-                  }}
-                  className="border-green-200 text-green-600 hover:bg-green-50 rounded-none"
-                >
-                  <Save className="h-4 w-4 mr-1" />
-                  Save
-                </Button>
-              )}
-            </div>
-            {isEditingCoverLetter ? (
-              <Textarea
-                value={editedCoverLetter}
-                onChange={(e) => setEditedCoverLetter(e.target.value)}
-                className="min-h-[300px] border-gray-200 focus:ring-0 rounded-none text-sm"
-                placeholder="Edit your cover letter..."
-              />
-            ) : (
-              <div className="border border-gray-200 bg-gray-50 p-6 relative">
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                  <div className="transform -rotate-45 text-gray-200 text-xl font-bold opacity-60">
-                    Unlock for €1.99
-                  </div>
-                </div>
-                <div className="whitespace-pre-line text-gray-800 leading-relaxed text-sm blur-sm select-none">
-                  {cvData.cover_letter}
-                </div>
-              </div>
-            )}
-            <p className="text-xs text-gray-500 mt-2">
-              {isEditingCoverLetter ? 'Make your edits and click Save' : 'Full cover letter available after payment'}
-            </p>
           </div>
         )}
 
         {/* Pricing Options */}
-        <div className="grid md:grid-cols-2 gap-4 mb-8">
-          {/* One-time purchase */}
-          <div className="p-6 border border-gray-200 bg-white">
-            <h3 className="text-lg font-medium text-black mb-2">One-Time Purchase</h3>
-            <p className="text-3xl font-light text-black mb-4">€1.99</p>
-            <p className="text-sm text-gray-600 mb-4">14 days access to download & edit this CV</p>
-            <Button 
-              onClick={onPayment}
-              disabled={isProcessingPayment}
-              className="w-full bg-black text-white hover:bg-gray-900 py-4 text-base font-normal rounded-none"
-            >
-              {isProcessingPayment ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Processing...
-                </>
-              ) : (
-                'Get CV for €1.99'
-              )}
-            </Button>
-          </div>
-
-          {/* Monthly subscription */}
-          <div className="p-6 border border-gray-200 bg-gray-50">
-            <h3 className="text-lg font-medium text-black mb-2">Monthly Subscription</h3>
-            <p className="text-3xl font-light text-black mb-4">€6.99<span className="text-sm text-gray-500">/month</span></p>
-            <p className="text-sm text-gray-600 mb-4">Unlimited CVs, edits & downloads</p>
-            <Link to={createPageUrl('Pricing')}>
+        <div className="bg-white rounded-2xl shadow-xl p-8">
+          <h3 className="text-3xl font-bold text-gray-900 mb-8 text-center">
+             Choose Your Plan
+          </h3>
+          <div className="grid md:grid-cols-2 gap-6 mb-8">
+            {/* One-time purchase */}
+            <div className="p-8 border-2 border-blue-200 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl relative overflow-hidden">
+              <div className="absolute top-4 right-4 bg-blue-600 text-white px-3 py-1 rounded-full text-sm font-medium">
+                 Popular
+              </div>
+              <h4 className="text-2xl font-bold text-gray-900 mb-3">One-Time Purchase</h4>
+              <p className="text-4xl font-bold text-blue-600 mb-4">€1.99</p>
+              <p className="text-gray-700 mb-6 leading-relaxed">14 days access to download & edit this CV</p>
               <Button 
-                variant="outline"
-                className="w-full border-gray-300 text-black hover:bg-gray-100 py-4 text-base font-normal rounded-none"
+                onClick={onPayment}
+                disabled={isProcessingPayment}
+                className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800 py-4 text-lg font-medium rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105"
               >
-                Subscribe Monthly
+                {isProcessingPayment ? (
+                  <>
+                    <Loader2 className="mr-3 h-5 w-5 animate-spin" />
+                    Processing...
+                  </>
+                ) : (
+                  'Get CV for €1.99'
+                )}
               </Button>
-            </Link>
+            </div>
+
+            {/* Monthly subscription */}
+            <div className="p-8 border-2 border-gray-200 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl">
+              <h4 className="text-2xl font-bold text-gray-900 mb-3">Monthly Subscription</h4>
+              <p className="text-4xl font-bold text-gray-700 mb-4">€6.99<span className="text-lg text-gray-500">/month</span></p>
+              <p className="text-gray-700 mb-6 leading-relaxed">Unlimited CVs, edits & downloads</p>
+              <Link to={createPageUrl('Pricing')}>
+                <Button 
+                  className="w-full bg-gradient-to-r from-gray-600 to-gray-700 text-white hover:from-gray-700 hover:to-gray-800 py-4 text-lg font-medium rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
+                >
+                  Subscribe Monthly
+                </Button>
+              </Link>
+            </div>
           </div>
         </div>
       </div>

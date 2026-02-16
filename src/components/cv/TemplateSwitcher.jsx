@@ -18,12 +18,12 @@ export default function TemplateSwitcher({ selectedTemplate, onTemplateChange, c
         CV Template
       </label>
       <Select
-        value={selectedTemplate || 'classic'}
+        value={selectedTemplate || 'minimal'}
         onValueChange={handleTemplateChange}
       >
         <SelectTrigger className="border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-lg">
           <SelectValue>
-            {currentTemplate ? currentTemplate.name : 'Classic'}
+            {currentTemplate ? currentTemplate.name : 'Minimal'}
           </SelectValue>
         </SelectTrigger>
         <SelectContent>

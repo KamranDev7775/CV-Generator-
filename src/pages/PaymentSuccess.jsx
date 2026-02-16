@@ -9,6 +9,8 @@ import { Check, Copy, Download, Loader2, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 import { jsPDF } from 'jspdf';
 import { useIsMounted } from '@/hooks/useIsMounted';
+import Navbar from '@/components/navigation/Navbar';
+import Footer from '@/components/navigation/Footer';
 
 export default function PaymentSuccess() {
   const [isLoading, setIsLoading] = useState(true);
@@ -400,9 +402,13 @@ export default function PaymentSuccess() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-white flex flex-col items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-gray-400 mb-4" />
-        <p className="text-gray-500">Verifying payment...</p>
+      <div className="min-h-screen flex flex-col" style={{ background: 'linear-gradient(180deg, #F3F1FF 0%, #FFFFFF 83.1%)' }}>
+        <Navbar />
+        <div className="flex-1 flex flex-col items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-gray-400 mb-4" />
+          <p className="text-gray-500">Verifying payment...</p>
+        </div>
+        <Footer />
       </div>
     );
   }
@@ -410,8 +416,9 @@ export default function PaymentSuccess() {
   // Subscription success (trial or monthly)
   if (paymentType === 'trial' || paymentType === 'monthly') {
     return (
-      <div className="min-h-screen bg-white">
-        <section className="px-6 md:px-12 lg:px-24 py-20">
+      <div className="min-h-screen flex flex-col" style={{ background: 'linear-gradient(180deg, #F3F1FF 0%, #FFFFFF 83.1%)' }}>
+        <Navbar />
+        <section className="flex-1 px-6 md:px-12 lg:px-24 py-12">
           <div className="max-w-xl mx-auto text-center">
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-500 mb-6">
               <Check className="h-8 w-8 text-white" />
@@ -439,6 +446,7 @@ export default function PaymentSuccess() {
             </div>
           </div>
         </section>
+        <Footer />
       </div>
     );
   }
@@ -446,21 +454,26 @@ export default function PaymentSuccess() {
   // CV purchase success
   if (!cvData) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center px-6">
-        <div className="text-center">
+      <div className="min-h-screen flex flex-col" style={{ background: 'linear-gradient(180deg, #F3F1FF 0%, #FFFFFF 83.1%)' }}>
+        <Navbar />
+        <div className="flex-1 flex items-center justify-center px-6">
+          <div className="text-center">
           <h1 className="text-2xl font-light text-black mb-4">No CV data found</h1>
           <p className="text-gray-500 mb-8">Please generate a CV first.</p>
           <Link to={createPageUrl('Home')} className="text-black underline hover:no-underline">
             Go back to start
           </Link>
+          </div>
         </div>
+        <Footer />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-white">
-      <section className="px-6 md:px-12 lg:px-24 py-20">
+    <div className="min-h-screen flex flex-col" style={{ background: 'linear-gradient(180deg, #F3F1FF 0%, #FFFFFF 83.1%)' }}>
+      <Navbar />
+      <section className="flex-1 px-6 md:px-12 lg:px-24 py-12">
         <div className="max-w-3xl mx-auto">
           <div className="mb-12 text-center">
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-black mb-6">
@@ -515,6 +528,7 @@ export default function PaymentSuccess() {
           </div>
         </div>
       </section>
+      <Footer />
     </div>
   );
 }
